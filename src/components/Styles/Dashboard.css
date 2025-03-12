@@ -1,0 +1,167 @@
+/* Dashboard.css */
+:root {
+    --surgical-green: #009f6b;
+    --surgical-green-light: rgba(0, 159, 107, 0.1);
+    --surgical-green-medium: rgba(0, 159, 107, 0.2);
+    --surgical-green-gradient: linear-gradient(135deg, rgba(0, 159, 107, 0.05) 0%, rgba(0, 159, 107, 0.15) 100%);
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --dark-gray: #495057;
+    --shadow: rgba(0, 0, 0, 0.05);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  body {
+    background-color: var(--white);
+    margin: 0;
+    padding: 0;
+  }
+  
+  .dashboard {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 2rem;
+    position: relative;
+    background: var(--surgical-green-gradient);
+    min-height: 100vh;
+  }
+  
+  .dashboard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background-color: var(--surgical-green);
+    z-index: 0;
+  }
+  
+  .dashboard h1 {
+    color: var(--white);
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    padding-top: 1.5rem;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, auto);
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding: 0.5rem;
+  }
+  
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.3s ease;
+    display: block;
+  }
+  
+  .card-container a:hover {
+    transform: translateY(-5px);
+  }
+  
+  .card {
+    background-color: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px var(--shadow);
+    display: flex;
+    height: 120px;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(0, 159, 107, 0.1);
+  }
+  
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--surgical-green);
+    transition: width 0.3s ease;
+  }
+  
+  .card:hover {
+    box-shadow: 0 12px 20px rgba(0, 159, 107, 0.2);
+  }
+  
+  .card:hover::before {
+    width: 10px;
+  }
+  
+  .card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surgical-green-light);
+    color: var(--surgical-green);
+    font-size: 2rem;
+    padding: 1.5rem;
+    min-width: 80px;
+  }
+  
+  .card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .card-content h3 {
+    color: var(--dark-gray);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .card-content p {
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  
+  .card:hover .card-content h3 {
+    color: var(--surgical-green);
+  }
+  
+  /* No need for custom icon selectors since we're now passing icons directly */
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .dashboard {
+      padding: 1rem;
+    }
+    
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .dashboard h1 {
+      font-size: 2rem;
+      padding-top: 1rem;
+    }
+  }

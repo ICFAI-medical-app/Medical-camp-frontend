@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  --surgical-green: #009f6b;
+  --surgical-green-light: rgba(0, 159, 107, 0.1);
+  --surgical-green-medium: rgba(0, 159, 107, 0.2);
+  --surgical-green-gradient: linear-gradient(135deg, rgba(0, 159, 107, 0.05) 0%, rgba(0, 159, 107, 0.15) 100%);
+  --white: #ffffff;
+  --light-gray: #f8f9fa;
+  --medium-gray: #e9ecef;
+  --dark-gray: #495057;
+  --shadow: rgba(0, 0, 0, 0.05);
+}
+
+.vitals {
+  background-color: var(--white);
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 40px auto;
+  box-shadow: 0 8px 16px var(--shadow);
+  font-family: 'Poppins', sans-serif;
+}
+
+.vitals h1 {
+  color: var(--surgical-green);
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.vitals h1::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background-color: var(--surgical-green);
+  margin: 0.5rem auto 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  color: var(--surgical-green);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.form-group:focus-within label {
+  color: var(--surgical-green-medium);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--surgical-green);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input[type="text"]:hover,
+.form-group input[type="number"]:hover {
+  border-color: var(--surgical-green-medium);
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus {
+  border-color: var(--surgical-green-medium);
+}
+
+button[type="submit"] {
+  background-color: var(--surgical-green);
+  color: var(--white);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+button[type="submit"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--surgical-green-light);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+button[type="submit"]:hover::after {
+  opacity: 1;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--surgical-green-medium);
+}
+
+/* Add responsive styling */
+@media (max-width: 768px) {
+  .vitals {
+    padding: 1.5rem;
+  }
+
+  .vitals h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="number"] {
+    padding: 0.5rem;
+  }
+
+  button[type="submit"] {
+    padding: 0.5rem 1rem;
+  }
+}

@@ -1,0 +1,18 @@
+.dashboard {
+  text-align: center;
+  background-color: #f2f2f2;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+}
+
+h1 {
+  color: #333;
+  margin-top: 40px;
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
