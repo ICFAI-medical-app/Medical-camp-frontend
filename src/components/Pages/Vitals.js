@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../Styles/Vitals.css';
 
 function Vitals() {
   const [formData, setFormData] = useState({
-    bookNumber: '',
+    book_no: '',
     bp: '',
     pulse: '',
     rbs: '',
