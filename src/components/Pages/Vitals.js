@@ -3,7 +3,7 @@ import '../Styles/Vitals.css';
 
 function Vitals() {
   const [formData, setFormData] = useState({
-    cardNumber: '',
+    bookNumber: '',
     bp: '',
     pulse: '',
     rbs: '',
@@ -29,8 +29,8 @@ function Vitals() {
       <h1 style={{ textAlign: 'center' }}>Vitals</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Card Number</label>
-          <input type="number" name="cardNumber" value={formData.cardNumber} onChange={handleChange} required />
+          <label>book Number</label>
+          <input type="number" name="bookNumber" value={formData.bookNumber} onChange={handleChange} required />
         </div>
         <div className="form-group">
           <label>BP (enter in systolic/diastolic format)</label>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../Styles/PatientRegistration.css';
 
 function PatientRegistration() {
   const [formData, setFormData] = useState({
-    cardNumber: '',
+    bookNumber: '',
     name: '',
     phoneNumber: '',
     age: '',
@@ -12,6 +14,10 @@ function PatientRegistration() {
     oldNew: '',
     eid: ''
   });
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,18 +27,45 @@ function PatientRegistration() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      const response = await axios.post('http://localhost:5002/api/patients', {
+        book_no: formData.bookNumber,
+        patient_name: formData.name,
+        patient_age: formData.age,
+        patient_sex: formData.gender,
+        patient_phone_no: formData.phoneNumber,
+        patient_area: formData.area,
+        oldNew: formData.oldNew,
+        eid: formData.eid
+      });
+      
+      // Set success message
+      setMessage(response.data.message || 'Patient registered successfully!');
+      setError(''); 
+      // Scroll to the success message if it's not visible
+      window.scrollTo(0, 0);
+    } catch (error) {
+      setError(error.response?.data?.message || 'An error occurred');
+      // setError(error.response?.data?.message || 'An error occurred');
+      setMessage('');
+    }
+  };
+
+  const handleBack = () => {
+    navigate('/');
   };
 
   return (
     <div className="patient-registration">
       <h1>Patient Registration</h1>
+      {message && <div className="success-msg">{message}</div>}
+      {error && <div className="error-msg">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Card Number</label>
-          <input type="number" name="cardNumber" value={formData.cardNumber} onChange={handleChange} required />
+          <label>Book Number</label>
+          <input type="number" name="bookNumber" value={formData.bookNumber} onChange={handleChange} required />
         </div>
         <div className="form-group">
           <label>Name</label>
@@ -80,7 +113,9 @@ function PatientRegistration() {
           <label>EID</label>
           <input type="number" name="eid" value={formData.eid} onChange={handleChange} required />
         </div>
+       
         <button type="submit">Submit</button>
+        <button type="button" onClick={handleBack}>Back</button>
       </form>
     </div>
   );

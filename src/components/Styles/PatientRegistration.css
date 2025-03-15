@@ -164,7 +164,8 @@ body {
   100% { opacity: 1; }
 }
 
-button[type="submit"] {
+button[type="submit"],
+button[type="button"] {
   display: block;
   width: 100%;
   padding: 16px;
@@ -182,7 +183,8 @@ button[type="submit"] {
   overflow: hidden;
 }
 
-button[type="submit"]::after {
+button[type="submit"]::after,
+button[type="button"]::after {
   content: '';
   position: absolute;
   top: 0;
@@ -194,17 +196,20 @@ button[type="submit"]::after {
   transition: transform 0.6s ease;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover,
+button[type="button"]:hover {
   background: linear-gradient(to right, var(--surgical-green-dark), var(--surgical-green));
   transform: translateY(-3px);
   box-shadow: 0 6px 15px rgba(0, 159, 107, 0.35);
 }
 
-button[type="submit"]:hover::after {
+button[type="submit"]:hover::after,
+button[type="button"]:hover::after {
   transform: translateX(100%);
 }
 
-button[type="submit"]:active {
+button[type="submit"]:active,
+button[type="button"]:active {
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0, 159, 107, 0.25);
 }
