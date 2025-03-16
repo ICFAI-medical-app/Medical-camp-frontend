@@ -1,0 +1,287 @@
+/* PatientRegistration.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  --surgical-green: #009f6b;
+  --surgical-green-dark: #00875a;
+  --surgical-green-light: #33b589;
+  --surgical-green-lighter: #e6f7f1;
+  --surgical-green-shadow: rgba(0, 159, 107, 0.2);
+  --white: #ffffff;
+  --off-white: #f8f9fa;
+  --light-gray: #e0e0e0;
+}
+
+body {
+  background-color: var(--off-white);
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.doctor-assigning {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 159, 107, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.doctor-assigning::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background-color: var(--surgical-green);
+}
+
+.doctor-assigning h1 {
+  color: var(--surgical-green);
+  text-align: center;
+  margin-bottom: 35px;
+  font-weight: 600;
+  font-size: 32px;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.doctor-assigning h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, var(--surgical-green-light), var(--surgical-green));
+  border-radius: 2px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 500;
+  font-size: 15px;
+  transition: color 0.3s ease;
+}
+
+.form-group:focus-within label {
+  color: var(--surgical-green);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--light-gray);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background-color: var(--white);
+}
+
+.form-group input[type="text"]:hover,
+.form-group input[type="number"]:hover {
+  border-color: #b0b0b0;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus {
+  outline: none;
+  border-color: var(--surgical-green);
+  box-shadow: 0 0 0 3px var(--surgical-green-shadow);
+  background-color: var(--surgical-green-lighter);
+}
+
+.radio-group {
+  display: flex;
+  gap: 30px;
+  padding: 5px 0;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 400;
+  color: #333;
+}
+
+.radio-group label:hover {
+  color: var(--surgical-green);
+}
+
+/* Base radio button styling */
+.radio-group input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #b0b0b0;
+  border-radius: 50%;
+  margin-right: 10px;
+  position: relative;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  /* Only transition the dot appearance, not the entire button */
+  transition: border-color 0.2s ease;
+}
+
+.radio-group input[type="radio"]:hover {
+  border-color: var(--surgical-green);
+}
+
+.radio-group input[type="radio"]:checked {
+  border-color: var(--surgical-green-dark); /* Darker green for checked state */
+}
+
+.radio-group input[type="radio"]:checked::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background-color: var(--surgical-green-dark);
+  border-radius: 50%;
+  animation: dotAppear 0.2s ease-out forwards;
+}
+
+@keyframes dotAppear {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+button[type="submit"],
+button[type="button"] {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(to right, var(--surgical-green), var(--surgical-green-dark));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 35px;
+  box-shadow: 0 4px 10px rgba(0, 159, 107, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+button[type="submit"]::after,
+button[type="button"]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+button[type="submit"]:hover,
+button[type="button"]:hover {
+  background: linear-gradient(to right, var(--surgical-green-dark), var(--surgical-green));
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 159, 107, 0.35);
+}
+
+button[type="submit"]:hover::after,
+button[type="button"]:hover::after {
+  transform: translateX(100%);
+}
+
+button[type="submit"]:active,
+button[type="button"]:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 159, 107, 0.25);
+}
+
+/* Add responsive styling */
+@media (max-width: 768px) {
+  .doctor-assigning {
+    padding: 30px 20px;
+    margin: 20px;
+    max-width: 100%;
+  }
+  
+  .radio-group {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .doctor-assigning h1 {
+    font-size: 26px;
+  }
+}
+
+/* Placeholder styling */
+::-webkit-input-placeholder {
+  color: #bbbbbb;
+  opacity: 0.7;
+}
+::-moz-placeholder {
+  color: #bbbbbb;
+  opacity: 0.7;
+}
+:-ms-input-placeholder {
+  color: #bbbbbb;
+  opacity: 0.7;
+}
+:-moz-placeholder {
+  color: #bbbbbb;
+  opacity: 0.7;
+}
+
+/* Custom input number styling (hide arrows) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Alternative approach to remove spinner for Firefox */
+input[type="number"] {
+  appearance: textfield;
+}
+
+/* Add subtle animation on form load */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.doctor-assigning {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.form-group {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+.form-group:nth-child(5) { animation-delay: 0.5s; }
+.form-group:nth-child(6) { animation-delay: 0.6s; }
+.form-group:nth-child(7) { animation-delay: 0.7s; }
+.form-group:nth-child(8) { animation-delay: 0.8s; }
