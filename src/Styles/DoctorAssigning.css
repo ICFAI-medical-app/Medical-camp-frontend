@@ -104,8 +104,10 @@ body {
   background-color: var(--surgical-green-lighter);
 }
 
+/* Modified radio-group to stack buttons vertically */
 .radio-group {
   display: flex;
+  flex-direction: column;
   gap: 30px;
   padding: 5px 0;
 }

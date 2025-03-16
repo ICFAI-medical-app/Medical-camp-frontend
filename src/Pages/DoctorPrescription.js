@@ -87,7 +87,7 @@ function DoctorPrescription() {
         <h2 className="prescription-title">Doctor Prescription</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Book No:</label>
+            <label>Book No</label>
             <input
               type="text"
               value={bookNo}
@@ -101,7 +101,7 @@ function DoctorPrescription() {
           {prescriptions.map((prescription, index) => (
             <div key={index} className="prescription-row">
               <div className="form-group">
-                <label>Medicine ID:</label>
+                <label>Medicine ID</label>
                 <input
                   type="number"
                   value={prescription.medicine_id}
@@ -114,7 +114,7 @@ function DoctorPrescription() {
               </div>
 
               <div className="form-group">
-                <label>Days:</label>
+                <label>Days</label>
                 <input
                   type="number"
                   value={prescription.days === 0 ? '' : prescription.days}

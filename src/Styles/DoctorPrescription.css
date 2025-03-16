@@ -32,10 +32,9 @@
 .prescription-title {
   text-align: center;
   margin-bottom: 35px;
-  font-size: 1.8rem;
+  font-size: 32px;
   color: var(--surgical-green);
   font-weight: 600;
-  font-size: 32px;
   position: relative;
   padding-bottom: 12px;
 }
@@ -55,7 +54,7 @@
 
 .subheading {
   margin-bottom: 1rem;
-  color: var(--surgical-green);
+  color: #000;
   font-weight: 500;
 }
 
@@ -97,9 +96,11 @@
   border-color: var(--surgical-green-medium);
 }
 
+/* UPDATED: Evenly distribute checkboxes across the width */
 .checkbox-group {
   display: flex;
-  gap: 10px;
+  justify-content: space-evenly; /* ensures equal spacing */
+  gap: 10px;                     /* optional gap between items */
 }
 
 .checkbox-group label {
@@ -114,6 +115,10 @@
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin-right: 5px; /* Increase this value as needed */
 }
 
 .btn-container {
@@ -178,9 +183,9 @@
   background-color: var(--surgical-green-medium);
 }
 
-/* "Calculated Quantity:" text matches surgical green */
+/* "Calculated Quantity:" text matches black */
 .form-group strong {
-  color: var(--surgical-green);
+  color: #000;
 }
 
 /* Popup overlay styling */
