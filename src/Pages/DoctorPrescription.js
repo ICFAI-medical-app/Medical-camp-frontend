@@ -81,11 +81,6 @@ function DoctorPrescription() {
     }
   };
 
-  // Navigate back one step
-  const handleBack = () => {
-    navigate(-1);
-  };
-
   return (
     <div className="prescription-container">
       <div className="prescription-card">
@@ -191,9 +186,6 @@ function DoctorPrescription() {
           <div className="btn-container">
             <button type="submit" className="submit-btn">
               Submit Prescription
-            </button>
-            <button type="button" className="back-btn" onClick={handleBack}>
-              Back
             </button>
           </div>
         </form>

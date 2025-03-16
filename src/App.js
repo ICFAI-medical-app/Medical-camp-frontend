@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Navbar from "./Components/Navbar";
 import Dashboard from './Pages/Dashboard';
 import PatientRegistration from './Pages/PatientRegistration';
 import Vitals from './Pages/Vitals';
@@ -10,6 +11,7 @@ import './App.css';
 function App() {
   return (
     <Router>
+      <Navbar/>
       <Routes>
         <Route exact path="/" element={<Dashboard />} />
         <Route path="/patient-registration" element={<PatientRegistration/>} />

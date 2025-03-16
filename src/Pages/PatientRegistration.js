@@ -53,10 +53,6 @@ function PatientRegistration() {
     }
   };
 
-  const handleBack = () => {
-    navigate('/');
-  };
-
   return (
     <div className="patient-registration">
       <h1>Patient Registration</h1>
@@ -115,7 +111,6 @@ function PatientRegistration() {
         </div>
        
         <button type="submit">Submit</button>
-        <button type="button" onClick={handleBack}>Back</button>
       </form>
     </div>
   );

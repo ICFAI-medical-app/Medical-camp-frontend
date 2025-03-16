@@ -49,9 +49,6 @@ function Vitals() {
       setMessage('');
     }
   };
-  const handleBack = () => {
-    navigate('/');
-  };
 
   return (
     <div className="vitals">
@@ -88,7 +85,6 @@ function Vitals() {
           <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} />
         </div>
         <button type="submit">Submit</button>
-        <button type="button" onClick={handleBack}>Back</button>
       </form>
     </div>
   );

@@ -42,10 +42,6 @@ function DoctorAssigning() {
     }
   };
 
-  const handleBack = () => {
-    navigate('/');
-  };
-
   return (
     <div className="doctor-assigning">
       <h1>Doctor Assigning</h1>
@@ -82,7 +78,6 @@ function DoctorAssigning() {
           </div>
         </div>
         <button type="submit">Submit</button>
-        <button type="button" onClick={handleBack}>Back</button>
       </form>
     </div>
   );

@@ -24,7 +24,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <h1>Dashboard</h1>
+      {/* <h1>Dashboard</h1> */}
       <div className="card-grid">
         {cardData.map((card, index) => (
           <Link to={card.path} key={index} className="card-link">
