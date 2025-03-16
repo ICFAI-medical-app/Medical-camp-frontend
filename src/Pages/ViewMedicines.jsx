@@ -9,7 +9,7 @@ function ViewPatients() {
     useEffect(() => {
         axios.get("http://localhost:5002/api/admin/get_medicines")
         .then((response) => {
-            console.log(response.data);
+            // console.log(response.data);
             setMedicines(response.data);
         })
         .catch((error) => {
@@ -27,12 +27,12 @@ function ViewPatients() {
                         <div>
                             <div className="card-icon">💊</div>
                             <div className="card-content">
-                                <h3>Formulation: {medicine.inventory['medicine_formulation']}</h3>
-                                <p>{medicine.inventory['medicine_id']}</p>
-                                <p>Quantity: {medicine.inventory['total_quantity']}</p>
+                                <h3>Formulation: {medicine.medicine_formulation}</h3>
+                                <p>{medicine.medicine_id}</p>
+                                <p>Quantity: {medicine.total_quantity}</p>
                                 <div>
                                     <h4>Details:</h4>
-                                    {medicine.inventory['medicine_details'].map((detail, index) => (
+                                    {medicine.medicine_details.map((detail, index) => (
                                         <div key={index} >
                                             <p>{detail.medicine_name}</p>
                                             <p>
