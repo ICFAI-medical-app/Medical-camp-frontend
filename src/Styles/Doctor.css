@@ -1,0 +1,384 @@
+
+
+
+:root {
+    --surgical-green: #009f6b;
+    --surgical-green-light: rgba(0, 159, 107, 0.1);
+    --surgical-green-medium: rgba(0, 159, 107, 0.2);
+    --surgical-green-gradient: linear-gradient(135deg, rgba(0, 159, 107, 0.05) 0%, rgba(0, 159, 107, 0.15) 100%);
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --dark-gray: #495057;
+    --shadow: rgba(0, 0, 0, 0.05);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  .doctor-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    background: var(--surgical-green-gradient);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    position: relative;
+  }
+  
+  .doctor-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background-color: var(--surgical-green);
+    z-index: 0;
+  }
+  
+  .doctor-header {
+    background-color: transparent;
+    color: var(--white);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .doctor-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+  }
+  
+  .doctor-content-wrapper {
+    position: relative;
+    z-index: 1;
+    padding: 0 2rem 2rem;
+  }
+  
+  .doctor-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .doctor-card {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    border: 1px solid var(--surgical-green-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .doctor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--surgical-green);
+    border-radius: 12px 0 0 12px;
+    transition: width 0.3s ease;
+  }
+  
+  .doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 159, 107, 0.15);
+  }
+  
+  .doctor-card:hover::before {
+    width: 8px;
+  }
+  
+  .doctor-card h2 {
+    color: var(--dark-gray);
+    margin-top: 0;
+    border-bottom: 1px solid var(--medium-gray);
+    padding-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.2rem;
+  }
+  
+  .doctor-item {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px var(--shadow);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid var(--surgical-green-light);
+    overflow: hidden;
+  }
+  
+  .doctor-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--surgical-green);
+    border-radius: 12px 0 0 12px;
+    transition: width 0.3s ease;
+  }
+  
+  .doctor-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px var(--surgical-green-medium);
+  }
+  
+  .doctor-item:hover::before {
+    width: 10px;
+  }
+  
+  .doctor-item h3 {
+    color: var(--dark-gray);
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .doctor-item:hover h3 {
+    color: var(--surgical-green);
+  }
+  
+  .doctor-item p {
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .doctor-item .button-danger {
+    margin-top: 1rem;
+  }
+  
+  .doctor-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark-gray);
+  }
+  
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--medium-gray);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--surgical-green);
+    box-shadow: 0 0 0 3px var(--surgical-green-light);
+  }
+  
+  .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  button {
+    background-color: var(--surgical-green);
+    color: var(--white);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  button:hover {
+    background-color: #008056;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .button-secondary {
+    background-color: var(--medium-gray);
+    color: var(--dark-gray);
+  }
+  
+  .button-secondary:hover {
+    background-color: #d1d7dc;
+  }
+  
+  .button-danger {
+    background-color: #e74c3c;
+  }
+  
+  .button-danger:hover {
+    background-color: #c0392b;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px var(--shadow);
+  }
+  
+  table th, table td {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid var(--medium-gray);
+  }
+  
+  table th {
+    background-color: var(--surgical-green-light);
+    font-weight: 600;
+    color: var(--dark-gray);
+  }
+  
+  table tbody tr:hover {
+    background-color: var(--light-gray);
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  
+  .pagination button {
+    margin: 0 0.3rem;
+  }
+  
+  .doctor-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stat-card {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px var(--shadow);
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--surgical-green-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--surgical-green);
+    transition: width 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 159, 107, 0.15);
+  }
+  
+  .stat-card:hover::before {
+    width: 8px;
+  }
+  
+  .stat-card h3 {
+    margin-top: 0;
+    color: var(--dark-gray);
+    font-size: 1rem;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+  
+  .stat-card p {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.8rem 0 0;
+    color: var(--surgical-green);
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .doctor-card, .doctor-item, .stat-card {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .doctor-item:nth-child(2) { animation-delay: 0.1s; }
+  .doctor-item:nth-child(3) { animation-delay: 0.2s; }
+  .doctor-item:nth-child(4) { animation-delay: 0.3s; }
+  .doctor-item:nth-child(5) { animation-delay: 0.4s; }
+  
+  @media (max-width: 768px) {
+    .doctor-content-wrapper {
+      padding: 0 1rem 1rem;
+    }
+    
+    .doctor-header {
+      padding: 1rem;
+    }
+    
+    .doctor-header h1 {
+      font-size: 2rem;
+    }
+    
+    .doctor-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .doctor-stats {
+      flex-direction: column;
+    }
+    
+    .doctor-card {
+      padding: 1.2rem;
+    }
+  }
+  
