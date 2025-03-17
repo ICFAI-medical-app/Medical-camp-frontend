@@ -15,34 +15,36 @@ import ViewMedicines from './Pages/ViewMedicines';
 import UpdateMedicineStock from './Pages/UpdateMedicineStock';
 import AddMedicine from './Pages/AddMedicine';
 import Login from './Pages/Login';
-
-
+import Footer from './Components/Footer';
 import './App.css';
 
 function App() {
-  // For admin dashboard, we will use DashboardAdmin component in place of Dashboard component
   return (
-    <Router>
-      <Navbar/>
-      <Routes>
-        {/* <Route exact path="/" element={<Dashboard />} /> */}
-        <Route path="/" element={<Login/>} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/dashboard-admin" element={<DashboardAdmin/>} />
-        <Route path="/patient-registration" element={<PatientRegistration/>} />
-        <Route path="/vitals" element={<Vitals/>} />
-        <Route path="/doctor-assigning" element={<DoctorAssigning />} />
-        <Route path="/doctor-prescription" element={<DoctorPrescription/>} />
-        <Route path="/medicine-pickup" element={<MedicinePickup />} />
-        <Route path="/medicine-verification" element={<div>Medicine Verification Page</div>} />
-        <Route path="/doctor" element={<Doctor/>} />
-        <Route path="/doctor-availability" element={<DoctorAvailability/>} />
-        <Route path="/view-patients" element={<ViewPatients/>} />
-        <Route path="/get-medicines" element={<ViewMedicines/>} />
-        <Route path="/update-medicine-stock" element={<UpdateMedicineStock/>}/>
-        <Route path="/add-new-medicine" element={<AddMedicine/>} />
-      </Routes>
-    </Router>
+    <div className="app-container">
+      <Router>
+        <Navbar />
+        <div className="main-content">
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+            <Route path="/patient-registration" element={<PatientRegistration />} />
+            <Route path="/vitals" element={<Vitals />} />
+            <Route path="/doctor-assigning" element={<DoctorAssigning />} />
+            <Route path="/doctor-prescription" element={<DoctorPrescription />} />
+            <Route path="/medicine-pickup" element={<MedicinePickup />} />
+            <Route path="/medicine-verification" element={<div>Medicine Verification Page</div>} />
+            <Route path="/doctor" element={<Doctor />} />
+            <Route path="/doctor-availability" element={<DoctorAvailability />} />
+            <Route path="/view-patients" element={<ViewPatients />} />
+            <Route path="/get-medicines" element={<ViewMedicines />} />
+            <Route path="/update-medicine-stock" element={<UpdateMedicineStock />} />
+            <Route path="/add-new-medicine" element={<AddMedicine />} />
+          </Routes>
+        </div>
+        <Footer />
+      </Router>
+    </div>
   );
 }
 

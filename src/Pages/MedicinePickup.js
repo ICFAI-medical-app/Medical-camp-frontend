@@ -10,7 +10,6 @@ function MedicinePickup() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  // Fetch prescription from the database
   const handleFetchPrescription = async () => {
     setError('');
     setMessage('');
@@ -31,7 +30,6 @@ function MedicinePickup() {
         return;
       }
   
-      // Ensure that fetched medicines are the latest
       setPrescribedMeds(response.data.medicines_prescribed.map(med => ({
         ...med,
         isGiven: false
@@ -40,7 +38,7 @@ function MedicinePickup() {
       setError(err.response?.data?.message || 'Failed to fetch prescription.');
     }
   };
-  // Submit the medicines that were picked up
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -63,14 +61,13 @@ function MedicinePickup() {
       );
 
       setMessage(response.data.message || 'Medicines given updated successfully!');
-      // **Remove picked up medicines from the list**
       setPrescribedMeds(prevMeds => prevMeds.filter(med => !med.isGiven));
+      setBookNo('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update medicines given.');
     }
   };
 
-  // Toggle checkboxes
   const handleCheckboxChange = (index) => {
     setPrescribedMeds(prevMeds =>
       prevMeds.map((med, i) => (i === index ? { ...med, isGiven: !med.isGiven } : med))
@@ -78,11 +75,11 @@ function MedicinePickup() {
   };
 
   return (
-    <div className="prescription-container">
-      <div className="prescription-card">
-        <h2 className="prescription-title">Medicine Pickup</h2>
+    <div className="medicine-pickup-container">
+      <div className="medicine-pickup-card">
+        <h1 className="medicine-pickup-title">Medicine Pickup</h1>
 
-        <div className="form-group">
+        <div className="medicine-pickup-form-group">
           <label>Book No</label>
           <input
             type="text"
@@ -93,10 +90,10 @@ function MedicinePickup() {
           />
         </div>
 
-        <div className="btn-container">
+        <div className="medicine-pickup-btn-container">
           <button
             type="button"
-            className="fetch-btn"
+            className="medicine-pickup-fetch-btn"
             onClick={handleFetchPrescription}
           >
             Fetch Prescription
@@ -104,12 +101,12 @@ function MedicinePickup() {
         </div>
 
         {prescribedMeds.length > 0 && (
-          <form onSubmit={handleSubmit}>
-            <h3 className="subheading">Prescribed Medicines</h3>
+          <form onSubmit={handleSubmit} className="medicine-pickup-form">
+            <h3 className="medicine-pickup-subheading">Prescribed Medicines</h3>
 
             {prescribedMeds.map((med, index) => (
-              <div key={index} className="prescription-row">
-                <div className="form-group checkbox-group">
+              <div key={index} className="medicine-pickup-row">
+                <div className="medicine-pickup-form-group medicine-pickup-checkbox-group">
                   <label>
                     <input
                       type="checkbox"
@@ -119,14 +116,14 @@ function MedicinePickup() {
                     Medicine ID: {med.medicine_id}
                   </label>
                 </div>
-                <div className="form-group">
+                <div className="medicine-pickup-form-group">
                   <strong>Quantity:</strong> {med.quantity}
                 </div>
               </div>
             ))}
 
-            <div className="btn-container">
-              <button type="submit" className="submit-btn">
+            <div className="medicine-pickup-btn-container">
+              <button type="submit" className="medicine-pickup-submit-btn">
                 Confirm Pickup
               </button>
             </div>
@@ -135,10 +132,10 @@ function MedicinePickup() {
       </div>
 
       {message && (
-        <div className="popup-overlay">
-          <div className="popup">
+        <div className="medicine-pickup-popup-overlay">
+          <div className="medicine-pickup-popup">
             <p>{message}</p>
-            <button className="close-popup" onClick={() => setMessage('')}>
+            <button className="medicine-pickup-close-popup" onClick={() => setMessage('')}>
               Close
             </button>
           </div>
@@ -146,10 +143,10 @@ function MedicinePickup() {
       )}
 
       {error && (
-        <div className="popup-overlay">
-          <div className="popup">
+        <div className="medicine-pickup-popup-overlay">
+          <div className="medicine-pickup-popup">
             <p>{error}</p>
-            <button className="close-popup" onClick={() => setError('')}>
+            <button className="medicine-pickup-close-popup" onClick={() => setError('')}>
               Close
             </button>
           </div>

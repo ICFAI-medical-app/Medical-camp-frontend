@@ -1,230 +1,160 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-
-:root {
-  --surgical-green: #009f6b;
-  --surgical-green-light: rgba(0, 159, 107, 0.1);
-  --surgical-green-medium: rgba(0, 159, 107, 0.2);
-  --white: #ffffff;
-  --light-gray: #f8f9fa;
-  --shadow: rgba(0, 0, 0, 0.05);
-}
-
-.prescription-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--light-gray);
-  min-height: 100vh;
+.doctor-prescription-container {
+  background-color: #fff;
+  max-width: 600px;
+  margin: 35px auto;
   padding: 20px;
-  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
 }
 
-.prescription-card {
-  background-color: var(--white);
-  max-width: 500px;
-  width: 100%;
-  padding: 30px 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px var(--shadow);
-}
-
-.prescription-title {
+.doctor-prescription-title {
+  color: #333;
   text-align: center;
-  margin-bottom: 35px;
-  font-size: 32px;
-  color: var(--surgical-green);
-  font-weight: 600;
-  position: relative;
-  padding-bottom: 12px;
+  margin-bottom: 25px;
 }
 
-/* DO NOT CHANGE ANYTHING OTHER THAN THE LINE BELOW HEADING */
-.prescription-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 4px;
-  background: linear-gradient(to right, var(--surgical-green-light), var(--surgical-green));
-  border-radius: 2px;
-}
-
-.subheading {
-  margin-bottom: 1rem;
-  color: #000;
-  font-weight: 500;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-  position: relative;
-}
-
-.form-group label {
-  display: block;
-  color: var(--surgical-green);
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"] {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--surgical-green);
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.form-group input[type="text"]::placeholder,
-.form-group input[type="number"]::placeholder {
-  color: #aaa;
-}
-
-.form-group input[type="text"]:hover,
-.form-group input[type="number"]:hover {
-  border-color: var(--surgical-green-medium);
-}
-
-.form-group input[type="text"]:focus,
-.form-group input[type="number"]:focus {
-  border-color: var(--surgical-green-medium);
-}
-
-/* UPDATED: Evenly distribute checkboxes across the width */
-.checkbox-group {
-  display: flex;
-  justify-content: space-evenly; /* ensures equal spacing */
-  gap: 10px;                     /* optional gap between items */
-}
-
-.checkbox-group label {
-  margin-bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.prescription-row {
-  border: 1px solid var(--surgical-green);
-  border-radius: 8px;
+.doctor-prescription-success-msg {
+  background-color: #d4edda;
+  color: #155724;
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  text-align: center;
 }
 
-.checkbox-group input[type="checkbox"] {
-  margin-right: 5px; /* Increase this value as needed */
+.doctor-prescription-error-msg {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  text-align: center;
 }
 
-.btn-container {
-  display: flex;
-  flex-direction: column; /* Stacked buttons */
-  gap: 10px;
-  margin-top: 10px;
+.doctor-prescription-form {
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-/* Base button styling with surgical green hover effect */
-.add-btn,
-.submit-btn,
-.remove-btn,
-.back-btn {
-  background-color: var(--surgical-green);
-  color: var(--white);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  position: relative;
-  overflow: hidden;
-  transition: background-color 0.3s ease;
+.doctor-prescription-subheading {
+  color: #333;
+  text-align: center;
+  margin: 20px 0 15px;
 }
 
-/* Override add and remove buttons to be slightly smaller */
-.add-btn,
-.remove-btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+.doctor-prescription-row {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
-/* Hover overlay effect for all buttons */
-.add-btn::after,
-.submit-btn::after,
-.remove-btn::after,
-.back-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
+.doctor-prescription-form-group {
+  margin-bottom: 15px;
+}
+
+.doctor-prescription-form-group label {
+  display: block;
+  margin-bottom: 3px;
+  color: #333;
+  font-weight: bold;
+}
+
+.doctor-prescription-form-group input[type="text"],
+.doctor-prescription-form-group input[type="number"] {
   width: 100%;
-  height: 100%;
-  background-color: var(--surgical-green-light);
-  transition: opacity 0.3s ease;
-  opacity: 0;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
 }
 
-.add-btn:hover::after,
-.submit-btn:hover::after,
-.remove-btn:hover::after,
-.back-btn:hover::after {
-  opacity: 1;
+.doctor-prescription-checkbox-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-top: 5px;
+  white-space: nowrap;
 }
 
-.add-btn:hover,
-.submit-btn:hover,
-.remove-btn:hover,
-.back-btn:hover {
-  background-color: var(--surgical-green-medium);
+.doctor-prescription-checkbox-group label {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
-/* "Calculated Quantity:" text matches black */
-.form-group strong {
-  color: #000;
+.doctor-prescription-checkbox-group input[type="checkbox"],
+.doctor-prescription-checkbox-group input[type="radio"] {
+  margin-right: 5px;
 }
 
-/* Popup overlay styling */
-.popup-overlay {
+.doctor-prescription-btn-container {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.doctor-prescription-add-btn,
+.doctor-prescription-submit-btn,
+.doctor-prescription-remove-btn {
+  width: 100%;
+  background-color: #33b48b;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.doctor-prescription-add-btn:hover,
+.doctor-prescription-submit-btn:hover,
+.doctor-prescription-remove-btn:hover {
+  background-color: #2a9d7a;
+}
+
+.doctor-prescription-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 1001;
 }
 
-/* Popup modal styling */
-.popup {
-  background-color: var(--white);
+.doctor-prescription-popup {
+  background-color: #fff;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 8px;
   max-width: 400px;
-  width: 100%;
   text-align: center;
-  box-shadow: 0 4px 8px var(--shadow);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Close button styling for popup */
-.close-popup {
-  background-color: var(--surgical-green);
-  color: var(--white);
+.doctor-prescription-close-popup {
+  width: 100%;
+  background-color: #33b48b;
+  color: #fff;
+  padding: 10px;
   border: none;
-  padding: 0.5rem 1rem;
-  margin-top: 15px;
-  border-radius: 8px;
+  border-radius: 5px;
+  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: 15px;
 }
 
-.close-popup:hover {
-  background-color: var(--surgical-green-medium);
+.doctor-prescription-close-popup:hover {
+  background-color: #2a9d7a;
 }

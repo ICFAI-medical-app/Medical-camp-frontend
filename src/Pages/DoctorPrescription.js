@@ -10,12 +10,10 @@ function DoctorPrescription() {
   ]);
   const [message, setMessage] = useState('');
 
-  // Update a prescription row and recalc quantity
   const handlePrescriptionChange = (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
       if (i === index) {
         const updated = { ...prescription, [field]: value };
-        // Recalculate quantity
         const trueCount =
           (updated.morning ? 1 : 0) +
           (updated.afternoon ? 1 : 0) +
@@ -28,7 +26,6 @@ function DoctorPrescription() {
     setPrescriptions(updatedPrescriptions);
   };
 
-  // Add a new prescription row
   const addPrescriptionRow = () => {
     setPrescriptions([
       ...prescriptions,
@@ -36,16 +33,13 @@ function DoctorPrescription() {
     ]);
   };
 
-  // Remove a prescription row
   const removePrescriptionRow = (index) => {
     const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
     setPrescriptions(updatedPrescriptions);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Prepare payload to send to backend
     const payload = {
       book_no: bookNo,
       prescriptions: prescriptions.map((p) => ({
@@ -68,7 +62,6 @@ function DoctorPrescription() {
       });
       if (response.ok) {
         setMessage('Prescription submitted successfully!');
-        // Optionally reset the form
         setBookNo('');
         setPrescriptions([
           { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
@@ -82,11 +75,11 @@ function DoctorPrescription() {
   };
 
   return (
-    <div className="prescription-container">
-      <div className="prescription-card">
-        <h2 className="prescription-title">Doctor Prescription</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
+    <div className="doctor-prescription-container">
+      <div className="doctor-prescription-card">
+        <h1 className="doctor-prescription-title">Doctor Prescription</h1>
+        <form onSubmit={handleSubmit} className="doctor-prescription-form">
+          <div className="doctor-prescription-form-group">
             <label>Book No</label>
             <input
               type="text"
@@ -96,11 +89,10 @@ function DoctorPrescription() {
               placeholder="Enter Book No"
             />
           </div>
-
-          <h3 className="subheading">Medicines</h3>
+          <h3 className="doctor-prescription-subheading">Medicines</h3>
           {prescriptions.map((prescription, index) => (
-            <div key={index} className="prescription-row">
-              <div className="form-group">
+            <div key={index} className="doctor-prescription-row">
+              <div className="doctor-prescription-form-group">
                 <label>Medicine ID</label>
                 <input
                   type="number"
@@ -112,8 +104,7 @@ function DoctorPrescription() {
                   placeholder="e.g. 101"
                 />
               </div>
-
-              <div className="form-group">
+              <div className="doctor-prescription-form-group">
                 <label>Days</label>
                 <input
                   type="number"
@@ -125,8 +116,7 @@ function DoctorPrescription() {
                   placeholder="e.g. 3"
                 />
               </div>
-
-              <div className="form-group checkbox-group">
+              <div className="doctor-prescription-form-group doctor-prescription-checkbox-group">
                 <label>
                   <input
                     type="checkbox"
@@ -158,43 +148,39 @@ function DoctorPrescription() {
                   Night
                 </label>
               </div>
-
-              <div className="form-group">
+              <div className="doctor-prescription-form-group">
                 <strong>Calculated Quantity:</strong> {prescription.quantity}
               </div>
-
               <button
                 type="button"
-                className="remove-btn"
+                className="doctor-prescription-remove-btn"
                 onClick={() => removePrescriptionRow(index)}
               >
                 Remove
               </button>
             </div>
           ))}
-
-          <div className="btn-container">
+          <div className="doctor-prescription-btn-container">
             <button
               type="button"
-              className="add-btn"
+              className="doctor-prescription-add-btn"
               onClick={addPrescriptionRow}
             >
               Add Medicine
             </button>
           </div>
-
-          <div className="btn-container">
-            <button type="submit" className="submit-btn">
+          <div className="doctor-prescription-btn-container">
+            <button type="submit" className="doctor-prescription-submit-btn">
               Submit Prescription
             </button>
           </div>
         </form>
       </div>
       {message && (
-        <div className="popup-overlay">
-          <div className="popup">
+        <div className="doctor-prescription-popup-overlay">
+          <div className="doctor-prescription-popup">
             <p>{message}</p>
-            <button className="close-popup" onClick={() => setMessage('')}>
+            <button className="doctor-prescription-close-popup" onClick={() => setMessage('')}>
               Close
             </button>
           </div>

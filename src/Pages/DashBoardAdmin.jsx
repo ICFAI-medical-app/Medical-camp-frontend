@@ -4,9 +4,9 @@ import '../Styles/Dashboard.css';
 
 function DashboardAdmin() {
   const Card = ({ title, icon }) => (
-    <div className="card">
-      <div className="card-icon">{icon}</div>
-      <div className="card-content">
+    <div className="dashboard-card">
+      <div className="dashboard-card-icon">{icon}</div>
+      <div className="dashboard-card-content">
         <h3>{title}</h3>
         <p>Subhead</p>
       </div>
@@ -16,25 +16,18 @@ function DashboardAdmin() {
   const cardData = [
     { title: "Doctor", icon: "👨‍⚕️", path: "/doctor" },
     { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
-    // { title: "Add a volunteer", icon: "🧍", path: "/add-volunteer" },
-    {title: "View Patients" , icon: "😷" , path: "/view-patients"},
+    { title: "View Patients", icon: "😷", path: "/view-patients" },
     { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },
     { title: "Add a new medicine to the inventory", icon: "💊", path: "/add-new-medicine" },
-    { title: "Get all the medicines in the inventory", icon: "💊", path: "/get-medicines"},
-    // { title: "Patient registration", icon: "👤", path: "/patient-registration" },
-    // { title: "Vitals", icon: "💓", path: "/vitals" },
-    // { title: "Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
-    // { title: "Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
-    // { title: "Medicine pickup", icon: "💊", path: "/medicine-pickup" },
-    // { title: "Medicine verification", icon: "✓", path: "/medicine-verification" },
+    { title: "Get all the medicines in the inventory", icon: "💊", path: "/get-medicines" }
   ];
 
   return (
-    <div className="dashboard">
-      <h1>Dashboard</h1>
-      <div className="card-grid">
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">Dashboard</h1>
+      <div className="dashboard-card-container">
         {cardData.map((card, index) => (
-          <Link to={card.path} key={index} className="card-link">
+          <Link to={card.path} key={index} className="dashboard-card-link">
             <Card title={card.title} icon={card.icon} />
           </Link>
         ))}

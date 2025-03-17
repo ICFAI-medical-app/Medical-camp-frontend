@@ -1,32 +1,63 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import "../Styles/Navbar.css";
-import SwechaLogo from "./SwechaLogo.png"; // Adjust path if needed
+import SwechaLogo from "./SwechaLogo.png";
 
 const Navbar = () => {
-  const location = useLocation();
+  const { pathname } = useLocation();
 
-  // Hide navbar links if on Dashboard
-  const isDashboard = location.pathname === "/";
+  const adminLinks = [
+    { path: '/dashboard-admin', label: 'Admin Dashboard' },
+    { path: '/doctor-availability', label: 'Doctor Availability' },
+    { path: '/doctor', label: 'Doctor Management' },
+    { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
+    { path: '/add-new-medicine', label: 'Add New Medicine' },
+    { path: '/view-patients', label: 'View Patients' },
+    { path: '/get-medicines', label: 'View Medicines' },
+  ];
+
+  const userLinks = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/patient-registration', label: 'Patient Registration' },
+    { path: '/vitals', label: 'Vitals' },
+    { path: '/doctor-assigning', label: 'Doctor Assigning' },
+    { path: '/doctor-prescription', label: 'Doctor Prescription' },
+    { path: '/medicine-pickup', label: 'Medicine Pickup' },
+    { path: '/medicine-verification', label: 'Medicine Verification' },
+  ];
+
+  if (pathname === '/dashboard' || pathname === '/dashboard-admin') {
+    return (
+      <nav className="navbar">
+        <div className="logo">
+          <Link to="/"><img src={SwechaLogo} alt="Swecha Logo" className="logo-img" /></Link>
+        </div>
+      </nav>
+    );
+  }
+
+  const adminPages = adminLinks.map(link => link.path);
+  const userPages = userLinks.map(link => link.path);
+
+  let linksToDisplay = [];
+  if (adminPages.includes(pathname)) {
+    linksToDisplay = adminLinks;
+  } else if (userPages.includes(pathname)) {
+    linksToDisplay = userLinks;
+  }
 
   return (
     <nav className="navbar">
       <div className="logo">
-        <Link to="/">
-          <img src={SwechaLogo} alt="Swecha Logo" className="logo-img" />
-        </Link>
+        <Link to="/"><img src={SwechaLogo} alt="Swecha Logo" className="logo-img" /></Link>
       </div>
-      {!isDashboard && (
-        <ul className="nav-links">
-          <li><Link to="/">DASHBOARD</Link></li>
-          <li><Link to="/patient-registration">Patient Registration</Link></li>
-          <li><Link to="/vitals">Vitals</Link></li>
-          <li><Link to="/doctor-assigning">Doctor Assigning</Link></li>
-          <li><Link to="/doctor-prescription">Doctor Prescription</Link></li>
-          <li><Link to="/medicine-pickup">Medicine Pickup</Link></li>
-          <li><Link to="/medicine-verification">Medicine Verification</Link></li>
-        </ul>
-      )}
+      <ul className="nav-links">
+        {linksToDisplay.map((link, index) => (
+          <li key={index}>
+            <Link to={link.path}>{link.label}</Link>
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 };

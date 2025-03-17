@@ -4,9 +4,9 @@ import '../Styles/Dashboard.css';
 
 function Dashboard() {
   const Card = ({ title, icon }) => (
-    <div className="card">
-      <div className="card-icon">{icon}</div>
-      <div className="card-content">
+    <div className="dashboard-card">
+      <div className="dashboard-card-icon">{icon}</div>
+      <div className="dashboard-card-content">
         <h3>{title}</h3>
         <p>Subhead</p>
       </div>
@@ -23,11 +23,11 @@ function Dashboard() {
   ];
 
   return (
-    <div className="dashboard">
-      <h1>Dashboard</h1>
-      <div className="card-grid">
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">Dashboard</h1>
+      <div className="dashboard-card-container">
         {cardData.map((card, index) => (
-          <Link to={card.path} key={index} className="card-link">
+          <Link to={card.path} key={index} className="dashboard-card-link">
             <Card title={card.title} icon={card.icon} />
           </Link>
         ))}

@@ -16,15 +16,11 @@ function PatientRegistration() {
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -40,44 +36,40 @@ function PatientRegistration() {
         oldNew: formData.oldNew,
         eid: formData.eid
       });
-      
-      // Set success message
       setMessage(response.data.message || 'Patient registered successfully!');
-      setError(''); 
-      // Scroll to the success message if it's not visible
+      setError('');
       window.scrollTo(0, 0);
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred');
-      // setError(error.response?.data?.message || 'An error occurred');
       setMessage('');
     }
   };
 
   return (
-    <div className="patient-registration">
-      <h1>Patient Registration</h1>
-      {message && <div className="success-msg">{message}</div>}
-      {error && <div className="error-msg">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
+    <div className="patient-registration-container">
+      <h1 className="patient-registration-title">Patient Registration</h1>
+      {message && <div className="patient-registration-success-msg">{message}</div>}
+      {error && <div className="patient-registration-error-msg">{error}</div>}
+      <form onSubmit={handleSubmit} className="patient-registration-form">
+        <div className="patient-registration-form-group">
           <label>Book Number</label>
           <input type="number" name="bookNumber" value={formData.bookNumber} onChange={handleChange} required />
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>Name</label>
           <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>Phone Number</label>
           <input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required maxLength="10" />
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>Age</label>
           <input type="number" name="age" value={formData.age} onChange={handleChange} required />
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>Gender</label>
-          <div className="radio-group">
+          <div className="patient-registration-radio-group">
             <label>
               <input type="radio" name="gender" value="male" checked={formData.gender === 'male'} onChange={handleChange} required />
               Male
@@ -88,13 +80,13 @@ function PatientRegistration() {
             </label>
           </div>
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>Area</label>
           <input type="text" name="area" value={formData.area} onChange={handleChange} required />
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>Old / New</label>
-          <div className="radio-group">
+          <div className="patient-registration-radio-group">
             <label>
               <input type="radio" name="oldNew" value="old" checked={formData.oldNew === 'old'} onChange={handleChange} required />
               Old
@@ -105,12 +97,11 @@ function PatientRegistration() {
             </label>
           </div>
         </div>
-        <div className="form-group">
+        <div className="patient-registration-form-group">
           <label>EID</label>
           <input type="number" name="eid" value={formData.eid} onChange={handleChange} required />
         </div>
-       
-        <button type="submit">Submit</button>
+        <button type="submit" className="patient-registration-submit-btn">Submit</button>
       </form>
     </div>
   );

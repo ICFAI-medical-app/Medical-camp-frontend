@@ -19,7 +19,6 @@ function UpdateMedicineStock() {
   });
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
 
-  // Fetch all medicines when component mounts
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
@@ -48,7 +47,6 @@ function UpdateMedicineStock() {
     setError("");
 
     try {
-      // Find the medicine from our list
       const foundMedicine = medicines.find(med => med.medicine_id === medicineId);
       
       if (!foundMedicine) {
@@ -57,7 +55,6 @@ function UpdateMedicineStock() {
       
       setMedicine(foundMedicine);
       
-      // Initialize updatedQuantities with current values
       const quantities = {};
       foundMedicine.medicine_details.forEach((detail, index) => {
         quantities[index] = detail.quantity;
@@ -94,33 +91,28 @@ function UpdateMedicineStock() {
     setSuccess("");
 
     try {
-      // Create updated medicine object
       const updatedMedicine = { ...medicine };
       
-      // Update quantities in the medicine_details array
       updatedMedicine.medicine_details = medicine.medicine_details.map((detail, index) => ({
         ...detail,
         quantity: updatedQuantities[index]
       }));
       
-      // Recalculate total quantity
       updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
         (total, detail) => total + detail.quantity, 0
       );
 
-      // Send update request - based on your admin routes, you're using a POST request
       await axios.post(
         "http://localhost:5002/api/admin/update_medicine_stock",
         {
           medicine_id: medicineId,
-          expiry_date: new Date(), // This might need to be adjusted based on your API
-          quantity: updatedQuantities[0] // This might need adjustment too
+          expiry_date: new Date(),
+          quantity: updatedQuantities[0]
         }
       );
 
-      setSuccess("Medicine stock updated successfully!");
+      setSuccess("Batch updated successfully!");
       
-      // Update the local state and list
       setMedicine(updatedMedicine);
       setMedicines(prev => 
         prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
@@ -137,70 +129,7 @@ function UpdateMedicineStock() {
     }
   };
 
-//   const handleAddNewEntry = async () => {
-//     // Validate new entry
-//     if (!newEntry.medicine_name || !newEntry.expiry_date || !newEntry.quantity) {
-//       setError("All fields are required for adding a new batch");
-//       return;
-//     }
-
-//     setLoading(true);
-//     setError("");
-//     setSuccess("");
-
-//     try {
-//       // Create updated medicine object with new entry added
-//       const updatedMedicine = { ...medicine };
-//       updatedMedicine.medicine_details = [
-//         ...medicine.medicine_details,
-//         newEntry
-//       ];
-      
-//       // Recalculate total quantity
-//       updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
-//         (total, detail) => total + detail.quantity, 0
-//       );
-
-//       // Send update request for adding a new entry
-//       await axios.post(
-//         "http://localhost:5002/api/admin/add_new_medicine_details",
-//         {
-//           medicine_id: medicineId,
-//           medicine_name: newEntry.medicine_name,
-//           expiry_date: newEntry.expiry_date,
-//           quantity: newEntry.quantity
-//         }
-//       );
-
-//       setSuccess("New batch added successfully!");
-      
-//       // Update local state
-//       setMedicine(updatedMedicine);
-//       setMedicines(prev => 
-//         prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
-//       );
-      
-//       // Reset form
-//       setNewEntry({
-//         medicine_name: "",
-//         expiry_date: "",
-//         quantity: ""
-//       });
-      
-//       setShowNewEntryForm(false);
-      
-//     } catch (error) {
-//       console.error("Error adding new batch:", error);
-//       setError(
-//         error.response?.data?.message || 
-//         "An error occurred while adding new batch."
-//       );
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-const handleAddNewEntry = async () => {
-    // Validate new entry
+  const handleAddNewEntry = async () => {
     if (!newEntry.medicine_name || !newEntry.expiry_date || !newEntry.quantity) {
       setError("All fields are required for adding a new batch");
       return;
@@ -211,10 +140,8 @@ const handleAddNewEntry = async () => {
     setSuccess("");
   
     try {
-      // Format the expiry date to YYYY-MM-DD
       const formattedDate = new Date(newEntry.expiry_date).toISOString().split('T')[0];
       
-      // Create the request payload
       const payload = {
         medicine_id: medicineId,
         medicine_name: newEntry.medicine_name,
@@ -224,7 +151,6 @@ const handleAddNewEntry = async () => {
       
       console.log("Adding new batch with payload:", payload);
       
-      // Send update request for adding a new entry
       const response = await axios.post(
         "http://localhost:5002/api/admin/add_new_medicine_details",
         payload
@@ -232,10 +158,8 @@ const handleAddNewEntry = async () => {
   
       console.log("Response from adding new batch:", response.data);
       
-      // Refresh medicine data from server to ensure we have the latest state
       const foundMedicine = medicines.find(med => med.medicine_id === medicineId);
       if (foundMedicine) {
-        // Add the new entry to our local medicine state
         const updatedMedicine = { ...foundMedicine };
         updatedMedicine.medicine_details.push({
           medicine_name: newEntry.medicine_name,
@@ -243,18 +167,15 @@ const handleAddNewEntry = async () => {
           quantity: newEntry.quantity
         });
         
-        // Recalculate total quantity
         updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
           (total, detail) => total + detail.quantity, 0
         );
         
-        // Update local state
         setMedicine(updatedMedicine);
         setMedicines(prev => 
           prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
         );
         
-        // Initialize updatedQuantities with new values
         const quantities = {};
         updatedMedicine.medicine_details.forEach((detail, index) => {
           quantities[index] = detail.quantity;
@@ -264,7 +185,6 @@ const handleAddNewEntry = async () => {
   
       setSuccess("New batch added successfully!");
       
-      // Reset form
       setNewEntry({
         medicine_name: "",
         expiry_date: "",
@@ -296,7 +216,6 @@ const handleAddNewEntry = async () => {
       setLoading(true);
       setError("");
       
-      // Format date as string in YYYY-MM-DD format
       const formattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
       
       await axios.post(
@@ -308,7 +227,6 @@ const handleAddNewEntry = async () => {
         }
       );
       
-      // Update local state for this specific change
       const updatedMedicine = {...medicine};
       updatedMedicine.medicine_details[index].quantity = updatedQuantities[index];
       updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
@@ -334,9 +252,8 @@ const handleAddNewEntry = async () => {
       <h2>Update Medicine Stock</h2>
       
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
       
-      {!medicine ? (
+      {(!medicine) ? (
         <form onSubmit={handleFetchMedicine} className="medicine-id-form">
           <div className="form-group">
             <label htmlFor="medicine_id">Select Medicine</label>
@@ -503,6 +420,17 @@ const handleAddNewEntry = async () => {
               onClick={() => navigate("/get-medicines")}
             >
               Return to Inventory
+            </button>
+          </div>
+        </div>
+      )}
+
+      {success && (
+        <div className="update-medicine-popup-overlay">
+          <div className="update-medicine-popup">
+            <p>{success}</p>
+            <button className="update-medicine-close-popup" onClick={() => setSuccess("")}>
+              Close
             </button>
           </div>
         </div>

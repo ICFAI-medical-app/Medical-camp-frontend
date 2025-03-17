@@ -1,180 +1,104 @@
-:root {
-    --surgical-green: #009f6b;
-    --surgical-green-light: rgba(0, 159, 107, 0.1);
-    --white: #ffffff;
-    --light-gray: #f8f9fa;
-    --medium-gray: #e9ecef;
-    --dark-gray: #495057;
-    --shadow: rgba(0, 0, 0, 0.05);
-    --available: #28a745;
-    --not-available: #dc3545;
+.doctor-availability-container {
+  background-color: #fff;
+  max-width: 800px;
+  margin: 35px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+}
+
+.doctor-availability-header {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.doctor-availability-header h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.doctor-availability-main {
+  margin-top: 20px;
+}
+
+.doctor-availability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.doctor-availability-card {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.doctor-availability-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.doctor-name {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.doctor-specialization,
+.doctor-email,
+.doctor-phone {
+  font-size: 1rem;
+  margin: 5px 0;
+  color: #333;
+}
+
+.doctor-availability-status {
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #000;
+}
+
+.doctor-availability-status.available {
+  color: #4CAF50;
+}
+
+.doctor-availability-status.unavailable {
+  color: #E53935;
+}
+
+.doctor-availability-button {
+  width: 100%;
+  background-color: #33b48b;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.doctor-availability-button:hover {
+  background-color: #2a9d7a;
+}
+
+.no-doctors-message {
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .doctor-availability-grid {
+    grid-template-columns: 1fr;
   }
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-  }
-  
-  .availability-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: linear-gradient(135deg, rgba(0, 159, 107, 0.05) 0%, rgba(0, 159, 107, 0.15) 100%);
-    min-height: 100vh;
-    position: relative;
-  }
-  
-  .availability-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 180px;
-    background-color: var(--surgical-green);
-    z-index: 0;
-  }
-  
-  .availability-header {
-    color: var(--white);
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-  }
-  
-  .availability-header h1 {
-    font-size: 2.5rem;
-    font-weight: 600;
-    margin: 0;
-  }
-  
-  .availability-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    position: relative;
-    z-index: 1;
-  }
-  
-  .availability-card {
-    background-color: var(--white);
-    border-radius: 12px;
-    box-shadow: 0 8px 16px var(--shadow);
-    padding: 1.5rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    border: 1px solid var(--surgical-green-light);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  
-  .availability-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 5px;
-    height: 100%;
-    background-color: var(--surgical-green);
-    border-radius: 12px 0 0 12px;
-    transition: width 0.3s ease;
-  }
-  
-  .availability-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 159, 107, 0.2);
-  }
-  
-  .availability-card:hover::before {
-    width: 10px;
-  }
-  
-  .availability-card h3 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.4rem;
-    color: var(--dark-gray);
-    border-bottom: 1px solid var(--medium-gray);
-    padding-bottom: 0.8rem;
-  }
-  
-  .availability-status {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-  }
-  
-  .status-available {
-    background-color: rgba(40, 167, 69, 0.1);
-    color: var(--available);
-    border: 1px solid rgba(40, 167, 69, 0.2);
-  }
-  
-  .status-unavailable {
-    background-color: rgba(220, 53, 69, 0.1);
-    color: var(--not-available);
-    border: 1px solid rgba(220, 53, 69, 0.2);
-  }
-  
-  button {
-    background-color: var(--surgical-green);
-    color: var(--white);
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s, transform 0.2s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-top: auto;
-    font-size: 0.95rem;
-  }
-  
-  button:hover {
-    background-color: #008056;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  .button-secondary {
-    background-color: var(--medium-gray);
-    color: var(--dark-gray);
-  }
-  
-  .button-secondary:hover {
-    background-color: #d1d7dc;
-  }
-  
-  .back-button-container {
-    text-align: center;
-    margin-top: 2.5rem;
-    position: relative;
-    z-index: 1;
-  }
-  
-  @media (max-width: 768px) {
-    .availability-container {
-      padding: 1rem;
-    }
-    
-    .availability-header h1 {
-      font-size: 2rem;
-    }
-    
-    .availability-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+}

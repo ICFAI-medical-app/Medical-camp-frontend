@@ -1,120 +1,89 @@
-.add-medicine-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .add-medicine-container h2 {
-    margin-bottom: 1.5rem;
-    color: #2c3e50;
-    text-align: center;
-  }
-  
-  .medicine-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .form-group label {
-    font-weight: 500;
-    color: #4a5568;
-  }
-  
-  .form-group input,
-  .form-group select {
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 1rem;
-  }
-  
-  .submit-btn,
-  .cancel-btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .submit-btn {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .submit-btn:hover {
-    background-color: #2980b9;
-  }
-  
-  .submit-btn:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-  }
-  
-  .cancel-btn {
-    background-color: #f1f1f1;
-    color: #333;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .error-message {
-    background-color: #ffebee;
-    color: #d32f2f;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-  }
-  
-  .success-message {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-  }
-  
-  @media (max-width: 768px) {
-    .add-medicine-container {
-      padding: 1rem;
-      max-width: 100%;
-      margin: 0 1rem;
-    }
-    
-    .form-actions {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    
-    .submit-btn, 
-    .cancel-btn {
-      width: 100%;
-    }
-  }
+.add-medicine-page {
+  background-color: #fff;
+  max-width: 600px;
+  margin: 35px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+  color: #000;
+}
+
+.add-medicine-page h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #000;
+}
+
+.add-medicine-error {
+  background-color: #f8d7da;
+  color: #000;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.add-medicine-success {
+  background-color: #d4edda;
+  color: #000;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.add-medicine-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.add-medicine-group {
+  margin-bottom: 15px;
+}
+
+.add-medicine-group label {
+  display: block;
+  margin-bottom: 3px;
+  color: #000;
+  font-weight: bold;
+}
+
+.add-medicine-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.add-medicine-actions {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.add-medicine-cancel,
+.add-medicine-submit {
+  width: 100%;
+  background-color: #33b48b;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+  display: inline-block;
+}
+
+.add-medicine-cancel:hover,
+.add-medicine-submit:hover {
+  background-color: #2a9d7a;
+}

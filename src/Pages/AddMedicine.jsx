@@ -43,7 +43,6 @@ function AddMedicine() {
         quantity: ""
       });
 
-      // Navigate back to inventory after 2 seconds
       setTimeout(() => {
         navigate("/");
       }, 2000);
@@ -59,18 +58,18 @@ function AddMedicine() {
   };
 
   return (
-    <div className="add-medicine-container">
+    <div className="add-medicine-page">
       <h2>Add New Medicine</h2>
       
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
+      {error && <div className="add-medicine-error">{error}</div>}
+      {success && <div className="add-medicine-success">{success}</div>}
       
-      <form onSubmit={handleSubmit} className="medicine-form">
-        <div className="form-group">
-          <label htmlFor="medicine_formulation">Medicine Formulation</label>
+      <form onSubmit={handleSubmit} className="add-medicine-form">
+        <div className="add-medicine-group">
+          <label htmlFor="add-medicine-formulation">Medicine Formulation</label>
           <input
             type="text"
-            id="medicine_formulation"
+            id="add-medicine-formulation"
             name="medicine_formulation"
             value={formData.medicine_formulation}
             onChange={handleChange}
@@ -79,11 +78,11 @@ function AddMedicine() {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="medicine_name">Medicine Name</label>
+        <div className="add-medicine-group">
+          <label htmlFor="add-medicine-name">Medicine Name</label>
           <input
             type="text"
-            id="medicine_name"
+            id="add-medicine-name"
             name="medicine_name"
             value={formData.medicine_name}
             onChange={handleChange}
@@ -92,11 +91,11 @@ function AddMedicine() {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="expiry_date">Expiry Date</label>
+        <div className="add-medicine-group">
+          <label htmlFor="add-expiry-date">Expiry Date</label>
           <input
             type="date"
-            id="expiry_date"
+            id="add-expiry-date"
             name="expiry_date"
             value={formData.expiry_date}
             onChange={handleChange}
@@ -104,11 +103,11 @@ function AddMedicine() {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="quantity">Quantity</label>
+        <div className="add-medicine-group">
+          <label htmlFor="add-quantity">Quantity</label>
           <input
             type="number"
-            id="quantity"
+            id="add-quantity"
             name="quantity"
             value={formData.quantity}
             onChange={handleChange}
@@ -118,17 +117,10 @@ function AddMedicine() {
           />
         </div>
 
-        <div className="form-actions">
-          <button 
-            type="button" 
-            className="cancel-btn"
-            onClick={() => navigate("/inventory")}
-          >
-            Cancel
-          </button>
+        <div className="add-medicine-actions">
           <button 
             type="submit" 
-            className="submit-btn" 
+            className="add-medicine-submit" 
             disabled={loading}
           >
             {loading ? "Adding..." : "Add Medicine"}
