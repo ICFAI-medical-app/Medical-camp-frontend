@@ -14,6 +14,8 @@ import ViewPatients from './Pages/ViewPatients';
 import ViewMedicines from './Pages/ViewMedicines';
 import UpdateMedicineStock from './Pages/UpdateMedicineStock';
 import AddMedicine from './Pages/AddMedicine';
+import Login from './Pages/Login';
+
 
 import './App.css';
 
@@ -24,7 +26,9 @@ function App() {
       <Navbar/>
       <Routes>
         {/* <Route exact path="/" element={<Dashboard />} /> */}
-        <Route exact path="/" element={<DashboardAdmin />} />
+        <Route path="/" element={<Login/>} />
+        <Route path="/dashboard" element={<Dashboard/>} />
+        <Route path="/dashboard-admin" element={<DashboardAdmin/>} />
         <Route path="/patient-registration" element={<PatientRegistration/>} />
         <Route path="/vitals" element={<Vitals/>} />
         <Route path="/doctor-assigning" element={<DoctorAssigning />} />
@@ -33,8 +37,7 @@ function App() {
         <Route path="/medicine-verification" element={<div>Medicine Verification Page</div>} />
         <Route path="/doctor" element={<Doctor/>} />
         <Route path="/doctor-availability" element={<DoctorAvailability/>} />
-        <Route path="/view-patients" element={<ViewPatients
-        />} />
+        <Route path="/view-patients" element={<ViewPatients/>} />
         <Route path="/get-medicines" element={<ViewMedicines/>} />
         <Route path="/update-medicine-stock" element={<UpdateMedicineStock/>}/>
         <Route path="/add-new-medicine" element={<AddMedicine/>} />

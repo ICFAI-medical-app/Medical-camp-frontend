@@ -21,12 +21,12 @@ function DashboardAdmin() {
     { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },
     { title: "Add a new medicine to the inventory", icon: "💊", path: "/add-new-medicine" },
     { title: "Get all the medicines in the inventory", icon: "💊", path: "/get-medicines"},
-    { title: "Patient registration", icon: "👤", path: "/patient-registration" },
-    { title: "Vitals", icon: "💓", path: "/vitals" },
-    { title: "Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
-    { title: "Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
-    { title: "Medicine pickup", icon: "💊", path: "/medicine-pickup" },
-    { title: "Medicine verification", icon: "✓", path: "/medicine-verification" },
+    // { title: "Patient registration", icon: "👤", path: "/patient-registration" },
+    // { title: "Vitals", icon: "💓", path: "/vitals" },
+    // { title: "Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
+    // { title: "Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
+    // { title: "Medicine pickup", icon: "💊", path: "/medicine-pickup" },
+    // { title: "Medicine verification", icon: "✓", path: "/medicine-verification" },
   ];
 
   return (
