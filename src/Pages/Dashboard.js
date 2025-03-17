@@ -8,7 +8,7 @@ function Dashboard() {
       <div className="dashboard-card-icon">{icon}</div>
       <div className="dashboard-card-content">
         <h3>{title}</h3>
-        <p>Subhead</p>
+        {/* <p>Subhead</p> */}
       </div>
     </div>
   );

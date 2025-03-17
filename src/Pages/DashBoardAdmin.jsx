@@ -8,7 +8,7 @@ function DashboardAdmin() {
       <div className="dashboard-card-icon">{icon}</div>
       <div className="dashboard-card-content">
         <h3>{title}</h3>
-        <p>Subhead</p>
+        {/* <p>Subhead</p> */}
       </div>
     </div>
   );
@@ -19,7 +19,7 @@ function DashboardAdmin() {
     { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
     { title: "View Patients", icon: "😷", path: "/view-patients" },
     { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },
-    { title: "Add a new medicine to the inventory", icon: "💊", path: "/add-new-medicine" },
+    { title: "Add a new medicine to inventory", icon: "💊", path: "/add-new-medicine" },
     { title: "Get all the medicines in the inventory", icon: "💊", path: "/get-medicines" }
   ];
 

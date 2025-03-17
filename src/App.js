@@ -16,6 +16,7 @@ import ViewMedicines from './Pages/ViewMedicines';
 import UpdateMedicineStock from './Pages/UpdateMedicineStock';
 import AddMedicine from './Pages/AddMedicine';
 import Login from './Pages/Login';
+import AdminLogin from './Pages/AdminLogin';
 import Footer from './Components/Footer';
 import './App.css';
 
@@ -29,6 +30,7 @@ function App() {
             <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/patient-registration" element={<PatientRegistration />} />
             <Route path="/vitals" element={<Vitals />} />
             <Route path="/doctor-assigning" element={<DoctorAssigning />} />
