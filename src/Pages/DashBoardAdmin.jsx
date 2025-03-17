@@ -14,7 +14,8 @@ function DashboardAdmin() {
   );
 
   const cardData = [
-    { title: "Doctor", icon: "👨‍⚕️", path: "/doctor" },
+    {title: "View Doctors" , icon: "👨‍⚕️" , path: "/get-doctors"},
+    { title: "Add Doctor", icon: "👨‍⚕️", path: "/add-doctor" },
     { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
     { title: "View Patients", icon: "😷", path: "/view-patients" },
     { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },

@@ -1,0 +1,44 @@
+import React , {useEffect , useState} from 'react';
+import axios from 'axios';
+
+import '../Styles/ViewDoctor.css';
+
+function ViewDoctors() {
+    const [doctors , setDoctors] = useState([]) ;
+
+    useEffect( () => {
+        axios.get('http://localhost:5002/api/admin/get_doctors')
+        .then(response => {
+            console.log(response.data);
+            setDoctors(response.data);
+        })
+        .catch(error => {
+            alert('Error fetching doctors');
+            console.log(error);
+        })
+    } , []);
+
+    const Doctor = ({ doctor }) => (
+        <div className="doctor-card">
+            <h3>{doctor.doctor_name}</h3>
+            <p>{doctor.specialization}</p>
+            <p>{doctor.doctor_email}</p>
+            <p>{doctor.doctor_age}</p>
+            <p>{doctor.doctor_phone_no}</p>
+        </div>
+    );
+
+    return (
+        <div className="doctor-container">
+            <h1>Doctors</h1>
+            <div className="doctor-card-container">
+                {doctors.map((doctor, index) => (
+                    <Doctor key={index} doctor={doctor} />
+                ))}
+            </div>
+        </div>
+    );
+
+}
+
+export default ViewDoctors ;

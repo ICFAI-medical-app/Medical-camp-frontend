@@ -7,7 +7,8 @@ import Vitals from './Pages/Vitals';
 import DoctorPrescription from './Pages/DoctorPrescription';
 import DoctorAssigning from './Pages/DoctorAssigning';
 import MedicinePickup from './Pages/MedicinePickup'; 
-import Doctor from './Pages/Doctor';
+import AddDoctor from './Pages/AddDoctor';
+import ViewDoctors from './Pages/ViewDoctors';
 import DashboardAdmin from './Pages/DashBoardAdmin';
 import DoctorAvailability from './Pages/DoctorAvailability';
 import ViewPatients from './Pages/ViewPatients';
@@ -34,12 +35,13 @@ function App() {
             <Route path="/doctor-prescription" element={<DoctorPrescription />} />
             <Route path="/medicine-pickup" element={<MedicinePickup />} />
             <Route path="/medicine-verification" element={<div>Medicine Verification Page</div>} />
-            <Route path="/doctor" element={<Doctor />} />
+            <Route path="/add-doctor" element={<AddDoctor />} />
             <Route path="/doctor-availability" element={<DoctorAvailability />} />
             <Route path="/view-patients" element={<ViewPatients />} />
             <Route path="/get-medicines" element={<ViewMedicines />} />
             <Route path="/update-medicine-stock" element={<UpdateMedicineStock />} />
             <Route path="/add-new-medicine" element={<AddMedicine />} />
+            <Route path='/get-doctors' element={<ViewDoctors />} />
           </Routes>
         </div>
         <Footer />
