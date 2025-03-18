@@ -19,11 +19,13 @@ function UpdateMedicineStock() {
   });
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
 
+  const PORT = process.env.PORT || 5002;
+
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5002/api/admin/get_medicines");
+        const response = await axios.get(`http://localhost:${PORT}/api/admin/get_medicines`);
         setMedicines(response.data);
         setLoading(false);
       } catch (err) {
@@ -103,7 +105,7 @@ function UpdateMedicineStock() {
       );
 
       await axios.post(
-        "http://localhost:5002/api/admin/update_medicine_stock",
+        `http://localhost:${PORT}/api/admin/update_medicine_stock`,
         {
           medicine_id: medicineId,
           expiry_date: new Date(),
@@ -152,7 +154,7 @@ function UpdateMedicineStock() {
       console.log("Adding new batch with payload:", payload);
       
       const response = await axios.post(
-        "http://localhost:5002/api/admin/add_new_medicine_details",
+        `http://localhost:${PORT}/api/admin/add_new_medicine_details`,
         payload
       );
   
@@ -219,7 +221,7 @@ function UpdateMedicineStock() {
       const formattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
       
       await axios.post(
-        "http://localhost:5002/api/admin/update_medicine_stock",
+        `http://localhost:${PORT}/api/admin/update_medicine_stock`,
         {
           medicine_id: medicineId,
           expiry_date: formattedDate,

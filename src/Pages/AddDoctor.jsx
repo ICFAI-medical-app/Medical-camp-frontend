@@ -52,7 +52,9 @@ function AddDoctor() {
         
         setIsLoading(true);
         
-        axios.post('http://localhost:5002/api/admin/add_doctor', formData)
+        const PORT = process.env.PORT || 5002;
+
+        axios.post(`http://localhost:${PORT}/api/admin/add_doctor`, formData)
             .then((response) => {
                 if (response.data) {
                     setFormData({

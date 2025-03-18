@@ -23,10 +23,12 @@ function PatientRegistration() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const PORT = process.env.PORT || 5002;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5002/api/patients', {
+      const response = await axios.post(`http://localhost:${PORT}/api/patients`, {
         book_no: formData.bookNumber,
         patient_name: formData.name,
         patient_age: formData.age,

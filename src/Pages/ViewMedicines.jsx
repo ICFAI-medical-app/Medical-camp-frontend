@@ -6,10 +6,11 @@ import '../Styles/ViewMedicines.css'
 function ViewPatients() {
     const navigate = useNavigate();
     const [medicines, setMedicines] = useState([]);
+    const PORT = process.env.PORT || 5002;
 
     useEffect(() => {
         axios
-            .get("http://localhost:5002/api/admin/get_medicines")
+            .get(`http://localhost:${PORT}/api/admin/get_medicines`)
             .then((response) => {
                 setMedicines(response.data);
             })

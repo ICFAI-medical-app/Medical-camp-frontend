@@ -9,6 +9,7 @@ function MedicinePickup() {
   const [prescribedMeds, setPrescribedMeds] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const PORT = process.env.PORT || 5002;
 
   const handleFetchPrescription = async () => {
     setError('');
@@ -22,7 +23,7 @@ function MedicinePickup() {
   
     try {
       const response = await axios.get(
-        `http://localhost:5002/api/patient-history/medicine-pickup/${bookNo}`
+        `http://localhost:${PORT}/api/patient-history/medicine-pickup/${bookNo}`
       );
       
       if (!response.data.medicines_prescribed || response.data.medicines_prescribed.length === 0) {
@@ -51,9 +52,11 @@ function MedicinePickup() {
       return;
     }
 
+    const PORT = process.env.PORT || 5002;
+
     try {
       const response = await axios.post(
-        'http://localhost:5002/api/patient-history/medicine-pickup',
+        `http://localhost:${PORT}/api/patient-history/medicine-pickup`,
         {
           book_no: bookNo,
           medicinesGiven: givenMeds,

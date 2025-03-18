@@ -4,10 +4,11 @@ import '../Styles/ViewDoctor.css';
 
 function ViewDoctors() {
   const [doctors, setDoctors] = useState([]);
+  const PORT = process.env.PORT || 5002;
 
   useEffect(() => {
     axios
-      .get('http://localhost:5002/api/admin/get_doctors')
+      .get(`http://localhost:${PORT}/api/admin/get_doctors`)
       .then(response => {
         console.log(response.data);
         setDoctors(response.data);

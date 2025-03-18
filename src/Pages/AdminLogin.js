@@ -7,10 +7,11 @@ const AdminLogin = () => {
   const [user_name, setUserName] = useState('');
   const [user_password, setUserPassword] = useState('');
   const navigate = useNavigate();
+  const PORT = process.env.PORT || 5002;
 
   const handleAdminLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5002/api/admin/login', { user_name, user_password, user_type: 'admin' });
+      const response = await axios.post(`http://localhost:${PORT}/api/admin/login`, { user_name, user_password, user_type: 'admin' });
       if (response.status === 200) {
         localStorage.setItem('authToken', response.data.token);
         navigate('/dashboard-admin');

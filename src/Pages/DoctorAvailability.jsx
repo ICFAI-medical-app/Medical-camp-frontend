@@ -6,9 +6,10 @@ import '../Styles/DoctorAvailability.css';
 function DoctorAvailability() {
     const [doctorList, setDoctorList] = useState([]);
     const navigate = useNavigate();
+    const PORT = process.env.PORT || 5002;
 
     useEffect(() => {
-        axios.get('http://localhost:5002/api/admin/get_doctors')
+        axios.get(`http://localhost:${PORT}/api/admin/get_doctors`)
             .then((response) => {
                 setDoctorList(response.data);
             })
@@ -20,7 +21,7 @@ function DoctorAvailability() {
     const toggleDoctorAvailability = (id) => {
         const doctor = doctorList.find((doc) => doc._id === id);
         const updatedAvailability = !doctor.doctor_availability;
-        axios.put(`http://localhost:5002/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
+        axios.put(`http://localhost:${PORT}/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
             .then((response) => {
                 setDoctorList(doctorList.map((doc) =>
                     doc._id === id ? response.data : doc

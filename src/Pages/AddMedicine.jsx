@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/AddMedicine.css";
 
+
 function AddMedicine() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ function AddMedicine() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const PORT = process.env.PORT || 5002;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +33,7 @@ function AddMedicine() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5002/api/admin/add_new_medicine",
+        `http://localhost:${PORT}/api/admin/add_new_medicine`,
         formData
       );
 

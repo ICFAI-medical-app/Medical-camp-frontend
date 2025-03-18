@@ -54,8 +54,10 @@ function DoctorPrescription() {
       })),
     };
 
+    const PORT = process.env.PORT || 5002;
+
     try {
-      const response = await fetch('http://localhost:5002/api/patient-history/doctor-prescription', {
+      const response = await fetch(`http://localhost:${PORT}/api/patient-history/doctor-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -16,9 +16,11 @@ function MedicineVerification() {
       return;
     }
 
+    const PORT = process.env.PORT || 5002;
+
     try {
       const response = await axios.get(
-        `http://localhost:5002/api/patient-history/medicine-verification/${bookNo}`
+        `http://localhost:${PORT}/api/patient-history/medicine-verification/${bookNo}`
       );
       setMedicinesGiven(response.data.medicines_given);
     } catch (err) {
