@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import '../Styles/PatientRegistration.css';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "../Styles/PatientRegistration.css";
 
 function PatientRegistration() {
   const [formData, setFormData] = useState({
@@ -40,6 +40,17 @@ function PatientRegistration() {
       });
       setMessage(response.data.message || 'Patient registered successfully!');
       setError('');
+      // Clear the form on successful update
+      setFormData({
+        bookNumber: '',
+        name: '',
+        phoneNumber: '',
+        age: '',
+        gender: '',
+        area: '',
+        oldNew: '',
+        eid: ''
+      });
       window.scrollTo(0, 0);
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred');

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import '../Styles/DoctorAssigning.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "../Styles/DoctorAssigning.css";
 
 function DoctorAssigning() {
   const [formData, setFormData] = useState({ bookNumber: '', doc_name: '' });
@@ -25,10 +25,12 @@ function DoctorAssigning() {
       });
       setMessage(response.data.message || 'Doctor patient mapping successful!');
       setError('');
+      // Clear the form on success
+      setFormData({ bookNumber: '', doc_name: '' });
       window.scrollTo(0, 0);
     } catch (error) {
       console.error('Error:', error);
-      setError(error.response?.data?.message || 'yayy An error occurred');
+      setError(error.response?.data?.message || 'An error occurred');
       setMessage('');
     }
   };

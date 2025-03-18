@@ -5,7 +5,7 @@ import '../Styles/Vitals.css';
 
 function Vitals() {
   const [formData, setFormData] = useState({
-    book_no: '',
+    bookNumber: '',
     bp: '',
     pulse: '',
     rbs: '',
@@ -38,6 +38,16 @@ function Vitals() {
       });
       setMessage(response.data.message || 'Vitals recorded successfully!');
       setError('');
+      // Clear the form upon successful update
+      setFormData({
+        bookNumber: '',
+        bp: '',
+        pulse: '',
+        rbs: '',
+        weight: '',
+        height: '',
+        extra_note: ''
+      });
       window.scrollTo(0, 0);
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred');
