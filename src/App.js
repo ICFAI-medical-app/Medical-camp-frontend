@@ -37,7 +37,7 @@ function App() {
             <Route path="/doctor-assigning" element={<DoctorAssigning />} />
             <Route path="/doctor-prescription" element={<DoctorPrescription />} />
             <Route path="/medicine-pickup" element={<MedicinePickup />} />
-            <Route path="/medicine-verification" element={<MedicineVerification />} /> {/* ✅ Updated Here */}
+            <Route path="/medicine-verification" element={<MedicineVerification />} />
             <Route path="/add-doctor" element={<AddDoctor />} />
             <Route path="/doctor-availability" element={<DoctorAvailability />} />
             <Route path="/view-patients" element={<ViewPatients />} />

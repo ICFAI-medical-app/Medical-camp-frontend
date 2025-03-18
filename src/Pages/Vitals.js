@@ -38,7 +38,6 @@ function Vitals() {
       });
       setMessage(response.data.message || 'Vitals recorded successfully!');
       setError('');
-      // Clear the form upon successful update
       setFormData({
         bookNumber: '',
         bp: '',

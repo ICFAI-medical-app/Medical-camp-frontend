@@ -40,7 +40,6 @@ function PatientRegistration() {
       });
       setMessage(response.data.message || 'Patient registered successfully!');
       setError('');
-      // Clear the form on successful update
       setFormData({
         bookNumber: '',
         name: '',
