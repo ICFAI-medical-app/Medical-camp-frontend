@@ -27,7 +27,7 @@ function Vitals() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:${PORT}/api/vitals`, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/vitals`, {
         book_no: formData.bookNumber,
         rbs: formData.rbs || null,
         bp: formData.bp || null,

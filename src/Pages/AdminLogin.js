@@ -11,7 +11,7 @@ const AdminLogin = () => {
 
   const handleAdminLogin = async () => {
     try {
-      const response = await axios.post(`http://localhost:${PORT}/api/admin/login`, { user_name, user_password, user_type: 'admin' });
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/login`, { user_name, user_password, user_type: 'admin' });
       if (response.status === 200) {
         localStorage.setItem('authToken', response.data.token);
         navigate('/dashboard-admin');

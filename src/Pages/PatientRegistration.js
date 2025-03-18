@@ -28,7 +28,7 @@ function PatientRegistration() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:${PORT}/api/patients`, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/patients`, {
         book_no: formData.bookNumber,
         patient_name: formData.name,
         patient_age: formData.age,

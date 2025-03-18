@@ -33,7 +33,7 @@ function AddMedicine() {
 
     try {
       const response = await axios.post(
-        `http://localhost:${PORT}/api/admin/add_new_medicine`,
+        `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine`,
         formData
       );
 

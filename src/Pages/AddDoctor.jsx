@@ -54,7 +54,7 @@ function AddDoctor() {
         
         const PORT = process.env.PORT || 5002;
 
-        axios.post(`http://localhost:${PORT}/api/admin/add_doctor`, formData)
+        axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/add_doctor`, formData)
             .then((response) => {
                 if (response.data) {
                     setFormData({

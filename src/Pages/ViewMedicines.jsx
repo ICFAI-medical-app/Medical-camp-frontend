@@ -10,7 +10,7 @@ function ViewPatients() {
 
     useEffect(() => {
         axios
-            .get(`http://localhost:${PORT}/api/admin/get_medicines`)
+            .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`)
             .then((response) => {
                 setMedicines(response.data);
             })

@@ -9,7 +9,7 @@ function DoctorAvailability() {
     const PORT = process.env.PORT || 5002;
 
     useEffect(() => {
-        axios.get(`http://localhost:${PORT}/api/admin/get_doctors`)
+        axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
             .then((response) => {
                 setDoctorList(response.data);
             })
@@ -21,7 +21,7 @@ function DoctorAvailability() {
     const toggleDoctorAvailability = (id) => {
         const doctor = doctorList.find((doc) => doc._id === id);
         const updatedAvailability = !doctor.doctor_availability;
-        axios.put(`http://localhost:${PORT}/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
+        axios.put(`${process.env.REACT_APP_BACKEND}/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
             .then((response) => {
                 setDoctorList(doctorList.map((doc) =>
                     doc._id === id ? response.data : doc

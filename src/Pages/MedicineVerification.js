@@ -20,7 +20,7 @@ function MedicineVerification() {
 
     try {
       const response = await axios.get(
-        `http://localhost:${PORT}/api/patient-history/medicine-verification/${bookNo}`
+        `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-verification/${bookNo}`
       );
       setMedicinesGiven(response.data.medicines_given);
     } catch (err) {

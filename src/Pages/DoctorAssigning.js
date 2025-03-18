@@ -19,7 +19,7 @@ function DoctorAssigning() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:${PORT}/api/doctor-assign`, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/doctor-assign`, {
         book_no: formData.bookNumber,
         doc_name: formData.doc_name,
       });

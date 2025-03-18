@@ -8,7 +8,7 @@ function ViewDoctors() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:${PORT}/api/admin/get_doctors`)
+      .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
       .then(response => {
         console.log(response.data);
         setDoctors(response.data);

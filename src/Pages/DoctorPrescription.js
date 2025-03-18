@@ -57,7 +57,7 @@ function DoctorPrescription() {
     const PORT = process.env.PORT || 5002;
 
     try {
-      const response = await fetch(`http://localhost:${PORT}/api/patient-history/doctor-prescription`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND}/api/patient-history/doctor-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

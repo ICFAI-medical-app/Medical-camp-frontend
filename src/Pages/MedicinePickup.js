@@ -23,7 +23,7 @@ function MedicinePickup() {
   
     try {
       const response = await axios.get(
-        `http://localhost:${PORT}/api/patient-history/medicine-pickup/${bookNo}`
+        `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup/${bookNo}`
       );
       
       if (!response.data.medicines_prescribed || response.data.medicines_prescribed.length === 0) {
@@ -56,7 +56,7 @@ function MedicinePickup() {
 
     try {
       const response = await axios.post(
-        `http://localhost:${PORT}/api/patient-history/medicine-pickup`,
+        `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup`,
         {
           book_no: bookNo,
           medicinesGiven: givenMeds,
