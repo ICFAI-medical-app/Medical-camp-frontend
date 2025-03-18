@@ -1,4 +1,3 @@
-/* ViewDoctor.css */
 .doctor-container {
   background-color: #fff;
   max-width: 1000px;
@@ -50,7 +49,6 @@
   margin: 3px 0;
 }
 
-/* Responsive Layout */
 @media (max-width: 900px) {
   .doctor-card-container {
     grid-template-columns: repeat(2, 1fr);

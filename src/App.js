@@ -7,7 +7,7 @@ import Vitals from './Pages/Vitals';
 import DoctorPrescription from './Pages/DoctorPrescription';
 import DoctorAssigning from './Pages/DoctorAssigning';
 import MedicinePickup from './Pages/MedicinePickup'; 
-import MedicineVerification from './Pages/MedicineVerification'; // ✅ Import MedicineVerification
+import MedicineVerification from './Pages/MedicineVerification';
 import AddDoctor from './Pages/AddDoctor';
 import ViewDoctors from './Pages/ViewDoctors';
 import DashboardAdmin from './Pages/DashBoardAdmin';
