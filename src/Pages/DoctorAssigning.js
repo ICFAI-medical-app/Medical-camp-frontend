@@ -25,7 +25,6 @@ function DoctorAssigning() {
       });
       setMessage(response.data.message || 'Doctor patient mapping successful!');
       setError('');
-      // Clear the form on success
       setFormData({ bookNumber: '', doc_name: '' });
       window.scrollTo(0, 0);
     } catch (error) {
