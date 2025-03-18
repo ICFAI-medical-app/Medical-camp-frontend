@@ -1,8 +1,8 @@
 .update-medicine-container {
   background-color: #fff;
-  max-width: 500px;
+  max-width: 560px;
   margin: 35px auto;
-  padding: 20px 70px;
+  padding: 20px 50px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   font-family: 'Arial', sans-serif;
@@ -37,25 +37,25 @@
   text-align: center;
 }
 
-.update-medicine-form {
-  max-width: 400px;
-  margin: 20 auto;
+.medicine-id-form,
+.medicine-details {
+  max-width: 500px;
+  margin: 0 auto;
 }
 
-.update-medicine-form-group {
+.form-group {
   margin-bottom: 15px;
 }
 
-.update-medicine-form-group label {
+.form-group label {
   display: block;
   margin-bottom: 3px;
   color: #000;
   font-weight: bold;
 }
 
-.update-medicine-form-group input,
-.update-medicine-form-group select,
-.update-medicine-form-group input[type="date"] {
+.form-group input,
+.form-group select {
   width: 100%;
   box-sizing: border-box;
   padding: 8px;
@@ -88,26 +88,31 @@
   margin-top: 20px;
 }
 
-.update-medicine-table {
+.medicine-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 20px 10px;
   background-color: #fff;
 }
 
-.update-medicine-table th,
-.update-medicine-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+.medicine-table th,
+.medicine-table td {
+  padding: 12px 0px;
   text-align: center;
   color: #000;
 }
 
-.update-medicine-table th {
+.medicine-table th {
   font-weight: bold;
   background-color: #fff;
 }
 
-.new-batch-form {
+.quantity-input {
+  width: 80px;
+  text-align: center;
+}
+
+.new-entry-form {
   margin-top: 20px;
   padding: 15px;
   border: 2px solid #ddd;
@@ -172,29 +177,4 @@
 
 .update-medicine-close-popup:hover {
   background-color: #2a9d7a;
-}
-
-.medicine-table th,
-.medicine-table td {
-  padding: 12px 0px;
-  text-align: center;
-}
-
-.medicine-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 15px;
-}
-
-.medicine-table th {
-  font-weight: bold;
-}
-
-.medicine-table tr {
-  border-bottom: 1px solid #ddd;
-}
-
-.quantity-input {
-  width: 80px;
-  text-align: center;
 }

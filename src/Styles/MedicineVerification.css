@@ -1,112 +1,93 @@
 .verification-container {
-    background-color: #fff;
-    max-width: 600px;
-    margin: 35px auto;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Arial', sans-serif;
-    color: #000;
-  }
-  
-  .verification-title {
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #000;
-  }
-  
-  .verification-error {
-    background-color: #f8d7da;
-    color: #000;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #f5c6cb;
-    border-radius: 5px;
-    text-align: center;
-  }
-  
-  .verification-success {
-    background-color: #d4edda;
-    color: #000;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #c3e6cb;
-    border-radius: 5px;
-    text-align: center;
-  }
-  
-  .verification-form {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .verification-group {
-    margin-bottom: 15px;
-  }
-  
-  .verification-group label {
-    display: block;
-    margin-bottom: 3px;
-    color: #000;
-    font-weight: bold;
-  }
-  
-  .verification-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    color: #000;
-    box-sizing: border-box;
-  }
-  
-  .verification-actions {
-    text-align: center;
-    margin-top: 15px;
-  }
-  
-  .verification-fetch-btn {
-    width: 100%;
-    background-color: #33b48b;
-    color: #fff;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 15px;
-    display: inline-block;
-  }
-  
-  .verification-fetch-btn:hover {
-    background-color: #2a9d7a;
-  }
-  
-  .medicines-list {
-    margin-top: 20px;
-  }
-  
-  .medicine-row {
-    background-color: #f8f9fa;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-  
-  .medicine-details {
-    font-size: 1rem;
-    color: #333;
-  }
-  
-  .subheading {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
+  background-color: #fff;
+  max-width: 600px;
+  margin: 35px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+}
+
+.verification-card {
+  margin: 0px 100px;
+}
+
+.verification-title {
+  color: #333;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 3px;
+  color: #333;
+  font-weight: bold;
+}
+
+.form-group input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.btn-container {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.fetch-btn {
+  width: 100%;
+  background-color: #33b48b;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.fetch-btn:hover {
+  background-color: #2a9d7a;
+}
+
+.medicines-list {
+  margin-top: 20px;
+}
+
+.subheading {
+  text-align: center;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.medicine-row {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.medicine-details {
+  margin-bottom: 8px;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  margin-top: 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  text-align: center;
+}

@@ -1,243 +1,94 @@
-.doctor-page {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-  }
-  
-  /* Header styling */
-  .doctor-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    position: relative;
-    padding-bottom: 1rem;
-  }
-  
-  .doctor-header h1 {
-    font-size: 2.8rem;
-    color: #2c3e50;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
-  
-  .doctor-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 4px;
-    background: linear-gradient(90deg, #3498db, #2980b9);
-    border-radius: 2px;
-  }
-  
-  /* Content container */
-  .doctor-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  /* Form section */
-  .doctor-form-section {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    padding: 2.5rem;
-    border: 1px solid #eaeaea;
-    transition: transform 0.3s ease;
-  }
-  
-  .doctor-form-section:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  }
-  
-  .doctor-form-section h2 {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 1.8rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 2px solid #f0f0f0;
-    position: relative;
-  }
-  
-  .doctor-form-section h2::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 60px;
-    height: 2px;
-    background-color: #3498db;
-  }
-  
-  /* Form styling */
-  .doctor-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  /* Error message */
-  .error-message {
-    background-color: #fee;
-    color: #e74c3c;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-    border-left: 4px solid #e74c3c;
-    grid-column: 1 / -1;
-  }
-  
-  /* Form groups */
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1.2rem;
-    position: relative;
-  }
-  
-  .form-group label {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #34495e;
-    margin-bottom: 0.6rem;
-  }
-  
-  .form-group input,
-  .form-group select {
-    padding: 0.9rem 1rem;
-    border: 2px solid #e5e5e5;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background-color: #f9f9f9;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    outline: none;
-    background-color: #fff;
-  }
-  
-  .form-group input::placeholder {
-    color: #b3b3b3;
-  }
-  
-  /* Add button */
-  .add-doctor-btn {
-    background: linear-gradient(90deg, #3498db, #2980b9);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 1.5rem;
-    grid-column: 1 / -1;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-  }
-  
-  .add-doctor-btn:hover {
-    background: linear-gradient(90deg, #2980b9, #3498db);
-    transform: translateY(-3px);
-    box-shadow: 0 7px 20px rgba(52, 152, 219, 0.4);
-  }
-  
-  .add-doctor-btn:active {
-    transform: translateY(1px);
-  }
-  
-  .add-doctor-btn:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 992px) {
-    .doctor-form {
-      grid-template-columns: 1fr;
-    }
-    
-    .doctor-header h1 {
-      font-size: 2.4rem;
-    }
-    
-    .doctor-form-section {
-      padding: 2rem;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .doctor-page {
-      margin: 1.5rem;
-    }
-    
-    .doctor-header h1 {
-      font-size: 2.2rem;
-    }
-    
-    .doctor-form-section h2 {
-      font-size: 1.6rem;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .doctor-page {
-      margin: 1rem;
-    }
-    
-    .doctor-header h1 {
-      font-size: 1.8rem;
-    }
-    
-    .doctor-form-section {
-      padding: 1.5rem;
-    }
-    
-    .add-doctor-btn {
-      padding: 0.8rem 1.5rem;
-    }
-  }
-  
-  /* Animations */
-  @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  
-  .doctor-page {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-  
-  .doctor-form-section {
-    opacity: 0;
-    animation: fadeIn 0.5s ease-out forwards;
-    animation-delay: 0.2s;
-  }
-  
-  /* Input validation visual cues */
-  .form-group input:invalid {
-    border-color: #e74c3c;
-  }
-  
-  .form-group input:valid {
-    border-color: #2ecc71;
-  }
-  
-  /* For number input arrows */
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    opacity: 1;
-    height: 30px;
-  }
+.add-doctor-page {
+  background-color: #fff;
+  max-width: 600px;
+  margin: 35px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+  color: #000;
+}
+
+.add-doctor-page h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #000;
+}
+
+.add-doctor-error {
+  background-color: #f8d7da;
+  color: #000;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.add-doctor-success {
+  background-color: #d4edda;
+  color: #000;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.add-doctor-form-section {
+  max-width: 500px;
+  margin: 0 auto 20px;
+}
+
+.add-doctor-form-section h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #000;
+}
+
+.add-doctor-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.add-doctor-group {
+  margin-bottom: 15px;
+}
+
+.add-doctor-group label {
+  display: block;
+  margin-bottom: 3px;
+  color: #000;
+  font-weight: bold;
+}
+
+.add-doctor-group input,
+.add-doctor-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.add-doctor-btn {
+  width: 100%;
+  background-color: #33b48b;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+  display: inline-block;
+}
+
+.add-doctor-btn:hover {
+  background-color: #2a9d7a;
+}

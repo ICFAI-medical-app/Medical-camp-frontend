@@ -10,9 +10,9 @@ const Navbar = () => {
     { path: '/dashboard-admin', label: 'Admin Dashboard' },
     { path: '/doctor-availability', label: 'Doctor Availability' },
     { path: '/add-doctor', label: 'Add Doctor' },
-    {path: '/get-doctors', label: 'View Doctors'},
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
     { path: '/add-new-medicine', label: 'Add New Medicine' },
+    {path: '/get-doctors', label: 'View Doctors'},
     { path: '/view-patients', label: 'View Patients' },
     { path: '/get-medicines', label: 'View Medicines' },
   ];
