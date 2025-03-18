@@ -1,0 +1,125 @@
+/* Simple Admin Login styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+  }
+  
+  .admin-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  
+  .admin-login-form-container {
+    background-color: white;
+    padding: min(2.5rem, 5vh);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: min(400px, 90%);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .admin-title {
+    font-size: clamp(1.5rem, 4vh, 1.8rem);
+    color: #2c3e50;
+    margin-bottom: min(1.5rem, 3vh);
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: min(1.2rem, 2.5vh);
+  }
+  
+  .admin-input {
+    width: 100%;
+    padding: min(12px, 2vh) min(15px, 3vw);
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #f9f9f9;
+    height: min(45px, 8vh);
+  }
+  
+  .admin-input:focus {
+    border-color: #33b48b;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(51, 180, 139, 0.2);
+  }
+  
+  .admin-button {
+    width: 100%;
+    background-color: #33b48b;
+    color: #fff;
+    border: none;
+    padding: min(12px, 2vh);
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: min(45px, 8vh);
+  }
+  
+  .admin-button:hover {
+    background-color: #2a9d7a;
+  }
+  
+  .admin-back-button {
+    width: 100%;
+    background-color: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+    padding: min(10px, 1.8vh);
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    height: min(40px, 7vh);
+  }
+  
+  .admin-back-button:hover {
+    background-color: #e5e5e5;
+  }
+  
+  /* Responsive adjustments for shorter screens */
+  @media (max-height: 600px) {
+    .admin-login-form-container {
+      padding: 1rem;
+    }
+    
+    .admin-form {
+      gap: 0.8rem;
+    }
+    
+    .admin-title {
+      margin-bottom: 0.8rem;
+    }
+  }
+  
+  /* Responsive adjustments for narrower screens */
+  @media (max-width: 500px) {
+    .admin-login-form-container {
+      padding: 1.5rem;
+      width: 90%;
+    }
+  }

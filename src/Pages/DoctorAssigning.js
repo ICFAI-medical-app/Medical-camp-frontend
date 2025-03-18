@@ -48,24 +48,20 @@ function DoctorAssigning() {
           <label>Doctor Assigned</label>
           <div className="doctor-assigning-radio-group">
             <label>
-              <input type="radio" name="doc_name" value="doctor1" checked={formData.doc_name === 'doctor1'} onChange={handleChange} required />
-              Doctor 1
+              <input type="radio" name="doc_name" value="Dr Uma" checked={formData.doc_name === 'Dr Uma'} onChange={handleChange} required />
+              Dr Uma
             </label>
             <label>
-              <input type="radio" name="doc_name" value="doctor2" checked={formData.doc_name === 'doctor2'} onChange={handleChange} required />
-              Doctor 2
+              <input type="radio" name="doc_name" value="Dr Keshava" checked={formData.doc_name === 'Dr Keshava'} onChange={handleChange} required />
+              Dr Keshava
             </label>
             <label>
-              <input type="radio" name="doc_name" value="doctor3" checked={formData.doc_name === 'doctor3'} onChange={handleChange} required />
-              Doctor 3
+              <input type="radio" name="doc_name" value="Dr Raghav" checked={formData.doc_name === 'Dr Raghav'} onChange={handleChange} required />
+              Dr Raghav
             </label>
             <label>
-              <input type="radio" name="doc_name" value="doctor4" checked={formData.doc_name === 'doctor4'} onChange={handleChange} required />
-              Doctor 4
-            </label>
-            <label>
-              <input type="radio" name="doc_name" value="doctor5" checked={formData.doc_name === 'doctor5'} onChange={handleChange} required />
-              Doctor 5
+              <input type="radio" name="doc_name" value="Dr Ramesh" checked={formData.doc_name === 'Dr Ramesh'} onChange={handleChange} required />
+              Dr Ramesh
             </label>
           </div>
         </div>
