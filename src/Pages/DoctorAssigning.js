@@ -1,20 +1,32 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../Styles/DoctorAssigning.css";
 
 function DoctorAssigning() {
   const [formData, setFormData] = useState({ bookNumber: '', doc_name: '' });
+  const [doctors, setDoctors] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch the list of doctors from the backend
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/doctor-assign/get_doctors`);
+        setDoctors(response.data);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        setError('Error fetching doctors');
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  const PORT = process.env.PORT || 5002;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +35,7 @@ function DoctorAssigning() {
         book_no: formData.bookNumber,
         doc_name: formData.doc_name,
       });
-      setMessage(response.data.message || 'Doctor patient mapping successful!');
+      setMessage(response.data.message || 'Doctor-patient mapping successful!');
       setError('');
       setFormData({ bookNumber: '', doc_name: '' });
       window.scrollTo(0, 0);
@@ -42,27 +54,30 @@ function DoctorAssigning() {
       <form onSubmit={handleSubmit} className="doctor-assigning-form">
         <div className="doctor-assigning-form-group">
           <label>Book Number</label>
-          <input type="number" name="bookNumber" value={formData.bookNumber} onChange={handleChange} required />
+          <input
+            type="number"
+            name="bookNumber"
+            value={formData.bookNumber}
+            onChange={handleChange}
+            required
+          />
         </div>
         <div className="doctor-assigning-form-group">
           <label>Doctor Assigned</label>
           <div className="doctor-assigning-radio-group">
-            <label>
-              <input type="radio" name="doc_name" value="Dr Uma" checked={formData.doc_name === 'Dr Uma'} onChange={handleChange} required />
-              Dr Uma
-            </label>
-            <label>
-              <input type="radio" name="doc_name" value="Dr Keshava" checked={formData.doc_name === 'Dr Keshava'} onChange={handleChange} required />
-              Dr Keshava
-            </label>
-            <label>
-              <input type="radio" name="doc_name" value="Dr Raghav" checked={formData.doc_name === 'Dr Raghav'} onChange={handleChange} required />
-              Dr Raghav
-            </label>
-            <label>
-              <input type="radio" name="doc_name" value="Dr Ramesh" checked={formData.doc_name === 'Dr Ramesh'} onChange={handleChange} required />
-              Dr Ramesh
-            </label>
+            {doctors.map((doctor) => (
+              <label key={doctor._id}>
+                <input
+                  type="radio"
+                  name="doc_name"
+                  value={doctor.doctor_name}
+                  checked={formData.doc_name === doctor.doctor_name}
+                  onChange={handleChange}
+                  required
+                />
+                {doctor.doctor_name} ({doctor.specialization})
+              </label>
+            ))}
           </div>
         </div>
         <button type="submit" className="doctor-assigning-submit-btn">Submit</button>
