@@ -12,6 +12,7 @@ function UpdateMedicineStock() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [updatedQuantities, setUpdatedQuantities] = useState({});
+  const [updatedExpiryDates, setUpdatedExpiryDates] = useState({});
   const [newEntry, setNewEntry] = useState({
     medicine_name: "",
     expiry_date: "",
@@ -50,19 +51,19 @@ function UpdateMedicineStock() {
 
     try {
       const foundMedicine = medicines.find(med => med.medicine_id === medicineId);
-      
+
       if (!foundMedicine) {
         throw new Error("Medicine not found with the given ID");
       }
-      
+
       setMedicine(foundMedicine);
-      
+
       const quantities = {};
       foundMedicine.medicine_details.forEach((detail, index) => {
         quantities[index] = detail.quantity;
       });
       setUpdatedQuantities(quantities);
-      
+
     } catch (error) {
       console.error("Error fetching medicine:", error);
       setError(error.message || "Medicine not found or an error occurred while fetching data.");
@@ -77,6 +78,55 @@ function UpdateMedicineStock() {
       ...updatedQuantities,
       [index]: value === "" ? "" : parseInt(value, 10)
     });
+  };
+
+  const handleExpiryDateChange = (index, value) => {
+    setUpdatedExpiryDates({
+      ...updatedExpiryDates,
+      [index]: value
+    });
+  };
+
+  const handleUpdateExpiryDate = async (index) => {
+    const selectedDetail = medicine.medicine_details[index];
+    const newExpiryDate = updatedExpiryDates[index];
+
+    if (!newExpiryDate) {
+      setError("Please select a new expiry date");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const oldFormattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
+      const newFormattedDate = new Date(newExpiryDate).toISOString().split('T')[0];
+
+      await axios.post(
+        `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_expiry_date`,
+        {
+          medicine_id: medicineId,
+          old_expiry_date: oldFormattedDate,
+          new_expiry_date: newFormattedDate
+        }
+      );
+
+      const updatedMedicine = { ...medicine };
+      updatedMedicine.medicine_details[index].expiry_date = newExpiryDate;
+
+      setMedicine(updatedMedicine);
+      setMedicines(prev =>
+        prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
+      );
+
+      setSuccess("Expiry date updated successfully!");
+    } catch (error) {
+      console.error("Error updating expiry date:", error);
+      setError(error.response?.data || "Failed to update expiry date");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNewEntryChange = (e) => {
@@ -94,12 +144,12 @@ function UpdateMedicineStock() {
 
     try {
       const updatedMedicine = { ...medicine };
-      
+
       updatedMedicine.medicine_details = medicine.medicine_details.map((detail, index) => ({
         ...detail,
         quantity: updatedQuantities[index]
       }));
-      
+
       updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
         (total, detail) => total + detail.quantity, 0
       );
@@ -114,16 +164,16 @@ function UpdateMedicineStock() {
       );
 
       setSuccess("Batch updated successfully!");
-      
+
       setMedicine(updatedMedicine);
-      setMedicines(prev => 
+      setMedicines(prev =>
         prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
       );
-      
+
     } catch (error) {
       console.error("Error updating medicine stock:", error);
       setError(
-        error.response?.data?.message || 
+        error.response?.data?.message ||
         "An error occurred while updating medicine stock."
       );
     } finally {
@@ -136,30 +186,30 @@ function UpdateMedicineStock() {
       setError("All fields are required for adding a new batch");
       return;
     }
-  
+
     setLoading(true);
     setError("");
     setSuccess("");
-  
+
     try {
       const formattedDate = new Date(newEntry.expiry_date).toISOString().split('T')[0];
-      
+
       const payload = {
         medicine_id: medicineId,
         medicine_name: newEntry.medicine_name,
         expiry_date: formattedDate,
         quantity: newEntry.quantity
       };
-      
+
       console.log("Adding new batch with payload:", payload);
-      
+
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine_details`,
         payload
       );
-  
+
       console.log("Response from adding new batch:", response.data);
-      
+
       const foundMedicine = medicines.find(med => med.medicine_id === medicineId);
       if (foundMedicine) {
         const updatedMedicine = { ...foundMedicine };
@@ -168,37 +218,37 @@ function UpdateMedicineStock() {
           expiry_date: newEntry.expiry_date,
           quantity: newEntry.quantity
         });
-        
+
         updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
           (total, detail) => total + detail.quantity, 0
         );
-        
+
         setMedicine(updatedMedicine);
-        setMedicines(prev => 
+        setMedicines(prev =>
           prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
         );
-        
+
         const quantities = {};
         updatedMedicine.medicine_details.forEach((detail, index) => {
           quantities[index] = detail.quantity;
         });
         setUpdatedQuantities(quantities);
       }
-  
+
       setSuccess("New batch added successfully!");
-      
+
       setNewEntry({
         medicine_name: "",
         expiry_date: "",
         quantity: ""
       });
-      
+
       setShowNewEntryForm(false);
-      
+
     } catch (error) {
       console.error("Error adding new batch:", error);
       setError(
-        error.response?.data || 
+        error.response?.data ||
         "An error occurred while adding new batch."
       );
     } finally {
@@ -213,13 +263,13 @@ function UpdateMedicineStock() {
 
   const handleUpdateBatch = async (index) => {
     const selectedDetail = medicine.medicine_details[index];
-    
+
     try {
       setLoading(true);
       setError("");
-      
+
       const formattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
-      
+
       await axios.post(
         `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
         {
@@ -228,18 +278,18 @@ function UpdateMedicineStock() {
           quantity: updatedQuantities[index]
         }
       );
-      
-      const updatedMedicine = {...medicine};
+
+      const updatedMedicine = { ...medicine };
       updatedMedicine.medicine_details[index].quantity = updatedQuantities[index];
       updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
         (total, detail) => total + detail.quantity, 0
       );
-      
+
       setMedicine(updatedMedicine);
-      setMedicines(prev => 
+      setMedicines(prev =>
         prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
       );
-      
+
       setSuccess("Batch updated successfully!");
     } catch (error) {
       console.error("Error updating batch:", error);
@@ -252,9 +302,9 @@ function UpdateMedicineStock() {
   return (
     <div className="update-medicine-container">
       <h2>Update Medicine Stock</h2>
-      
+
       {error && <div className="error-message">{error}</div>}
-      
+
       {(!medicine) ? (
         <form onSubmit={handleFetchMedicine} className="medicine-id-form">
           <div className="form-group">
@@ -274,9 +324,9 @@ function UpdateMedicineStock() {
               ))}
             </select>
           </div>
-          <button 
-            type="submit" 
-            className="submit-btn" 
+          <button
+            type="submit"
+            className="submit-btn"
             disabled={loading || !medicineId}
           >
             {loading ? "Loading..." : "Fetch Medicine"}
@@ -289,7 +339,7 @@ function UpdateMedicineStock() {
             <p><strong>Medicine ID:</strong> {medicine.medicine_id}</p>
             <p><strong>Total Quantity:</strong> {medicine.total_quantity}</p>
           </div>
-          
+
           <h4>Medicine Batches</h4>
           <div className="table-container">
             <table className="medicine-table">
@@ -305,7 +355,26 @@ function UpdateMedicineStock() {
                 {medicine.medicine_details.map((detail, index) => (
                   <tr key={index}>
                     <td>{detail.medicine_name}</td>
-                    <td>{formatDate(detail.expiry_date)}</td>
+                    {/* <td>{formatDate(detail.expiry_date)}</td> */}
+                    <td>
+                      <div className="expiry-date-container">
+                        <span>{formatDate(detail.expiry_date)}</span>
+                        <input
+                          type="date"
+                          value={updatedExpiryDates[index] || ''}
+                          onChange={(e) => handleExpiryDateChange(index, e.target.value)}
+                          className="expiry-date-input"
+                          min={new Date().toISOString().split('T')[0]}
+                        />
+                        <button
+                          className="action-btn update-date-btn"
+                          onClick={() => handleUpdateExpiryDate(index)}
+                          disabled={!updatedExpiryDates[index]}
+                        >
+                          Update Date
+                        </button>
+                      </div>
+                    </td>
                     <td>
                       <input
                         type="number"
@@ -316,7 +385,7 @@ function UpdateMedicineStock() {
                       />
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="action-btn update-btn"
                         onClick={() => handleUpdateBatch(index)}
                       >
@@ -328,7 +397,7 @@ function UpdateMedicineStock() {
               </tbody>
             </table>
           </div>
-          
+
           {showNewEntryForm ? (
             <div className="new-entry-form">
               <h4>Add New Batch</h4>
@@ -345,7 +414,7 @@ function UpdateMedicineStock() {
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="expiry_date">Expiry Date</label>
                   <input
@@ -357,7 +426,7 @@ function UpdateMedicineStock() {
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="quantity">Quantity</label>
                   <input
@@ -372,10 +441,10 @@ function UpdateMedicineStock() {
                   />
                 </div>
               </div>
-              
+
               <div className="form-actions">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="cancel-btn"
                   onClick={() => {
                     setShowNewEntryForm(false);
@@ -388,9 +457,9 @@ function UpdateMedicineStock() {
                 >
                   Cancel
                 </button>
-                <button 
-                  type="button" 
-                  className="submit-btn" 
+                <button
+                  type="button"
+                  className="submit-btn"
                   onClick={handleAddNewEntry}
                   disabled={loading}
                 >
@@ -399,16 +468,16 @@ function UpdateMedicineStock() {
               </div>
             </div>
           ) : (
-            <button 
+            <button
               className="add-entry-btn"
               onClick={() => setShowNewEntryForm(true)}
             >
               Add New Batch
             </button>
           )}
-          
+
           <div className="navigation-buttons">
-            <button 
+            <button
               className="back-btn"
               onClick={() => {
                 setMedicine(null);
@@ -417,7 +486,7 @@ function UpdateMedicineStock() {
             >
               Back to Medicine Selection
             </button>
-            <button 
+            <button
               className="inventory-btn"
               onClick={() => navigate("/get-medicines")}
             >
