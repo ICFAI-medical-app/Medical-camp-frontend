@@ -1,6 +1,6 @@
 .medicine-pickup-container {
   background-color: #fff;
-  max-width: 600px;
+  max-width: 800px; /* Increased to accommodate horizontal cards */
   margin: 35px auto;
   padding: 20px;
   border-radius: 8px;
@@ -9,7 +9,7 @@
 }
 
 .medicine-pickup-card{
-  margin: 0px 100px 0px;
+  margin: 0px 20px 0px; /* Reduced side margins to allow more space for horizontal cards */
 }
 
 .medicine-pickup-title {
@@ -39,7 +39,7 @@
 }
 
 .medicine-pickup-form {
-  max-width: 400px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -151,4 +151,207 @@
 
 .medicine-pickup-close-popup:hover {
   background-color: #2a9d7a;
+}
+
+/* Updated styles for horizontal layout */
+.medicine-block {
+  margin-bottom: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f9f9f9;
+}
+
+.medicine-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.medicine-id {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  background-color: #33b48b; /* Using your theme color */
+  color: white;
+  border-radius: 4px;
+  margin-right: 1rem;
+}
+
+.medicine-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.medicine-details p {
+  margin: 0.25rem 0;
+}
+
+/* Horizontal batches layout */
+.batches-row {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.batch-card {
+  flex: 0 0 auto;
+  width: calc(33.33% - 0.67rem);
+  min-width: 200px;
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.batch-card p {
+  margin: 0.5rem 0;
+}
+
+.batch-card input {
+  margin-top: 0.5rem;
+  padding: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.medicine-divider {
+  height: 2px;
+  background-color: #eaeaea;
+  margin: 1rem 0;
+}
+
+.medicine-pickup-subheading {
+  color: #333;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.medicine-verification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.medicine-verification-popup {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.medicine-verification-popup h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.verification-section {
+  margin-bottom: 24px;
+}
+
+.verification-section h3 {
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.verification-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.verification-table th,
+.verification-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.verification-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.verification-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.verification-error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+.medicine-pickup-btn-container {
+  width: 100%;
+  margin: 16px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.medicine-pickup-fetch-btn {
+  background-color: #3cb371; /* Use the same color for both buttons */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 200px;
+  transition: background-color 0.3s;
+}
+
+.medicine-pickup-fetch-btn:hover {
+  background-color: #2e8b57;
+}
+
+.medicine-pickup-verify-btn:hover {
+  background-color: #388e3c;
+}
+/* For smaller screens */
+@media (max-width: 768px) {
+  .medicine-pickup-card{
+    margin: 0;
+  }
+  
+  .batches-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .batch-card {
+    width: 100%;
+  }
+  
+  .medicine-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .medicine-id {
+    margin-bottom: 0.5rem;
+  }
 }

@@ -24,7 +24,7 @@ const Navbar = () => {
     { path: '/doctor-assigning', label: 'Doctor Assigning' },
     { path: '/doctor-prescription', label: 'Doctor Prescription' },
     { path: '/medicine-pickup', label: 'Medicine Pickup' },
-    { path: '/medicine-verification', label: 'Medicine Verification' },
+    // { path: '/medicine-verification', label: 'Medicine Verification' },
   ];
 
   if (pathname === '/dashboard' || pathname === '/dashboard-admin') {

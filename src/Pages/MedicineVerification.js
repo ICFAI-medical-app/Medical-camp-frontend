@@ -1,76 +1,109 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../Styles/MedicineVerification.css';
+import '../Styles/MedicinePickup.css';
 
-function MedicineVerification() {
-  const [bookNo, setBookNo] = useState('');
-  const [medicinesGiven, setMedicinesGiven] = useState([]);
+function MedicineVerification({ bookNo, showVerification, setShowVerification }) {
+  const [verificationData, setVerificationData] = useState({
+    medicines_prescribed: [],
+    medicines_given: []
+  });
   const [error, setError] = useState('');
-  
-  const handleFetchVerification = async () => {
-    setError('');
-    setMedicinesGiven([]);
 
-    if (!bookNo) {
-      setError('Please enter a valid Book No.');
-      return;
+  useEffect(() => {
+    if (bookNo && showVerification) {
+      fetchVerificationData();
     }
+  }, [bookNo, showVerification]);
 
-    const PORT = process.env.PORT || 5002;
-
+  const fetchVerificationData = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-verification/${bookNo}`
       );
-      setMedicinesGiven(response.data.medicines_given);
+      setVerificationData(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch verification data.');
+      setError(err.response?.data?.message || 'Failed to fetch verification data');
     }
   };
 
+  if (!showVerification) return null;
+
   return (
-    <div className="verification-container">
-      <div className="verification-card">
-        <h2 className="verification-title">Medicine Verification</h2>
+    <div className="medicine-verification-overlay">
+      <div className="medicine-verification-popup">
+        <h2>Medicine Verification - Book #{bookNo}</h2>
         
-        <div className="form-group">
-          <label>Book No</label>
-          <input
-            type="text"
-            value={bookNo}
-            onChange={(e) => setBookNo(e.target.value)}
-            required
-            placeholder="Enter Book No"
-          />
+        <div className="verification-section">
+          <h3>Prescribed Medicines</h3>
+          {verificationData.medicines_prescribed.length > 0 ? (
+            <table className="verification-table">
+              <thead>
+                <tr>
+                  <th>Medicine ID</th>
+                  <th>Quantity</th>
+                  <th>Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+                {verificationData.medicines_prescribed.map((med, index) => (
+                  <tr key={`prescribed-${index}`}>
+                    <td>{med.medicine_id}</td>
+                    <td>{med.quantity}</td>
+                    <td>
+                      {med.dosage_schedule ? (
+                        <>
+                          {med.dosage_schedule.days} days
+                          <br />
+                          {med.dosage_schedule.morning && '✓ Morning '}
+                          {med.dosage_schedule.afternoon && '✓ Afternoon '}
+                          {med.dosage_schedule.night && '✓ Night'}
+                        </>
+                      ) : (
+                        'No schedule'
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No prescribed medicines found</p>
+          )}
+        </div>
+        
+        <div className="verification-section">
+          <h3>Medicines Given</h3>
+          {verificationData.medicines_given.length > 0 ? (
+            <table className="verification-table">
+              <thead>
+                <tr>
+                  <th>Medicine ID</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {verificationData.medicines_given.map((med, index) => (
+                  <tr key={`given-${index}`}>
+                    <td>{med.medicine_id}</td>
+                    <td>{med.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No medicines have been given yet</p>
+          )}
         </div>
 
-        <div className="btn-container">
-          <button type="button" className="fetch-btn" onClick={handleFetchVerification}>
-            Fetch Medicines Given
-          </button>
-        </div>
-
-        {medicinesGiven.length > 0 && (
-          <div className="medicines-list">
-            <h3 className="subheading">Medicines Given</h3>
-            {medicinesGiven.map((med, index) => (
-              <div key={index} className="medicine-row">
-                <div className="medicine-details">
-                  <strong>Medicine ID:</strong> {med.medicine_id}
-                </div>
-                <div className="medicine-details">
-                  <strong>Quantity:</strong> {med.quantity}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {error && (
-          <div className="error-message">
-            <p>{error}</p>
-          </div>
-        )}
+        {error && <div className="verification-error">{error}</div>}
+        
+        <button 
+          className="medicine-pickup-close-popup"
+          onClick={() => setShowVerification(false)}
+        >
+          Close
+        </button>
       </div>
     </div>
   );
