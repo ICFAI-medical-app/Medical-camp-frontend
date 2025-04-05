@@ -1,122 +1,3 @@
-/* #medicine-container {
-  background-color: #fff;
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Arial', sans-serif;
-}
-
-#medicine-title {
-  text-align: center;
-  color: #333;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-#medicine-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
-}
-
-.medicine-card {
-  background-color: #fff;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-align: center;
-}
-
-.medicine-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.medicine-card-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.medicine-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.medicine-card-header .medicine-formulation {
-  margin: 0;
-  flex-grow: 1;
-  margin-left: 10px;
-}
-
-.medicine-icon {
-  font-size: 2.5rem;
-  margin-bottom: 5px;
-}
-
-.medicine-info {
-  text-align: center;
-  width: 90%;
-}
-
-.medicine-formulation {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #333;
-  margin: 5px 0;
-}
-
-.medicine-id,
-.medicine-quantity {
-  font-size: 1rem;
-  color: #333;
-  margin: 3px 0;
-}
-
-.medicine-details {
-  margin-top: 10px;
-  text-align: left;
-}
-
-.details-heading {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.medicine-detail-card {
-  margin-bottom: 5px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-.medicine-name,
-.expiry-date,
-.detail-quantity {
-  font-size: 1rem;
-  color: #333;
-  margin: 3px 0;
-}
-
-@media (max-width: 600px) {
-  #medicine-list {
-    grid-template-columns: 1fr;
-  }
-} */
-
-
 #medicine-container {
   background-color: #fff;
   max-width: 900px;
@@ -287,6 +168,22 @@
 .delete-batch-btn:hover {
   background-color: #ffe8a1;
   transform: scale(1.05);
+}
+
+.expired-medicine {
+  background-color: rgba(255, 200, 200, 0.3);
+  border: 1px solid #ff6b6b;
+}
+
+.expired-text {
+  color: #d63031;
+  font-weight: bold;
+}
+
+.expired-label {
+  color: #d63031;
+  font-weight: bold;
+  margin-left: 5px;
 }
 
 @media (max-width: 600px) {

@@ -20,7 +20,8 @@ function DashboardAdmin() {
     { title: "View Patients", icon: "😷", path: "/view-patients" },
     { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },
     { title: "Add a new medicine to inventory", icon: "💊", path: "/add-new-medicine" },
-    { title: "Get all the medicines in the inventory", icon: "💊", path: "/get-medicines" }
+    { title: "View Medicines", icon: "💊", path: "/get-medicines" },
+    {title: "Expired Medicines", icon: "💊", path: "/expired-medicines"}
   ];
 
   return (
