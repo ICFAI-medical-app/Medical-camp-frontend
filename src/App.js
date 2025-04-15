@@ -20,6 +20,7 @@ import ExpiredMedicines from './Pages/ExpiredMedicines';
 import Login from './Pages/Login';
 import AdminLogin from './Pages/AdminLogin';
 import Footer from './Components/Footer';
+import DoctorProfile from './Pages/DoctorProfile';
 import './App.css';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
             <Route path="/add-new-medicine" element={<AddMedicine />} />
             <Route path='/get-doctors' element={<ViewDoctors />} />
             <Route path="/expired-medicines" element={<ExpiredMedicines />} />
+            <Route path='/doctor/:id' element={<DoctorProfile />} />
           </Routes>
         </div>
         <Footer />
