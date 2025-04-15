@@ -1,140 +1,165 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import '../Styles/ViewMedicines.css'
-
-// Helper function to format the date into a readable format
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    });
-}
+import '../Styles/ViewMedicines.css';
 
 function ViewMedicines() {
     const navigate = useNavigate();
     const [medicines, setMedicines] = useState([]);
-    const PORT = process.env.PORT || 5002;
+    const [showExpiredOnly, setShowExpiredOnly] = useState(false); // State to toggle expired medicines filter
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios
-            .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`)
-            .then((response) => {
-                setMedicines(response.data);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        fetchMedicines();
     }, []);
 
+    const fetchMedicines = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
+            const currentDate = new Date();
+
+            // Process the data to identify expired batches
+            const medicinesWithBatches = response.data.map(medicine => {
+                const expiredBatches = medicine.medicine_details.filter(batch => {
+                    const expiryDate = new Date(batch.expiry_date);
+                    return expiryDate < currentDate;
+                });
+
+                return {
+                    ...medicine,
+                    expiredBatches: expiredBatches
+                };
+            });
+
+            setMedicines(medicinesWithBatches);
+        } catch (error) {
+            console.error("Error fetching medicines:", error);
+            alert("Failed to fetch medicines. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleDeleteMedicine = async (medicineId) => {
-        // Ask to make sure the user wants to delete the medicine
-        const confirmDelete = window.confirm("Are you sure you want to delete this medicine?");
+        const confirmDelete = window.confirm("Are you sure you want to delete this medicine? This will delete ALL batches.");
         if (!confirmDelete) return;
-        // Make the delete request
+
         try {
             await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/delete_medicine`, {
                 medicine_id: medicineId,
             });
-            
+
             alert("Medicine deleted successfully");
-            // Update the state to remove the deleted medicine
-            setMedicines((prevMedicines) =>
-                prevMedicines.filter((medicine) => medicine.medicine_id !== medicineId)
-            );
+            fetchMedicines();
         } catch (error) {
-            console.log("Error deleting medicine");
-            console.error(error);
-            // Show the error message to the user
-            alert("Error deleting medicine. Please try again " + error.message);
+            console.error("Error deleting medicine:", error);
+            alert(`Error deleting medicine: ${error.message || "Unknown error"}`);
         }
     };
 
     const handleDeleteMedicineBatch = async (medicineId, expiryDate) => {
-        // Ask to make sure the user wants to delete the medicine
-        const medicine = medicines.find(med => med.medicine_id === medicineId);
-        if (!medicine) return;
-        
-        const confirmDelete = window.confirm(`Are you sure you want to delete this medicine batch with expiry date ${expiryDate} with formulation ${medicine.medicine_formulation}?`);
+        const confirmDelete = window.confirm(`Are you sure you want to delete the batch with expiry date ${new Date(expiryDate).toLocaleDateString()}?`);
         if (!confirmDelete) return;
-        
-        // Make the delete request
+
         try {
             await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/delete_medicine_batch`, {
                 medicine_id: medicineId,
                 expiry_date: expiryDate,
             });
 
-            // Fetch updated medicine list after deletion
             alert("Medicine batch deleted successfully");
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
-            setMedicines(response.data);
+            fetchMedicines();
         } catch (error) {
-            console.log("Error deleting medicine batch");
-            console.error(error);
-            // Show the error message to the user
-            alert("Error deleting medicine batch. Please try again " + error.message);
+            console.error("Error deleting medicine batch:", error);
+            alert(`Error deleting medicine batch: ${error.message || "Unknown error"}`);
         }
     };
 
+    // Filter medicines based on the "showExpiredOnly" state
+    const filteredMedicines = showExpiredOnly
+        ? medicines.filter(medicine => medicine.expiredBatches.length > 0)
+        : medicines;
+
     return (
-        <div id="medicine-container">
-            <h1 id="medicine-title">View Medicines</h1>
-            <div id="medicine-list">
-                {medicines.map((medicine, index) => (
-                    <div className="medicine-card" key={index}>
-                        <div className="medicine-card-header">
-                            <div className="medicine-icon">💊</div>
-                            <h3 className="medicine-formulation">
-                                Formulation: {medicine.medicine_formulation}
-                            </h3>
-                            <button 
-                                className="delete-medicine-btn" 
-                                onClick={() => handleDeleteMedicine(medicine.medicine_id)}
-                            >
-                                Delete Med
-                            </button>
-                        </div>
-                        <div className="medicine-card-body">
-                            <div className="medicine-info">
-                                <p className="medicine-id">Medicine Id:{medicine.medicine_id}</p>
-                                <p className="medicine-quantity">Total Quantity: {medicine.total_quantity}</p>
-                                <div className="medicine-details">
-                                    <h4 className="details-heading">Details:</h4>
-                                    {medicine.medicine_details.map((detail, index) => {
-                                        // Check if the medicine is expired
-                                        const isExpired = new Date(detail.expiry_date) < new Date();
-                                        
-                                        return (
-                                            <div 
-                                                key={index} 
-                                                className={`medicine-detail-card ${isExpired ? 'expired-medicine' : ''}`}
-                                            >
-                                                <p className="medicine-name">{detail.medicine_name}</p>
-                                                <p className={`expiry-date ${isExpired ? 'expired-text' : ''}`}>
-                                                    Expiry Date: {formatDate(detail.expiry_date)}
-                                                    {isExpired && <span className="expired-label"> (EXPIRED)</span>}
-                                                </p>
-                                                <p className="detail-quantity">Quantity: {detail.quantity}</p>
+        <div className="expired-medicines-container">
+            <div className="page-header">
+                <h1>View Medicines</h1>
+                <label htmlFor="expired-filter" className="filter-label">
+                    <input
+                        type="checkbox"
+                        id="expired-filter"
+                        checked={showExpiredOnly}
+                        onChange={() => setShowExpiredOnly(!showExpiredOnly)}
+                    />
+                    Show Expired Medicines Only
+                </label>
+            </div>
+
+            {loading ? (
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p>Loading medicines...</p>
+                </div>
+            ) : filteredMedicines.length === 0 ? (
+                <div className="no-data-container">
+                    <i className="fas fa-box-open fa-3x"></i>
+                    <p>No medicines found.</p>
+                </div>
+            ) : (
+                <div className="table-responsive">
+                    <table className="expired-medicines-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Medicine Name</th>
+                                <th>Formulation</th>
+                                <th>Batches</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredMedicines.map((medicine) => (
+                                <tr key={medicine.medicine_id}>
+                                    <td className="medicine-id">{medicine.medicine_id}</td>
+                                    <td className="medicine-name">{medicine.medicine_name}</td>
+                                    <td className="medicine-formulation">{medicine.medicine_formulation}</td>
+                                    <td className="expired-batches">
+                                        {(showExpiredOnly ? medicine.expiredBatches : medicine.medicine_details).map((batch, index) => (
+                                            <div key={index} className="batch-item">
+                                                <div className="batch-details">
+                                                    <span className="batch-expiry">
+                                                        <i className="fas fa-calendar-times"></i> 
+                                                        {new Date(batch.expiry_date).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="batch-quantity">
+                                                        <i className="fas fa-cubes"></i> 
+                                                        {batch.quantity} units
+                                                    </span>
+                                                </div>
                                                 <button 
-                                                    className="delete-batch-btn" 
-                                                    onClick={() => handleDeleteMedicineBatch(medicine.medicine_id, detail.expiry_date)}
+                                                    className="delete-batch-btn"
+                                                    onClick={() => handleDeleteMedicineBatch(medicine.medicine_id, batch.expiry_date)}
                                                 >
-                                                    Delete Batch
+                                                    <i className="fas fa-trash-alt"></i> Delete
                                                 </button>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                                        ))}
+                                    </td>
+                                    <td className="actions-cell">
+                                        <button 
+                                            className="delete-medicine-btn"
+                                            onClick={() => handleDeleteMedicine(medicine.medicine_id)}
+                                        >
+                                            <i className="fas fa-trash"></i> Delete All
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,3 +1,46 @@
+#filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #333;
+  font-weight: bold;
+  cursor: pointer;
+  gap: 10px;
+}
+
+#expired-filter {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #33b48b;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+#expired-filter:checked {
+  background-color: #33b48b;
+  border-color: #33b48b;
+  position: relative;
+}
+
+#expired-filter:checked::after {
+  content: '✔';
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 #medicine-container {
   background-color: #fff;
   max-width: 900px;
@@ -146,28 +189,6 @@
   padding: 6px 12px;
   font-weight: bold;
   transition: all 0.2s ease;
-}
-
-.delete-medicine-btn {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.delete-medicine-btn:hover {
-  background-color: #f5c6cb;
-  transform: scale(1.05);
-}
-
-.delete-batch-btn {
-  background-color: #ffeeba;
-  color: #856404;
-  margin-top: 5px;
-  font-size: 0.9rem;
-}
-
-.delete-batch-btn:hover {
-  background-color: #ffe8a1;
-  transform: scale(1.05);
 }
 
 .expired-medicine {
