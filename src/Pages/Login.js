@@ -14,6 +14,21 @@ const Login = () => {
   ];
 
   useEffect(() => {
+    // Check for auth token and user type when component mounts
+    const authToken = localStorage.getItem('authToken');
+    const userType = localStorage.getItem('userType');
+    
+    if (authToken) {
+      // Redirect based on user type
+      if (userType === 'admin') {
+        navigate('/dashboard-admin');
+      } else if (userType === 'volunteer') {
+        navigate('/dashboard');
+      }
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === images.length - 1 ? 0 : prevIndex + 1
@@ -24,7 +39,7 @@ const Login = () => {
   }, [images.length]);
 
   const handleVolunteerClick = () => {
-    navigate('/dashboard');
+    navigate('/volunteer-login');
   };
 
   const handleAdminClick = () => {
@@ -36,7 +51,6 @@ const Login = () => {
       <header className="app-header">
         <h1 className='login-heading'>SWECHA Healthcare</h1>
       </header>
-      
       <div className="login-container">
         <div className="login-section">
           <div className="login-content">

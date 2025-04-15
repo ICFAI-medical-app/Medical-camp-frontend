@@ -1,10 +1,30 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import "../Styles/Navbar.css";
 import SwechaLogo from "./SwechaLogo.png";
 
 const Navbar = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userType, setUserType] = useState(null);
+
+  // Check if user is logged in on component mount and route changes
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const type = localStorage.getItem('userType');
+    setIsLoggedIn(!!token);
+    setUserType(type);
+  }, [pathname]);
+
+  const handleLogout = () => {
+    // Clear auth-related data from localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userType');
+    
+    // Redirect to login page
+    navigate('/');
+  };
 
   const adminLinks = [
     { path: '/dashboard-admin', label: 'Admin Dashboard' },
@@ -12,9 +32,9 @@ const Navbar = () => {
     { path: '/add-doctor', label: 'Add Doctor' },
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
     { path: '/add-new-medicine', label: 'Add New Medicine' },
-    {path: '/get-doctors', label: 'View Doctors'},
+    { path: '/get-doctors', label: 'View Doctors'},
     { path: '/get-medicines', label: 'View Medicines' },
-    {path: '/expired-medicines', label: 'Expired Medicines'},
+    { path: '/expired-medicines', label: 'Expired Medicines'},
   ];
 
   const userLinks = [
@@ -27,12 +47,20 @@ const Navbar = () => {
     // { path: '/medicine-verification', label: 'Medicine Verification' },
   ];
 
+  // Handle special case for dashboard routes which have a different layout
   if (pathname === '/dashboard' || pathname === '/dashboard-admin') {
     return (
       <nav className="navbar">
         <div className="logo">
           <Link to="/"><img src={SwechaLogo} alt="Swecha Logo" className="logo-img" /></Link>
         </div>
+        {isLoggedIn && (
+          <div className="logout-container">
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        )}
       </nav>
     );
   }
@@ -59,6 +87,13 @@ const Navbar = () => {
           </li>
         ))}
       </ul>
+      {isLoggedIn && (
+        <div className="logout-container">
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      )}
     </nav>
   );
 };

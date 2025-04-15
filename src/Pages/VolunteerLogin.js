@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../Styles/Login.css';
 
-const AdminLogin = () => {
+const VolunteerLogin = () => {
   const [user_name, setUserName] = useState('');
   const [user_password, setUserPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,7 +27,7 @@ const AdminLogin = () => {
     }
   }, [navigate]);
 
-  const handleAdminLogin = async (e) => {
+  const handleVolunteerLogin = async (e) => {
     e.preventDefault();
     
     if (!user_name || !user_password) {
@@ -39,16 +39,16 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/admin/login`, {
+      const response = await axios.post(`${BACKEND_URL}/api/volunteer/login`, {
         user_name,
         user_password,
-        user_type: 'admin'
+        user_type: 'volunteer'
       });
       
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token);
-        localStorage.setItem('userType', 'admin');
-        navigate('/dashboard-admin');
+        localStorage.setItem('userType', 'volunteer');
+        navigate('/dashboard');
       } else {
         setError('Login failed. Please check your credentials.');
       }
@@ -68,8 +68,8 @@ const AdminLogin = () => {
 
   return (
     <div className="login-container">
-      <h2 className="login-title">Admin Login</h2>
-      <form className="login-admin-form" onSubmit={handleAdminLogin}>
+      <h2 className="login-title">Volunteer Login</h2>
+      <form className="login-admin-form" onSubmit={handleVolunteerLogin}>
         {error && <div className="error-message">{error}</div>}
         <input
           type="text"
@@ -97,4 +97,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default VolunteerLogin;
