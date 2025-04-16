@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../Styles/DoctorProfile.css';
 
-function DoctorProfile() {
+const DoctorProfile = () => {
   const [doctor, setDoctor] = useState(null);
   const [editableDoctor, setEditableDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,26 +12,25 @@ function DoctorProfile() {
   const [validationErrors, setValidationErrors] = useState({});
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
 
   useEffect(() => {
     fetchDoctorData();
   }, [id]);
 
-  const fetchDoctorData = () => {
+  const fetchDoctorData = async () => {
     setLoading(true);
-    axios
-      .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctor/${id}`)
-      .then(response => {
-        console.log("Doctor data:", response.data);
-        setDoctor(response.data);
-        setEditableDoctor(response.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        alert('Error fetching doctor information');
-        console.log(error);
-        setLoading(false);
-      });
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/admin/get_doctor/${id}`);
+      setDoctor(response.data);
+      setEditableDoctor(response.data);
+    } catch (error) {
+      console.error('Error fetching doctor:', error);
+      alert('Error fetching doctor information');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditToggle = () => {
@@ -62,17 +61,15 @@ function DoctorProfile() {
   const validateForm = () => {
     const errors = {};
     
-    if (!editableDoctor.doctor_name || editableDoctor.doctor_name.trim() === '') {
-      errors.doctor_name = "Doctor name is required";
+    if (!editableDoctor.name || editableDoctor.name.trim() === '') {
+      errors.name = "Name is required";
     }
     
     if (!editableDoctor.specialization || editableDoctor.specialization.trim() === '') {
       errors.specialization = "Specialization is required";
     }
     
-    if (!editableDoctor.doctor_phone_no || editableDoctor.doctor_phone_no.trim() === '') {
-      errors.doctor_phone_no = "Phone number is required";
-    }
+    // Add more validation as needed
     
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -86,25 +83,38 @@ function DoctorProfile() {
     
     setSaving(true);
     try {
-      const url = `${process.env.REACT_APP_BACKEND}/api/admin/edit_doctor/${id}`;
-      console.log('Sending update to:', url);
-      console.log('With data:', editableDoctor);
+      const response = await axios.post(
+        `${BACKEND_URL}/api/admin/update_doctor/${id}`, 
+        editableDoctor
+      );
       
-      const response = await axios.put(url, editableDoctor);
       setDoctor(response.data);
       setIsEditing(false);
       alert('Doctor information updated successfully');
     } catch (error) {
-      console.error('Error updating doctor information:', error);
+      console.error('Error updating doctor:', error);
       
-      // Check if it's a validation error from the server
-      if (error.response && error.response.data && error.response.data.error) {
-        alert('Update failed: ' + error.response.data.error);
+      if (error.response && error.response.data && error.response.data.message) {
+        alert('Update failed: ' + error.response.data.message);
       } else {
         alert('Failed to update doctor information. Please try again.');
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Add delete functionality here
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this doctor? This action cannot be undone.')) {
+      try {
+        await axios.delete(`${BACKEND_URL}/api/admin/delete_doctor/${id}`);
+        alert('Doctor deleted successfully');
+        navigate('/get-doctors');
+      } catch (error) {
+        console.error('Error deleting doctor:', error);
+        alert('Failed to delete doctor. Please try again.');
+      }
     }
   };
 
@@ -126,9 +136,14 @@ function DoctorProfile() {
       <div className="doctor-profile-header">
         <h1>Doctor Profile</h1>
         {!isEditing ? (
-          <button className="edit-button" onClick={handleEditToggle}>
-            Edit
-          </button>
+          <div className="header-actions">
+            <button className="edit-button" onClick={handleEditToggle}>
+              Edit
+            </button>
+            <button className="delete-button" onClick={handleDelete}>
+              Delete
+            </button>
+          </div>
         ) : (
           <div className="action-buttons">
             <button 
@@ -146,21 +161,21 @@ function DoctorProfile() {
       </div>
       <div className="doctor-profile-card">
         <div className="doctor-avatar-large">
-          {doctor.doctor_name?.charAt(0).toUpperCase() || 'D'}
+          {doctor.name?.charAt(0).toUpperCase() || 'D'}
         </div>
         {isEditing ? (
           // Edit mode
           <div className="doctor-edit-form">
             <div className="form-group">
-              <label>Doctor Name <span className="required">*</span></label>
+              <label>Name <span className="required">*</span></label>
               <input
-                name="doctor_name"
-                value={editableDoctor.doctor_name || ''}
+                name="name"
+                value={editableDoctor.name || ''}
                 onChange={handleInputChange}
-                className={`form-control ${validationErrors.doctor_name ? 'error-input' : ''}`}
+                className={`form-control ${validationErrors.name ? 'error-input' : ''}`}
               />
-              {validationErrors.doctor_name && (
-                <div className="error-message">{validationErrors.doctor_name}</div>
+              {validationErrors.name && (
+                <div className="error-message">{validationErrors.name}</div>
               )}
             </div>
             <div className="form-group">
@@ -176,22 +191,19 @@ function DoctorProfile() {
               )}
             </div>
             <div className="form-group">
-              <label>Phone Number <span className="required">*</span></label>
+              <label>Phone Number</label>
               <input
-                name="doctor_phone_no"
-                value={editableDoctor.doctor_phone_no || ''}
+                name="phone"
+                value={editableDoctor.phone || ''}
                 onChange={handleInputChange}
-                className={`form-control ${validationErrors.doctor_phone_no ? 'error-input' : ''}`}
+                className="form-control"
               />
-              {validationErrors.doctor_phone_no && (
-                <div className="error-message">{validationErrors.doctor_phone_no}</div>
-              )}
             </div>
             <div className="form-group">
               <label>Email</label>
               <input
-                name="doctor_email"
-                value={editableDoctor.doctor_email || ''}
+                name="email"
+                value={editableDoctor.email || ''}
                 onChange={handleInputChange}
                 className="form-control"
                 type="email"
@@ -200,8 +212,8 @@ function DoctorProfile() {
             <div className="form-group">
               <label>Age</label>
               <input
-                name="doctor_age"
-                value={editableDoctor.doctor_age || ''}
+                name="age"
+                value={editableDoctor.age || ''}
                 onChange={handleInputChange}
                 className="form-control"
                 type="number"
@@ -210,8 +222,8 @@ function DoctorProfile() {
             <div className="form-group">
               <label>Sex</label>
               <select
-                name="doctor_sex"
-                value={editableDoctor.doctor_sex || ''}
+                name="sex"
+                value={editableDoctor.sex || ''}
                 onChange={handleInputChange}
                 className="form-control"
               >
@@ -225,7 +237,7 @@ function DoctorProfile() {
         ) : (
           // View mode
           <>
-            <h2>{doctor.doctor_name}</h2>
+            <h2>{doctor.name}</h2>
             <div className="doctor-details-container">
               <div className="doctor-detail">
                 <strong>Specialization:</strong> 
@@ -233,19 +245,19 @@ function DoctorProfile() {
               </div>
               <div className="doctor-detail">
                 <strong>Phone:</strong> 
-                <span>{doctor.doctor_phone_no}</span>
+                <span>{doctor.phone}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Email:</strong> 
-                <span>{doctor.doctor_email}</span>
+                <span>{doctor.email}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Age:</strong> 
-                <span>{doctor.doctor_age}</span>
+                <span>{doctor.age}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Sex:</strong> 
-                <span>{doctor.doctor_sex || 'Not specified'}</span>
+                <span>{doctor.sex || 'Not specified'}</span>
               </div>
             </div>
           </>

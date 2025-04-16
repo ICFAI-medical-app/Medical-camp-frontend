@@ -1,0 +1,96 @@
+.add-volunteer-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .add-volunteer-container h2 {
+    color: #33b48b;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .volunteer-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .volunteer-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .volunteer-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .volunteer-form input:focus {
+    outline: none;
+    border-color: #33b48b;
+    box-shadow: 0 0 5px rgba(51, 180, 139, 0.3);
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+  
+  .submit-btn, .cancel-btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+  }
+  
+  .submit-btn {
+    background-color: #33b48b;
+    color: white;
+  }
+  
+  .submit-btn:hover {
+    background-color: #2a9673;
+  }
+  
+  .cancel-btn {
+    background-color: #f7f7f7;
+    color: #555;
+    border: 1px solid #ddd;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #eee;
+  }
+  
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .submit-btn:disabled, .cancel-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }

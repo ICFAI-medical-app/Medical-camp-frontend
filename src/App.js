@@ -25,6 +25,9 @@ import DoctorProfile from './Pages/DoctorProfile';
 import ProtectedRoute from './Pages/ProtectedRoute';
 import AdminAnalytics from './Pages/AdminAnalytics';  
 import './App.css';
+import AddVolunteer from './Pages/AddVolunteer';
+import ViewVolunteers from './Pages/ViewVolunteers';
+import VolunteerProfile from './Pages/VolunteerProfile';
 
 function App() {
   return (
@@ -44,6 +47,7 @@ function App() {
             <Route path="/doctor-prescription" element={<ProtectedRoute requiredType="volunteer"><DoctorPrescription /></ProtectedRoute>} />
             <Route path="/medicine-pickup" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
             {/* <Route path="/medicine-verification" element={<MedicineVerification />} /> */}
+            <Route path="/add-volunteer" element={<ProtectedRoute requiredType="admin"><AddVolunteer /></ProtectedRoute>} />
             <Route path="/add-doctor" element={<ProtectedRoute requiredType="admin"><AddDoctor/></ProtectedRoute>} />
             <Route path="/doctor-availability" element={<ProtectedRoute requiredType="admin"><DoctorAvailability/></ProtectedRoute>} />
             <Route path="/view-patients" element={<ProtectedRoute requiredType="admin"><ViewPatients /></ProtectedRoute>} />
@@ -53,6 +57,8 @@ function App() {
             <Route path='/get-doctors' element={<ProtectedRoute requiredType="admin"><ViewDoctors /></ProtectedRoute>} />
             <Route path="/expired-medicines" element={<ProtectedRoute requiredType="admin"><ExpiredMedicines /></ProtectedRoute>} />
             <Route path='/doctor/:id' element={<ProtectedRoute requiredType="admin"><DoctorProfile /></ProtectedRoute>} />
+            <Route path="/get-volunteers" element={<ProtectedRoute requiredType="admin"><ViewVolunteers /></ProtectedRoute>} />
+            <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
           </Routes>
         </div>

@@ -1,4 +1,4 @@
-.doctor-profile-container {
+.volunteer-profile-container {
   background-color: #fff;
   max-width: 800px;
   margin: 40px auto;
@@ -8,7 +8,7 @@
   font-family: 'Arial', sans-serif;
 }
 
-.doctor-profile-header {
+.volunteer-profile-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,7 +17,7 @@
   border-bottom: 1px solid #eee;
 }
 
-.doctor-profile-header h1 {
+.volunteer-profile-header h1 {
   color: #000;
   margin: 0;
   font-size: 1.8rem;
@@ -85,7 +85,7 @@
   background-color: #c0392b;
 }
 
-.doctor-profile-card {
+.volunteer-profile-card {
   background-color: #f8f9fa;
   padding: 30px;
   border-radius: 8px;
@@ -93,10 +93,10 @@
   position: relative;
 }
 
-.doctor-avatar-large {
+.volunteer-avatar-large {
   width: 80px;
   height: 80px;
-  background-color: #3498db;
+  background-color: #33b48b;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -107,20 +107,20 @@
   margin: 0 auto 20px;
 }
 
-.doctor-profile-card h2 {
+.volunteer-profile-card h2 {
   color: #000;
   font-size: 1.6rem;
   margin-bottom: 20px;
   text-align: center;
 }
 
-.doctor-details-container {
+.volunteer-details-container {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.doctor-detail {
+.volunteer-detail {
   padding: 12px;
   border-radius: 6px;
   background-color: #fff;
@@ -128,16 +128,16 @@
   display: flex;
 }
 
-.doctor-detail strong {
+.volunteer-detail strong {
   width: 130px;
   color: #555;
 }
 
-.doctor-detail span {
+.volunteer-detail span {
   flex-grow: 1;
 }
 
-.doctor-edit-form {
+.volunteer-edit-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -196,7 +196,7 @@
 
 .loading-spinner {
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #33b48b;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -232,26 +232,26 @@
 }
 
 @media (max-width: 600px) {
-  .doctor-profile-container {
+  .volunteer-profile-container {
     width: 95%;
     padding: 15px;
   }
   
-  .doctor-profile-header {
+  .volunteer-profile-header {
     flex-direction: column;
     gap: 15px;
     align-items: flex-start;
   }
   
-  .doctor-profile-card {
+  .volunteer-profile-card {
     padding: 20px;
   }
   
-  .doctor-detail {
+  .volunteer-detail {
     flex-direction: column;
   }
   
-  .doctor-detail strong {
+  .volunteer-detail strong {
     width: auto;
     margin-bottom: 5px;
   }

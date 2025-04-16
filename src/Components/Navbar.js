@@ -34,6 +34,8 @@ const Navbar = () => {
     { path: '/add-new-medicine', label: 'Add New Medicine' },
     { path: '/get-doctors', label: 'View Doctors'},
     { path: '/get-medicines', label: 'View Medicines' },
+    { path: '/get-volunteers', label: 'View Volunteers' },
+    { path: '/add-volunteer', label: 'Add Volunteer' },
     { path: '/expired-medicines', label: 'Expired Medicines'},
   ];
 
@@ -65,11 +67,22 @@ const Navbar = () => {
     );
   }
 
-  const adminPages = adminLinks.map(link => link.path);
+  // List of all admin routes including profile pages
+  const adminPages = [
+    ...adminLinks.map(link => link.path),
+    '/volunteer/:id', '/doctor/:id',  // Add dynamic routes
+    '/volunteer', '/doctor'           // Add base paths
+  ];
+  
   const userPages = userLinks.map(link => link.path);
 
   let linksToDisplay = [];
-  if (adminPages.includes(pathname)) {
+  
+  // Check if the current path starts with any admin page path
+  if (adminPages.some(page => 
+      pathname === page || 
+      (page.includes(':id') && pathname.startsWith(page.split('/:')[0])))
+  ) {
     linksToDisplay = adminLinks;
   } else if (userPages.includes(pathname)) {
     linksToDisplay = userLinks;
