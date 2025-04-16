@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({children , required_type}) => {
+const ProtectedRoute = ({children , requiredType}) => {
     const authToken = localStorage.getItem('authToken');
     const userType = localStorage.getItem('userType');
 
@@ -9,7 +9,10 @@ const ProtectedRoute = ({children , required_type}) => {
         return <Navigate to="/" replace />;
     }
 
-    if (required_type && userType !== required_type) {
+    // console.log("User Type:", userType);
+    // console.log("Required Type:", requiredType);
+
+    if (requiredType && userType !== requiredType) {
         return <Navigate to="/" replace />;
     }
 

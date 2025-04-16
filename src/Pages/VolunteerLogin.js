@@ -39,7 +39,7 @@ const VolunteerLogin = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/volunteer/login`, {
+      const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
         user_name,
         user_password,
         user_type: 'volunteer'
