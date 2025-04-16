@@ -23,6 +23,7 @@ import VolunteerLogin from './Pages/VolunteerLogin'; // Import the new component
 import Footer from './Components/Footer';
 import DoctorProfile from './Pages/DoctorProfile';
 import ProtectedRoute from './Pages/ProtectedRoute';
+import AdminAnalytics from './Pages/AdminAnalytics';  
 import './App.css';
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
             <Route path='/get-doctors' element={<ProtectedRoute requiredType="admin"><ViewDoctors /></ProtectedRoute>} />
             <Route path="/expired-medicines" element={<ProtectedRoute requiredType="admin"><ExpiredMedicines /></ProtectedRoute>} />
             <Route path='/doctor/:id' element={<ProtectedRoute requiredType="admin"><DoctorProfile /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />
