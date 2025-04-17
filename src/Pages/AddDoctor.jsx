@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import '../Styles/Doctor.css';
 
@@ -67,7 +68,8 @@ function AddDoctor() {
 
         const PORT = process.env.PORT || 5002;
 
-        axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/add_doctor`, formData)
+        // axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/add_doctor`, formData)
+        privateAxios.post('/api/admin/add_doctor', formData)
             .then((response) => {
                 if (response.data) {
                     setFormData({

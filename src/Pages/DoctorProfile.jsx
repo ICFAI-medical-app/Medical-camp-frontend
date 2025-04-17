@@ -161,7 +161,7 @@ const DoctorProfile = () => {
       </div>
       <div className="doctor-profile-card">
         <div className="doctor-avatar-large">
-          {doctor.name?.charAt(0).toUpperCase() || 'D'}
+          {doctor.doctor_name?.charAt(0).toUpperCase() || 'D'}
         </div>
         {isEditing ? (
           // Edit mode
@@ -170,7 +170,7 @@ const DoctorProfile = () => {
               <label>Name <span className="required">*</span></label>
               <input
                 name="name"
-                value={editableDoctor.name || ''}
+                value={editableDoctor.doctor_name || ''}
                 onChange={handleInputChange}
                 className={`form-control ${validationErrors.name ? 'error-input' : ''}`}
               />
@@ -194,7 +194,7 @@ const DoctorProfile = () => {
               <label>Phone Number</label>
               <input
                 name="phone"
-                value={editableDoctor.phone || ''}
+                value={editableDoctor.doctor_phone_no || ''}
                 onChange={handleInputChange}
                 className="form-control"
               />
@@ -203,7 +203,7 @@ const DoctorProfile = () => {
               <label>Email</label>
               <input
                 name="email"
-                value={editableDoctor.email || ''}
+                value={editableDoctor.doctor_email || ''}
                 onChange={handleInputChange}
                 className="form-control"
                 type="email"
@@ -213,7 +213,7 @@ const DoctorProfile = () => {
               <label>Age</label>
               <input
                 name="age"
-                value={editableDoctor.age || ''}
+                value={editableDoctor.doctor_age || ''}
                 onChange={handleInputChange}
                 className="form-control"
                 type="number"
@@ -223,7 +223,7 @@ const DoctorProfile = () => {
               <label>Sex</label>
               <select
                 name="sex"
-                value={editableDoctor.sex || ''}
+                value={editableDoctor.doctor_sex || ''}
                 onChange={handleInputChange}
                 className="form-control"
               >
@@ -237,7 +237,7 @@ const DoctorProfile = () => {
         ) : (
           // View mode
           <>
-            <h2>{doctor.name}</h2>
+            <h2>{doctor.doctor_name}</h2>
             <div className="doctor-details-container">
               <div className="doctor-detail">
                 <strong>Specialization:</strong> 
@@ -245,19 +245,19 @@ const DoctorProfile = () => {
               </div>
               <div className="doctor-detail">
                 <strong>Phone:</strong> 
-                <span>{doctor.phone}</span>
+                <span>{doctor.doctor_phone_no}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Email:</strong> 
-                <span>{doctor.email}</span>
+                <span>{doctor.doctor_email}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Age:</strong> 
-                <span>{doctor.age}</span>
+                <span>{doctor.doctor_age}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Sex:</strong> 
-                <span>{doctor.sex || 'Not specified'}</span>
+                <span>{doctor.doctor_sex || 'Not specified'}</span>
               </div>
             </div>
           </>
