@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
+import { publicAxios } from '../api/axios';
 import '../Styles/Login.css';
 
 const AdminLogin = () => {
@@ -10,7 +11,7 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
-  const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
+  // const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
 
   useEffect(() => {
     // Check for auth token and user type when component mounts
@@ -39,7 +40,12 @@ const AdminLogin = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
+      // const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
+      //   user_name,
+      //   user_password,
+      //   user_type: 'admin'
+      // });
+      const response = await publicAxios.post('/api/auth/login', {
         user_name,
         user_password,
         user_type: 'admin'
