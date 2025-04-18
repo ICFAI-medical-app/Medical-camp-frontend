@@ -25,10 +25,12 @@ function ViewMedicines() {
                     const expiryDate = new Date(batch.expiry_date);
                     return expiryDate < currentDate;
                 });
+                const medicineNames = [...new Set(medicine.medicine_details.map(detail => detail.medicine_name))];
 
                 return {
                     ...medicine,
-                    expiredBatches: expiredBatches
+                    expiredBatches: expiredBatches,
+                    medicineNames: medicineNames // Add extracted names to the medicine object
                 };
             });
 
@@ -112,7 +114,6 @@ function ViewMedicines() {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Medicine Name</th>
                                 <th>Formulation</th>
                                 <th>Batches</th>
                                 <th>Actions</th>
@@ -122,22 +123,25 @@ function ViewMedicines() {
                             {filteredMedicines.map((medicine) => (
                                 <tr key={medicine.medicine_id}>
                                     <td className="medicine-id">{medicine.medicine_id}</td>
-                                    <td className="medicine-name">{medicine.medicine_name}</td>
-                                    <td className="medicine-formulation">{medicine.medicine_formulation}</td>
+                                    <td className="medicine-formulation">{medicine.medicine_formulation}</td> {/* Formulation column */}
                                     <td className="expired-batches">
                                         {(showExpiredOnly ? medicine.expiredBatches : medicine.medicine_details).map((batch, index) => (
                                             <div key={index} className="batch-item">
                                                 <div className="batch-details">
+                                                    <span className="batch-medicine-name">
+                                                        <i className="fas fa-pills"></i>
+                                                        {batch.medicine_name}
+                                                    </span>
                                                     <span className="batch-expiry">
-                                                        <i className="fas fa-calendar-times"></i> 
+                                                        <i className="fas fa-calendar-times"></i>
                                                         {new Date(batch.expiry_date).toLocaleDateString()}
                                                     </span>
                                                     <span className="batch-quantity">
-                                                        <i className="fas fa-cubes"></i> 
+                                                        <i className="fas fa-cubes"></i>
                                                         {batch.quantity} units
                                                     </span>
                                                 </div>
-                                                <button 
+                                                <button
                                                     className="delete-batch-btn"
                                                     onClick={() => handleDeleteMedicineBatch(medicine.medicine_id, batch.expiry_date)}
                                                 >
@@ -146,8 +150,9 @@ function ViewMedicines() {
                                             </div>
                                         ))}
                                     </td>
+
                                     <td className="actions-cell">
-                                        <button 
+                                        <button
                                             className="delete-medicine-btn"
                                             onClick={() => handleDeleteMedicine(medicine.medicine_id)}
                                         >
