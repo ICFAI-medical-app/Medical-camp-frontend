@@ -16,7 +16,7 @@ import ViewPatients from './Pages/ViewPatients';
 import ViewMedicines from './Pages/ViewMedicines';
 import UpdateMedicineStock from './Pages/UpdateMedicineStock';
 import AddMedicine from './Pages/AddMedicine';
-import ExpiredMedicines from './Pages/ExpiredMedicines';
+// import ExpiredMedicines from './Pages/ExpiredMedicines';
 import Login from './Pages/Login';
 import AdminLogin from './Pages/AdminLogin';
 import VolunteerLogin from './Pages/VolunteerLogin'; // Import the new component
@@ -55,7 +55,7 @@ function App() {
             <Route path="/update-medicine-stock" element={<ProtectedRoute requiredType="admin"><UpdateMedicineStock /></ProtectedRoute>} />
             <Route path="/add-new-medicine" element={<ProtectedRoute requiredType="admin"><AddMedicine /></ProtectedRoute>} />
             <Route path='/get-doctors' element={<ProtectedRoute requiredType="admin"><ViewDoctors /></ProtectedRoute>} />
-            <Route path="/expired-medicines" element={<ProtectedRoute requiredType="admin"><ExpiredMedicines /></ProtectedRoute>} />
+            {/* <Route path="/expired-medicines" element={<ProtectedRoute requiredType="admin"><ExpiredMedicines /></ProtectedRoute>} /> */}
             <Route path='/doctor/:id' element={<ProtectedRoute requiredType="admin"><DoctorProfile /></ProtectedRoute>} />
             <Route path="/get-volunteers" element={<ProtectedRoute requiredType="admin"><ViewVolunteers /></ProtectedRoute>} />
             <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
