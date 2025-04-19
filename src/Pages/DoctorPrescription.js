@@ -9,9 +9,11 @@ function DoctorPrescription() {
   const [prescriptions, setPrescriptions] = useState([
     { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
   ]);
+  // Holds fetched medicine info per row
+  const [medicineDetails, setMedicineDetails] = useState([]);
   const [message, setMessage] = useState('');
 
-  const handlePrescriptionChange = (index, field, value) => {
+  const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
       if (i === index) {
         const updated = { ...prescription, [field]: value };
@@ -24,7 +26,22 @@ function DoctorPrescription() {
       }
       return prescription;
     });
+
     setPrescriptions(updatedPrescriptions);
+
+    // Fetch medicine info when ID changes
+    if (field === 'medicine_id' && value !== '') {
+      try {
+        const response = await privateAxios.get(`/api/inventory/${value}`);
+        const detailsCopy = [...medicineDetails];
+        detailsCopy[index] = response.data;
+        setMedicineDetails(detailsCopy);
+      } catch (err) {
+        const detailsCopy = [...medicineDetails];
+        detailsCopy[index] = { error: 'Medicine not found' };
+        setMedicineDetails(detailsCopy);
+      }
+    }
   };
 
   const addPrescriptionRow = () => {
@@ -32,11 +49,12 @@ function DoctorPrescription() {
       ...prescriptions,
       { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
     ]);
+    setMedicineDetails([...medicineDetails, null]);
   };
 
   const removePrescriptionRow = (index) => {
-    const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
-    setPrescriptions(updatedPrescriptions);
+    setPrescriptions(prescriptions.filter((_, i) => i !== index));
+    setMedicineDetails(medicineDetails.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -55,29 +73,24 @@ function DoctorPrescription() {
       })),
     };
 
-    const PORT = process.env.PORT || 5002;
-
     try {
-      // const response = await fetch(`${process.env.REACT_APP_BACKEND}/api/patient-history/doctor-prescription`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(payload),
-      // });
       const response = await privateAxios.post(
         `/api/patient-history/doctor-prescription`,
         payload
       );
-      if (response.ok) {
+      // Axios resolves non-2xx as exceptions, so response here indicates success
+      if (response.status >= 200 && response.status < 300) {
         setMessage('Prescription submitted successfully!');
         setBookNo('');
         setPrescriptions([
           { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
         ]);
+        setMedicineDetails([]);
       } else {
         setMessage('Failed to submit prescription.');
       }
     } catch (error) {
-      setMessage('Error: ' + error.message);
+      setMessage('Error: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -110,7 +123,26 @@ function DoctorPrescription() {
                   required
                   placeholder="e.g. 101"
                 />
+                {medicineDetails[index] && (
+                  <div className="doctor-prescription-medicine-info">
+                    {medicineDetails[index].error ? (
+                      <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
+                    ) : (
+                      <>
+                        <p><strong>Formulation:</strong> {medicineDetails[index].medicine_formulation}</p>
+                        <ul>
+                          {medicineDetails[index].details.map((med, i) => (
+                            <li key={i}>
+                              {med.medicine_name} — Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
+
               <div className="doctor-prescription-form-group">
                 <label>Days</label>
                 <input
@@ -123,6 +155,7 @@ function DoctorPrescription() {
                   placeholder="e.g. 3"
                 />
               </div>
+
               <div className="doctor-prescription-form-group doctor-prescription-checkbox-group">
                 <label>
                   <input
@@ -155,9 +188,11 @@ function DoctorPrescription() {
                   Night
                 </label>
               </div>
+
               <div className="doctor-prescription-form-group">
                 <strong>Calculated Quantity:</strong> {prescription.quantity}
               </div>
+
               <button
                 type="button"
                 className="doctor-prescription-remove-btn"
@@ -167,6 +202,7 @@ function DoctorPrescription() {
               </button>
             </div>
           ))}
+
           <div className="doctor-prescription-btn-container">
             <button
               type="button"
@@ -176,6 +212,7 @@ function DoctorPrescription() {
               Add Medicine
             </button>
           </div>
+
           <div className="doctor-prescription-btn-container">
             <button type="submit" className="doctor-prescription-submit-btn">
               Submit Prescription
