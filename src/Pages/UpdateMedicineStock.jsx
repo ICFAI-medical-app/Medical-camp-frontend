@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/UpdateMedicineStock.css";
 
@@ -26,7 +27,8 @@ function UpdateMedicineStock() {
     const fetchMedicines = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
+        // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
+        const response = await privateAxios.get("/api/admin/get_medicines");
         setMedicines(response.data);
         setLoading(false);
       } catch (err) {
@@ -103,8 +105,11 @@ function UpdateMedicineStock() {
       const oldFormattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
       const newFormattedDate = new Date(newExpiryDate).toISOString().split('T')[0];
 
-      await axios.post(
-        `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_expiry_date`,
+      // await axios.post(
+      //   `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_expiry_date`,
+      //   {
+      await privateAxios.post(
+        "/api/admin/update_medicine_expiry_date",
         {
           medicine_id: medicineId,
           old_expiry_date: oldFormattedDate,
@@ -154,8 +159,11 @@ function UpdateMedicineStock() {
         (total, detail) => total + detail.quantity, 0
       );
 
-      await axios.post(
-        `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
+      // await axios.post(
+      //   `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
+      //   {
+      await privateAxios.post(
+        "/api/admin/update_medicine_stock",
         {
           medicine_id: medicineId,
           expiry_date: new Date(),
@@ -203,8 +211,12 @@ function UpdateMedicineStock() {
 
       console.log("Adding new batch with payload:", payload);
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine_details`,
+      // const response = await axios.post(
+      //   `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine_details`,
+      //   payload
+      // );
+      const response = await privateAxios.post(
+        "/api/admin/add_new_medicine_details",
         payload
       );
 

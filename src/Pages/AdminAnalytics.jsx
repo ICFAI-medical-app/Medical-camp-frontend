@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import '../Styles/AdminAnalytics.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -16,15 +17,20 @@ function AdminAnalytics() {
     setLoading(true);
   
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND}/api/admin/analytics`, {
-          params: { monthYear },
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+      // const token = localStorage.getItem('authToken');
+      // const response = await axios.get(
+      //   `${process.env.REACT_APP_BACKEND}/api/admin/analytics`, {
+      //     params: { monthYear },
+      //     headers: {
+      //       'Authorization': `Bearer ${token}`
+      //     }
+      //   }
+      // );
+
+      const response = await privateAxios.get('/api/admin/analytics', {
+        params: { monthYear }
+      });
+      
       setAnalyticsData(response.data);
     } catch (err) {
       console.error("Error fetching analytics data:", err);

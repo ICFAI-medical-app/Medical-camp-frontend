@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import '../Styles/MedicinePickup.css';
 import MedicineVerification from './MedicineVerification';
 
@@ -24,8 +25,11 @@ function MedicinePickup() {
     }
 
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup/${bookNo}`
+      // const response = await axios.get(
+      //   `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup/${bookNo}`
+      // );
+      const response = await privateAxios.get(
+        `/api/patient-history/medicine-pickup/${bookNo}`
       );
 
       if (!response.data.medicines_prescribed || response.data.medicines_prescribed.length === 0) {
@@ -108,8 +112,15 @@ function MedicinePickup() {
     }
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup`,
+      // const response = await axios.post(
+      //   `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup`,
+      //   {
+      //     book_no: bookNo,
+      //     medicinesGiven
+      //   }
+      // );
+      const response = await privateAxios.post(
+        '/api/patient-history/medicine-pickup',
         {
           book_no: bookNo,
           medicinesGiven

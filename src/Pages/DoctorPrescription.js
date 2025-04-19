@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorPrescription.css';
+import { privateAxios } from '../api/axios';
 
 function DoctorPrescription() {
   const navigate = useNavigate();
@@ -57,11 +58,15 @@ function DoctorPrescription() {
     const PORT = process.env.PORT || 5002;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND}/api/patient-history/doctor-prescription`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      // const response = await fetch(`${process.env.REACT_APP_BACKEND}/api/patient-history/doctor-prescription`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(payload),
+      // });
+      const response = await privateAxios.post(
+        `/api/patient-history/doctor-prescription`,
+        payload
+      );
       if (response.ok) {
         setMessage('Prescription submitted successfully!');
         setBookNo('');

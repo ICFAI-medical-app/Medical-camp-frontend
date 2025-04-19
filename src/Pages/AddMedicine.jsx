@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/AddMedicine.css";
 
@@ -32,8 +33,12 @@ function AddMedicine() {
     setSuccess("");
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine`,
+      // const response = await axios.post(
+      //   `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine`,
+      //   formData
+      // );
+      const response = await privateAxios.post(
+        `/api/admin/add_new_medicine`,
         formData
       );
 

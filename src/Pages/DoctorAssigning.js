@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { privateAxios } from "../api/axios";
 import "../Styles/DoctorAssigning.css";
 
 function DoctorAssigning() {
@@ -12,7 +13,8 @@ function DoctorAssigning() {
     // Fetch the list of doctors from the backend
     const fetchDoctors = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/doctor-assign/get_doctors`);
+        // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/doctor-assign/get_doctors`);
+        const response = await privateAxios.get('/api/doctor-assign/get_doctors');
         setDoctors(response.data);
       } catch (error) {
         console.error('Error fetching doctors:', error);
@@ -31,7 +33,8 @@ function DoctorAssigning() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/doctor-assign`, {
+      // const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/doctor-assign`, {
+      const response = await privateAxios.post('/api/doctor-assign', {
         book_no: formData.bookNumber,
         doc_name: formData.doc_name,
       });

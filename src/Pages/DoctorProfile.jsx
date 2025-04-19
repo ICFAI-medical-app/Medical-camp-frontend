@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import '../Styles/DoctorProfile.css';
 
 const DoctorProfile = () => {
@@ -22,7 +23,8 @@ const DoctorProfile = () => {
   const fetchDoctorData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/admin/get_doctor/${id}`);
+      // const response = await axios.get(`${BACKEND_URL}/api/admin/get_doctor/${id}`);
+      const response = await privateAxios.get(`/api/admin/get_doctor/${id}`);
       setDoctor(response.data);
       setEditableDoctor(response.data);
     } catch (error) {
@@ -83,8 +85,12 @@ const DoctorProfile = () => {
     
     setSaving(true);
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/admin/update_doctor/${id}`, 
+      // const response = await axios.post(
+      //   `${BACKEND_URL}/api/admin/update_doctor/${id}`, 
+      //   editableDoctor
+      // );
+      const response = await privateAxios.post(
+        `/api/admin/update_doctor/${id}`,
         editableDoctor
       );
       
@@ -108,7 +114,8 @@ const DoctorProfile = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this doctor? This action cannot be undone.')) {
       try {
-        await axios.delete(`${BACKEND_URL}/api/admin/delete_doctor/${id}`);
+        // await axios.delete(`${BACKEND_URL}/api/admin/delete_doctor/${id}`);
+        await privateAxios.delete(`/api/admin/delete_doctor/${id}`);
         alert('Doctor deleted successfully');
         navigate('/get-doctors');
       } catch (error) {

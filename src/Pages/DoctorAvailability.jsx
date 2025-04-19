@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorAvailability.css';
 
@@ -9,7 +10,8 @@ function DoctorAvailability() {
     const PORT = process.env.PORT || 5002;
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
+        // axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
+        privateAxios.get('/api/admin/get_doctors')
             .then((response) => {
                 setDoctorList(response.data);
             })
@@ -24,8 +26,9 @@ function DoctorAvailability() {
     const toggleDoctorAvailability = (id) => {
         const doctor = doctorList.find((doc) => doc._id === id);
         const updatedAvailability = !doctor.doctor_availability;
-        axios.put(`${process.env.REACT_APP_BACKEND}/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
-            .then((response) => {
+        // axios.put(`${process.env.REACT_APP_BACKEND}/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
+        privateAxios.put(`/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
+        .then((response) => {
                 setDoctorList(doctorList.map((doc) =>
                     doc._id === id ? response.data : doc
                 ));

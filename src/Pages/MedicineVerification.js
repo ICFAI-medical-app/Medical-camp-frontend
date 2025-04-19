@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import '../Styles/MedicinePickup.css';
 
 function MedicineVerification({ bookNo, showVerification, setShowVerification }) {
@@ -18,8 +19,11 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
 
   const fetchVerificationData = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-verification/${bookNo}`
+      // const response = await axios.get(
+      //   `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-verification/${bookNo}`
+      // );
+      const response = await privateAxios.get(
+        `/api/patient-history/medicine-verification/${bookNo}`
       );
       setVerificationData(response.data);
     } catch (err) {
