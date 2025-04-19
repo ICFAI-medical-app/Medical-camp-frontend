@@ -87,3 +87,26 @@
 .add-medicine-submit:hover {
   background-color: #2a9d7a;
 }
+
+@media screen and (max-width: 600px) {
+  .add-medicine-page {
+    margin: 20px 10px;
+    padding: 15px;
+  }
+
+  .add-medicine-form {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .add-medicine-group input {
+    font-size: 0.95rem;
+    padding: 7px;
+  }
+
+  .add-medicine-submit,
+  .add-medicine-cancel {
+    font-size: 0.95rem;
+    padding: 9px;
+  }
+}

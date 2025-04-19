@@ -92,3 +92,32 @@
 .add-doctor-btn:hover {
   background-color: #2a9d7a;
 }
+
+@media screen and (max-width: 600px) {
+  .add-doctor-page {
+    margin: 20px 10px;
+    padding: 15px;
+  }
+
+  .add-doctor-form-section,
+  .add-doctor-form {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .add-doctor-group input,
+  .add-doctor-group select {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .add-doctor-btn {
+    font-size: 1rem;
+    padding: 12px;
+  }
+
+  .add-doctor-page h1,
+  .add-doctor-form-section h2 {
+    font-size: 1.5rem;
+  }
+}

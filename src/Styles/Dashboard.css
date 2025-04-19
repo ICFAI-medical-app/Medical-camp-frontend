@@ -57,3 +57,32 @@
   font-size: 1rem;
   color: #666;
 }
+
+@media screen and (max-width: 600px) {
+  .dashboard-container {
+    margin: 20px 10px;
+    padding: 15px;
+  }
+
+  .dashboard-card-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+  .dashboard-card {
+    padding: 15px;
+  }
+
+  .dashboard-card-icon {
+    font-size: 2.5rem;
+  }
+
+  .dashboard-card-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-card-content p {
+    font-size: 0.95rem;
+  }
+}

@@ -91,3 +91,58 @@
   border-radius: 5px;
   text-align: center;
 }
+
+@media screen and (max-width: 600px) {
+  .verification-container {
+    margin: 20px auto;
+    padding: 15px;
+    width: 90%;
+  }
+
+  .verification-card {
+    margin: 0px 20px;
+  }
+
+  .verification-title {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    font-size: 1rem;
+  }
+
+  .form-group input[type="text"] {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .fetch-btn {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .medicines-list {
+    margin-top: 15px;
+  }
+
+  .medicine-row {
+    padding: 12px;
+  }
+
+  .medicine-details {
+    font-size: 1rem;
+  }
+
+  .error-message {
+    margin-top: 15px;
+  }
+
+  .subheading {
+    font-size: 1.2rem;
+  }
+}
