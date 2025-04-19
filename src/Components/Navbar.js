@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import "../Styles/Navbar.css";
 import SwechaLogo from "./SwechaLogo.png";
+import { privateAxios } from '../api/axios';
+
 
 const Navbar = () => {
   const { pathname } = useLocation();
@@ -17,11 +19,17 @@ const Navbar = () => {
     setUserType(type);
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+
+    // log that the user is being logged out.
+    await privateAxios.post('/api/logs' , {
+      action: 'Logout'
+    })
+
     // Clear auth-related data from localStorage
     localStorage.removeItem('authToken');
     localStorage.removeItem('userType');
-    
+
     // Redirect to login page
     navigate('/');
   };
