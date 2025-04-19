@@ -264,8 +264,8 @@ const DoctorProfile = () => {
         )}
       </div>
       <div className="nav-actions">
-        <button onClick={() => navigate('/get-doctors')} className="back-button">
-          Back to Doctors List
+        <button onClick={() => navigate('/doctor-availability')} className="back-button">
+          Back to Doctors Availability Page
         </button>
       </div>
     </div>

@@ -17,6 +17,9 @@ function DoctorAvailability() {
                 console.log(error);
             });
     }, []);
+    const handleDoctorClick = (id) => {
+        navigate(`/doctor/${id}`); // Navigate to the doctor details page
+    };
 
     const toggleDoctorAvailability = (id) => {
         const doctor = doctorList.find((doc) => doc._id === id);
@@ -31,31 +34,55 @@ function DoctorAvailability() {
                 console.log(error);
             });
     }
-    
+
     return (
         <div className="doctor-availability-container">
             <header className="doctor-availability-header">
                 <h1>Doctor Availability</h1>
             </header>
-            
+
             <main className="doctor-availability-main">
                 {doctorList.length > 0 ? (
-                    <div className="doctor-availability-grid">
-                        {doctorList.map((doctor) => (
-                            <div className="doctor-availability-card" key={doctor._id}>
-                                <h3 className="doctor-name">{doctor.doctor_name}</h3>
-                                <p className="doctor-specialization"><strong>Specialization:</strong> {doctor.specialization || 'General Practice'}</p>
-                                <p className="doctor-email"><strong>Email:</strong> {doctor.doctor_email}</p>
-                                <p className="doctor-phone"><strong>Phone:</strong> {doctor.doctor_phone_no}</p>
-                                <div className={`doctor-availability-status ${doctor.doctor_availability ? 'available' : 'unavailable'}`}>
-                                    {doctor.doctor_availability ? 'Available' : 'Not Available'}
-                                </div>
-                                <button className="doctor-availability-button" onClick={() => toggleDoctorAvailability(doctor._id)}>
-                                    {doctor.doctor_availability ? 'Mark Unavailable' : 'Mark Available'}
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                    <table className="doctor-availability-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Availability</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {doctorList.map((doctor) => (
+                                <tr
+                                    key={doctor._id}
+                                    className="doctor-row"
+                                    onClick={() => handleDoctorClick(doctor._id)}
+                                >
+                                    <td>{doctor.doctor_name}</td>
+                                    <td>{doctor.specialization || 'General Practice'}</td>
+                                    <td>{doctor.doctor_email}</td>
+                                    <td>{doctor.doctor_phone_no}</td>
+                                    <td className={`doctor-availability-status ${doctor.doctor_availability ? 'available' : 'unavailable'}`}>
+                                        {doctor.doctor_availability ? 'Available' : 'Not Available'}
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="toggle-availability-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent row click
+                                                toggleDoctorAvailability(doctor._id);
+                                            }}
+                                        >
+                                            {doctor.doctor_availability ? 'Mark Unavailable' : 'Mark Available'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 ) : (
                     <p className="no-doctors-message">No doctors found.</p>
                 )}

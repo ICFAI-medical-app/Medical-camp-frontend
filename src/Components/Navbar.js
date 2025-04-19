@@ -36,7 +36,6 @@ const Navbar = () => {
     { path: '/get-medicines', label: 'View Medicines' },
     { path: '/get-volunteers', label: 'View Volunteers' },
     { path: '/add-volunteer', label: 'Add Volunteer' },
-    { path: '/expired-medicines', label: 'Expired Medicines'},
   ];
 
   const userLinks = [

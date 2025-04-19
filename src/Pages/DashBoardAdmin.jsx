@@ -21,7 +21,6 @@ function DashboardAdmin() {
     { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },
     { title: "Add a new medicine to inventory", icon: "💊", path: "/add-new-medicine" },
     { title: "View Medicines", icon: "💊", path: "/get-medicines" },
-    {title: "Expired Medicines", icon: "💊", path: "/expired-medicines"},
     { title: "Add Volunteer", icon: "👥", path: "/add-volunteer" },
     { title: "View Volunteers", icon: "👥", path: "/get-volunteers" },
     { title: "Camp Analytics", icon: "📊", path: "/analytics" },
