@@ -28,6 +28,7 @@ import './App.css';
 import AddVolunteer from './Pages/AddVolunteer';
 import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerProfile from './Pages/VolunteerProfile';
+import Log from './Pages/Log';
 
 function App() {
   return (
@@ -46,6 +47,11 @@ function App() {
             <Route path="/doctor-assigning" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigning /></ProtectedRoute>} />
             <Route path="/doctor-prescription" element={<ProtectedRoute requiredType="volunteer"><DoctorPrescription /></ProtectedRoute>} />
             <Route path="/medicine-pickup" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
+            <Route path="/log" element= {
+              <ProtectedRoute requiredType="admin">
+                <Log />
+              </ProtectedRoute>
+            } />
             {/* <Route path="/medicine-verification" element={<MedicineVerification />} /> */}
             <Route path="/add-volunteer" element={<ProtectedRoute requiredType="admin"><AddVolunteer /></ProtectedRoute>} />
             <Route path="/add-doctor" element={<ProtectedRoute requiredType="admin"><AddDoctor/></ProtectedRoute>} />

@@ -24,6 +24,7 @@ function DashboardAdmin() {
     { title: "Add Volunteer", icon: "👥", path: "/add-volunteer" },
     { title: "View Volunteers", icon: "👥", path: "/get-volunteers" },
     { title: "Camp Analytics", icon: "📊", path: "/analytics" },
+    { title: "View Logs", icon: "📜", path: "/log" },
   ];
 
   return (
