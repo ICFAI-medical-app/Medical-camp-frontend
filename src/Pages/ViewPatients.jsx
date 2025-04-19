@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import '../Styles/ViewPatients.css'
 
@@ -10,8 +11,13 @@ function ViewPatients() {
     const PORT = process.env.PORT || 5002;
 
     useEffect(() => {
-        axios
-            .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_patients`)
+        // axios
+        //     .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_patients`)
+        //     .then((response) => {
+        //         setPatients(response.data);
+        //     })
+        privateAxios
+            .get("/api/admin/get_patients")
             .then((response) => {
                 setPatients(response.data);
             })

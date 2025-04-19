@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
 import '../Styles/DoctorDetails.css';
+import { privateAxios } from '../api/axios';
 
 function DoctorDetails() {
     const { id } = useParams(); // Get doctor ID from the URL
     const [doctor, setDoctor] = useState(null);
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctor/${id}`)
+        // axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctor/${id}`)
+        privateAxios.get(`/api/admin/get_doctor/${id}`)
             .then((response) => {
                 setDoctor(response.data);
             })

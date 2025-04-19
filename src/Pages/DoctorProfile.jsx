@@ -25,6 +25,7 @@ const DoctorProfile = () => {
     try {
       // const response = await axios.get(`${BACKEND_URL}/api/admin/get_doctor/${id}`);
       const response = await privateAxios.get(`/api/admin/get_doctor/${id}`);
+      console.log(response.data);
       setDoctor(response.data);
       setEditableDoctor(response.data);
     } catch (error) {
@@ -46,9 +47,22 @@ const DoctorProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Fix: Map the form field names to the correct property names
+    const fieldMapping = {
+      name: 'doctor_name',
+      specialization: 'specialization',
+      phone: 'doctor_phone_no',
+      email: 'doctor_email',
+      age: 'doctor_age',
+      sex: 'doctor_sex'
+    };
+    
+    const fieldName = fieldMapping[name] || name;
+    
     setEditableDoctor({
       ...editableDoctor,
-      [name]: value
+      [fieldName]: value
     });
     
     // Clear validation error for this field
@@ -63,8 +77,8 @@ const DoctorProfile = () => {
   const validateForm = () => {
     const errors = {};
     
-    if (!editableDoctor.name || editableDoctor.name.trim() === '') {
-      errors.name = "Name is required";
+    if (!editableDoctor.doctor_name || editableDoctor.doctor_name.trim() === '') {
+      errors.doctor_name = "Name is required";
     }
     
     if (!editableDoctor.specialization || editableDoctor.specialization.trim() === '') {
@@ -85,13 +99,20 @@ const DoctorProfile = () => {
     
     setSaving(true);
     try {
-      // const response = await axios.post(
-      //   `${BACKEND_URL}/api/admin/update_doctor/${id}`, 
-      //   editableDoctor
-      // );
-      const response = await privateAxios.post(
-        `/api/admin/update_doctor/${id}`,
-        editableDoctor
+      // Fix 1: Change the field names to match expected backend field names
+      const doctorToUpdate = {
+        doctor_name: editableDoctor.doctor_name,
+        specialization: editableDoctor.specialization,
+        doctor_phone_no: editableDoctor.doctor_phone_no,
+        doctor_email: editableDoctor.doctor_email,
+        doctor_age: editableDoctor.doctor_age,
+        doctor_sex: editableDoctor.doctor_sex
+      };
+
+      // Fix 2: Use the correct HTTP method (PUT instead of POST if your API expects PUT)
+      const response = await privateAxios.put(
+        `/api/admin/edit_doctor/${id}`,
+        doctorToUpdate
       );
       
       setDoctor(response.data);
@@ -179,10 +200,10 @@ const DoctorProfile = () => {
                 name="name"
                 value={editableDoctor.doctor_name || ''}
                 onChange={handleInputChange}
-                className={`form-control ${validationErrors.name ? 'error-input' : ''}`}
+                className={`form-control ${validationErrors.doctor_name ? 'error-input' : ''}`}
               />
-              {validationErrors.name && (
-                <div className="error-message">{validationErrors.name}</div>
+              {validationErrors.doctor_name && (
+                <div className="error-message">{validationErrors.doctor_name}</div>
               )}
             </div>
             <div className="form-group">

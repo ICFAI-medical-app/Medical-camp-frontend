@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import '../Styles/VolunteerProfile.css';
 
 function VolunteerProfile() {
@@ -22,7 +23,8 @@ function VolunteerProfile() {
   const fetchVolunteerData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/admin/get_volunteer/${id}`);
+      // const response = await axios.get(`${BACKEND_URL}/api/admin/get_volunteer/${id}`);
+      const response = await privateAxios.get(`/api/admin/get_volunteer/${id}`);
       setVolunteer(response.data);
       setEditableVolunteer(response.data);
     } catch (error) {
@@ -93,8 +95,12 @@ function VolunteerProfile() {
     
     setSaving(true);
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/admin/edit_volunteer/${id}`, 
+      // const response = await axios.post(
+      //   `${BACKEND_URL}/api/admin/edit_volunteer/${id}`, 
+      //   editableVolunteer
+      // );
+      const response = await privateAxios.post(
+        `/api/admin/edit_volunteer/${id}`,
         editableVolunteer
       );
       
@@ -117,7 +123,8 @@ function VolunteerProfile() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this volunteer? This action cannot be undone.')) {
       try {
-        await axios.post(`${BACKEND_URL}/api/admin/delete_volunteer/${id}`);
+        // await axios.post(`${BACKEND_URL}/api/admin/delete_volunteer/${id}`);
+        await privateAxios.post(`/api/admin/delete_volunteer/${id}`);
         alert('Volunteer deleted successfully');
         navigate('/get-volunteers');
       } catch (error) {

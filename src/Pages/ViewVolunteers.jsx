@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/ViewVolunteer.css';
 
@@ -17,7 +18,8 @@ function ViewVolunteers() {
   const fetchVolunteers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/admin/get_volunteers`);
+      // const response = await axios.get(`${BACKEND_URL}/api/admin/get_volunteers`);
+      const response = await privateAxios.get('/api/admin/get_volunteers');
       setVolunteers(response.data);
     } catch (error) {
       console.error('Error fetching volunteers:', error);

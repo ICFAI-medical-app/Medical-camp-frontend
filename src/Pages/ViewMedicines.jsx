@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
+import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import '../Styles/ViewMedicines.css';
 
@@ -16,7 +17,8 @@ function ViewMedicines() {
     const fetchMedicines = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
+            // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
+            const response = await privateAxios.get(`/api/admin/get_medicines`);
             const currentDate = new Date();
 
             // Process the data to identify expired batches
@@ -48,7 +50,10 @@ function ViewMedicines() {
         if (!confirmDelete) return;
 
         try {
-            await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/delete_medicine`, {
+            // await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/delete_medicine`, {
+            //     medicine_id: medicineId,
+            // });
+            await privateAxios.post(`/api/admin/delete_medicine`, {
                 medicine_id: medicineId,
             });
 
@@ -65,7 +70,11 @@ function ViewMedicines() {
         if (!confirmDelete) return;
 
         try {
-            await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/delete_medicine_batch`, {
+            // await axios.post(`${process.env.REACT_APP_BACKEND}/api/admin/delete_medicine_batch`, {
+            //     medicine_id: medicineId,
+            //     expiry_date: expiryDate,
+            // });
+            await privateAxios.post(`/api/admin/delete_medicine_batch`, {
                 medicine_id: medicineId,
                 expiry_date: expiryDate,
             });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
+import { privateAxios } from '../api/axios';
 import '../Styles/Vitals.css';
 
 function Vitals() {
@@ -27,7 +28,8 @@ function Vitals() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/vitals`, {
+      // const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/vitals`, {
+      const response = await privateAxios.post('/api/vitals', {
         book_no: formData.bookNumber,
         rbs: formData.rbs || null,
         bp: formData.bp || null,

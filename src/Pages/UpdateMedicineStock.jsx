@@ -282,8 +282,16 @@ function UpdateMedicineStock() {
 
       const formattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
 
-      await axios.post(
-        `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
+      // await axios.post(
+      //   `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
+      //   {
+      //     medicine_id: medicineId,
+      //     expiry_date: formattedDate,
+      //     quantity: updatedQuantities[index]
+      //   }
+      // );
+      await privateAxios.post(
+        "/api/admin/update_medicine_stock",
         {
           medicine_id: medicineId,
           expiry_date: formattedDate,

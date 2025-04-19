@@ -28,7 +28,8 @@ function PatientRegistration() {
   const handleBookNumberSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/patients/${formData.bookNumber}`);
+      // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/patients/${formData.bookNumber}`);
+      const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
       if (response.data) {
         // Load patient data into the form
         setFormData({

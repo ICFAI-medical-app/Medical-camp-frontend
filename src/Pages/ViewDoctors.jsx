@@ -48,6 +48,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/ViewDoctor.css';
+import { privateAxios } from '../api/axios';
 
 function ViewDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -55,8 +56,13 @@ function ViewDoctors() {
   const PORT = process.env.PORT || 5002;
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
+    // axios
+    //   .get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
+    //   .then(response => {
+    //     console.log(response.data);
+    //     setDoctors(response.data);
+    //   })
+    privateAxios.get('/api/admin/get_doctors')
       .then(response => {
         console.log(response.data);
         setDoctors(response.data);
