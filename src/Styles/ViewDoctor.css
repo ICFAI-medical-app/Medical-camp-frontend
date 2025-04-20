@@ -127,7 +127,7 @@
 /* Keep existing media queries */
 @media (max-width: 900px) {
   .doctor-container {
-    width: 95%;
+    width: 85%;
   }
 }
 

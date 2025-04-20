@@ -96,3 +96,54 @@
 .patient-registration-submit-btn:hover {
   background-color: #2a9d7a;
 }
+
+@media screen and (max-width: 600px) {
+  .patient-registration-container {
+    margin: 20px auto;
+    padding: 15px;
+    width: 90%;
+  }
+
+  .patient-registration-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .patient-registration-form {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .patient-registration-form-group {
+    margin-bottom: 12px;
+  }
+
+  .patient-registration-form-group label {
+    font-size: 1rem;
+  }
+
+  .patient-registration-form-group input[type="text"],
+  .patient-registration-form-group input[type="number"] {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .patient-registration-radio-group {
+    margin-top: 8px;
+  }
+
+  .patient-registration-radio-group label {
+    font-size: 1rem;
+  }
+
+  .patient-registration-submit-btn {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .patient-registration-success-msg,
+  .patient-registration-error-msg {
+    font-size: 1rem;
+    padding: 12px;
+  }
+}

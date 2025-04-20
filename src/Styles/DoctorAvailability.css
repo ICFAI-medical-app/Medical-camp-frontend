@@ -101,7 +101,7 @@
   color: #333;
   margin-top: 20px;
 }
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .doctor-availability-table th,
   .doctor-availability-table td {
     font-size: 0.9rem;
@@ -112,7 +112,7 @@
     font-size: 0.8rem;
     padding: 8px;
   }
-}
+} */
 /* .doctor-name {
   font-size: 1.4rem;
   font-weight: bold;
@@ -166,9 +166,58 @@
   color: #333;
   margin-top: 20px;
 } */
-
+/* 
 @media (max-width: 600px) {
   .doctor-availability-grid {
     grid-template-columns: 1fr;
   }
+} */
+
+@media (max-width: 600px) {
+  .doctor-availability-table th,
+  .doctor-availability-table td {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+
+  .doctor-availability-container {
+    padding: 15px;
+    margin: 10px;
+    width: 85%;
+  }
+
+  .doctor-availability-table {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+  }
+
+  .doctor-availability-table th,
+  .doctor-availability-table td {
+    display: block;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .doctor-availability-table tr {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .doctor-availability-table td {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+  }
+
+  .toggle-availability-btn {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
+  .doctor-availability-status {
+    font-size: 0.9rem;
+  }
 }
+

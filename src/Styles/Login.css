@@ -67,3 +67,42 @@
   margin-bottom: 1.5rem;
   text-align: center;
 }
+
+@media screen and (max-width: 600px) {
+  .login-container {
+    margin: 20vh auto;
+    padding: 25px;
+    width: 85%;
+  }
+
+  .login-title {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+  }
+
+  .login-button-group {
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+  }
+
+  .login-button-group button {
+    width: 100%;
+  }
+
+  .login-admin-form input {
+    width: 90%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .login-admin-form button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .login-heading {
+    font-size: 1.4rem;
+  }
+}

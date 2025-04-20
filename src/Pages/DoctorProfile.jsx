@@ -330,6 +330,9 @@ const DoctorProfile = () => {
         <button onClick={() => navigate('/doctor-availability')} className="back-button">
           Back to Doctors Availability Page
         </button>
+        <button onClick={() => navigate('/get-doctors')} className="back-button back-button-spacing">
+          Back to View Doctors Page
+        </button>
       </div>
     </div>
   );

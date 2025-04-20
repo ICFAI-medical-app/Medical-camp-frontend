@@ -51,8 +51,6 @@ function DoctorAvailability() {
                             <tr>
                                 <th>Name</th>
                                 <th>Specialization</th>
-                                <th>Email</th>
-                                <th>Phone</th>
                                 <th>Availability</th>
                                 <th>Action</th>
                             </tr>
@@ -66,8 +64,6 @@ function DoctorAvailability() {
                                 >
                                     <td>{doctor.doctor_name}</td>
                                     <td>{doctor.specialization || 'General Practice'}</td>
-                                    <td>{doctor.doctor_email}</td>
-                                    <td>{doctor.doctor_phone_no}</td>
                                     <td className={`doctor-availability-status ${doctor.doctor_availability ? 'available' : 'unavailable'}`}>
                                         {doctor.doctor_availability ? 'Available' : 'Not Available'}
                                     </td>
