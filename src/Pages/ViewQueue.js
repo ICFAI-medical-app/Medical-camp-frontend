@@ -71,14 +71,14 @@ export default function ViewQueue() {
   };
 
   return (
-    <div className="view-queue-container">
-      <h1>Doctor Queues</h1>
-      {error && <div className="error-msg">{error}</div>}
-      <ul className="doctor-queue-list">
+    <div className="view-queues-container">
+      <h1 className="view-queues-title">Doctor Queues</h1>
+      {error && <div className="view-queues-error">{error}</div>}
+      <ul className="view-queues-list">
         {doctors.map((doc) => {
           const bookNo = queues[doc.doctor_id];
           return (
-            <li key={doc.doctor_id} className="doctor-queue-item">
+            <li key={doc.doctor_id} className="view-queues-item">
               <strong>{doc.doctor_name}</strong>:&nbsp;
               {bookNo === undefined
                 ? 'Loading...'
@@ -87,7 +87,7 @@ export default function ViewQueue() {
                 : `Book #${bookNo}`}
               {bookNo && (
                 <button
-                  className="assign-btn"
+                  className="view-queues-assign-btn"
                   onClick={() => handleAssign(doc)}
                   disabled={status[doc.doctor_id] === 'Assigned'}
                 >
@@ -95,7 +95,7 @@ export default function ViewQueue() {
                 </button>
               )}
               {status[doc.doctor_id] && (
-                <span className="status-msg">{status[doc.doctor_id]}</span>
+                <span className="view-queues-status">{status[doc.doctor_id]}</span>
               )}
             </li>
           );

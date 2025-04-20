@@ -1,0 +1,100 @@
+/* ViewQueue.css */
+
+.view-queues-container {
+  background-color: #fff;
+  max-width: 800px;
+  margin: 35px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Arial', sans-serif;
+}
+
+.view-queues-title {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.view-queues-error {
+  text-align: center;
+  color: #E53935;
+  margin-bottom: 15px;
+}
+
+.view-queues-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.view-queues-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.view-queues-item:hover {
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.view-queues-item strong {
+  color: #333;
+}
+
+.view-queues-assign-btn {
+  padding: 10px;
+  background-color: #33b48b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-queues-assign-btn:hover {
+  background-color: #2a9d7a;
+}
+
+.view-queues-assign-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.view-queues-status {
+  margin-left: 10px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+@media (max-width: 600px) {
+  .view-queues-container {
+    padding: 15px;
+    margin: 10px;
+    width: 85%;
+  }
+
+  .view-queues-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .view-queues-assign-btn {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+
+  .view-queues-status {
+    margin-top: 5px;
+  }
+}
