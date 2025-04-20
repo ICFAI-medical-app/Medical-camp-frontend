@@ -6,6 +6,7 @@ import PatientRegistration from './Pages/PatientRegistration';
 import Vitals from './Pages/Vitals';
 import DoctorPrescription from './Pages/DoctorPrescription';
 import DoctorAssigning from './Pages/DoctorAssigning';
+import DoctorAssigningAutomatic from './Pages/DoctorAssigningAutomatic';
 import MedicinePickup from './Pages/MedicinePickup';
 import MedicineVerification from './Pages/MedicineVerification';
 import AddDoctor from './Pages/AddDoctor';
@@ -46,6 +47,7 @@ function App() {
             <Route path="/patient-registration" element={<ProtectedRoute requiredType="volunteer"><PatientRegistration /></ProtectedRoute>} />
             <Route path="/vitals" element={<ProtectedRoute requiredType="volunteer"><Vitals /></ProtectedRoute>} />
             <Route path="/doctor-assigning" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigning /></ProtectedRoute>} />
+            <Route path="/doctor-assigning-automatic" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigningAutomatic /></ProtectedRoute>} />
             <Route path="/doctor-prescription" element={<ProtectedRoute requiredType="volunteer"><DoctorPrescription /></ProtectedRoute>} />
             <Route path="/medicine-pickup" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
             <Route path="/log" element= {
