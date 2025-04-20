@@ -1,3 +1,5 @@
+// src/Pages/ViewQueue.js
+
 import React, { useState, useEffect } from 'react';
 import { privateAxios } from '../api/axios';
 import '../Styles/ViewQueue.css';
@@ -5,6 +7,7 @@ import '../Styles/ViewQueue.css';
 export default function ViewQueue() {
   const [doctors, setDoctors] = useState([]);
   const [queues, setQueues] = useState({});
+  const [queueCounts, setQueueCounts] = useState({});       // new state for counts
   const [error, setError] = useState('');
   const [status, setStatus] = useState({});
 
@@ -24,6 +27,8 @@ export default function ViewQueue() {
 
   useEffect(() => {
     if (doctors.length === 0) return;
+
+    // fetch the next book_no for assignment (existing logic)
     const fetchQueues = async () => {
       const map = {};
       await Promise.all(
@@ -40,7 +45,25 @@ export default function ViewQueue() {
       setQueues(map);
     };
 
+    // fetch the queue length for each doctor (new logic)
+    const fetchQueueCounts = async () => {
+      const countMap = {};
+      await Promise.all(
+        doctors.map(async (doc) => {
+          try {
+            const res = await privateAxios.get(`/api/queue/count/${doc.doctor_id}`);
+            countMap[doc.doctor_id] = res.data.queueCount;
+          } catch (err) {
+            console.error(`Error fetching count for doctor ${doc.doctor_id}`, err);
+            countMap[doc.doctor_id] = 0;
+          }
+        })
+      );
+      setQueueCounts(countMap);
+    };
+
     fetchQueues();
+    fetchQueueCounts();
   }, [doctors]);
 
   const handleAssign = async (doctor) => {
@@ -77,14 +100,17 @@ export default function ViewQueue() {
       <ul className="view-queues-list">
         {doctors.map((doc) => {
           const bookNo = queues[doc.doctor_id];
+          const count = queueCounts[doc.doctor_id];
           return (
             <li key={doc.doctor_id} className="view-queues-item">
-              <strong>{doc.doctor_name}</strong>:&nbsp;
+              <strong>{doc.doctor_name}</strong>
+              {' '}[Queue length: {count === undefined ? 'Loading...' : count}]:
+              {' '}
               {bookNo === undefined
-                ? 'Loading...'
+                ? 'Loading next...'
                 : bookNo === null
                 ? 'No queue'
-                : `Book #${bookNo}`}
+                : `Next → Book #${bookNo}`}
               {bookNo && (
                 <button
                   className="view-queues-assign-btn"
