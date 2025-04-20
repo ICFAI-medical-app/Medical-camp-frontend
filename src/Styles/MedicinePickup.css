@@ -1,5 +1,5 @@
 .medicine-pickup-container {
-  background-color: #fff;
+  background-color: #f5f5f5;
   max-width: 600px; /* Increased to accommodate horizontal cards */
   margin: 35px auto;
   padding: 20px;
@@ -20,8 +20,8 @@
 }
 
 .medicine-pickup-success-msg {
-  background-color: #d4edda;
-  color: #155724;
+  background: #66bca15d;
+  color: #176101;
   padding: 10px;
   margin-bottom: 15px;
   border: 1px solid #c3e6cb;
@@ -30,7 +30,7 @@
 }
 
 .medicine-pickup-error-msg {
-  background-color: #f8d7da;
+  background-color: #fb9ea6;
   color: #721c24;
   padding: 10px;
   margin-bottom: 15px;
@@ -72,7 +72,7 @@
 .medicine-pickup-fetch-btn,
 .medicine-pickup-submit-btn {
   width: 100%;
-  background-color: #33b48b;
+  background-color: #373737;
   color: #fff;
   padding: 10px;
   border: none;
@@ -85,7 +85,7 @@
 
 .medicine-pickup-fetch-btn:hover,
 .medicine-pickup-submit-btn:hover {
-  background-color: #2a9d7a;
+  background-color: #0c0c0c;
 }
 
 .medicine-pickup-row {
@@ -129,7 +129,7 @@
 }
 
 .medicine-pickup-popup {
-  background-color: #fff;
+  background-color: #f5f5f5;
   padding: 20px;
   border-radius: 8px;
   max-width: 400px;
@@ -139,7 +139,7 @@
 
 .medicine-pickup-close-popup {
   width: 100%;
-  background-color: #33b48b;
+  background-color: #373737;
   color: #fff;
   padding: 10px;
   border: none;
@@ -151,7 +151,7 @@
 }
 
 .medicine-pickup-close-popup:hover {
-  background-color: #2a9d7a;
+  background-color: #0c0c0c;
 }
 
 /* Updated styles for horizontal layout */
@@ -175,7 +175,7 @@
   font-size: 1.5rem;
   font-weight: bold;
   padding: 0.5rem 1rem;
-  background-color: #33b48b; /* Using your theme color */
+  background-color: #373737; /* Changed to match theme */
   color: white;
   border-radius: 4px;
   margin-right: 1rem;
@@ -249,7 +249,7 @@
 }
 
 .medicine-verification-popup {
-  background-color: white;
+  background-color: #f5f5f5;
   border-radius: 8px;
   padding: 24px;
   width: 90%;
@@ -313,7 +313,7 @@
 }
 
 .medicine-pickup-fetch-btn {
-  background-color: #33b48b; /* Use the same color for both buttons */
+  background-color: #373737; /* Changed to match theme */
   color: white;
   border: none;
   border-radius: 4px;
@@ -326,11 +326,11 @@
 }
 
 .medicine-pickup-fetch-btn:hover {
-  background-color: #2a9d7a;
+  background-color: #0c0c0c;
 }
 
 .medicine-pickup-verify-btn:hover {
-  background-color: #2a9d7a;
+  background-color: #0c0c0c;
 }
 /* For smaller screens */
 @media (max-width: 768px) {

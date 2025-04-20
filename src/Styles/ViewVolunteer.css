@@ -28,12 +28,12 @@
 }
 
 .volunteer-table th {
-  background-color: #f8f9fa;
+  background-color: #33b48b;
   padding: 12px 15px;
   text-align: left;
   border-bottom: 2px solid #ddd;
   font-weight: bold;
-  color: #000;
+  color: #fff;
 }
 
 .volunteer-table td {

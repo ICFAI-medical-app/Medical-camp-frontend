@@ -1,7 +1,7 @@
 /* ViewQueue.css */
 
 .view-queues-container {
-  background-color: #fff;
+  background-color: #f5f5f5;
   max-width: 800px;
   margin: 35px auto;
   padding: 20px;
@@ -20,7 +20,7 @@
 
 .view-queues-error {
   text-align: center;
-  color: #E53935;
+  color: #721c24;
   margin-bottom: 15px;
 }
 
@@ -31,6 +31,7 @@
 }
 
 .view-queues-item {
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,7 +53,7 @@
 
 .view-queues-assign-btn {
   padding: 10px;
-  background-color: #33b48b;
+  background-color: #252525cd;
   color: white;
   border: none;
   border-radius: 5px;
@@ -62,7 +63,7 @@
 }
 
 .view-queues-assign-btn:hover {
-  background-color: #2a9d7a;
+  background-color: #0c0c0c;
 }
 
 .view-queues-assign-btn:disabled {

@@ -19,7 +19,7 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 2px solid #33b48b;
+  border: 2px solid #373737;
   border-radius: 4px;
   outline: none;
   cursor: pointer;
@@ -27,8 +27,8 @@
 }
 
 #expired-filter:checked {
-  background-color: #33b48b;
-  border-color: #33b48b;
+  background-color: #373737;
+  border-color: #373737;
   position: relative;
 }
 
@@ -46,7 +46,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Arial', sans-serif;
 }
 
 .page-header {
@@ -60,12 +60,12 @@
 
 .page-header h1 {
   font-size: 28px;
-  color: #2c3e50;
+  color: #333;
   margin: 0;
 }
 
 .back-button {
-  background-color: #3498db;
+  background-color: #373737;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -79,7 +79,7 @@
 }
 
 .back-button:hover {
-  background-color: #2980b9;
+  background-color: #0c0c0c;
 }
 
 .loading-container {
@@ -93,7 +93,7 @@
 .loading-spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #373737;
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
@@ -161,18 +161,19 @@
 
 .medicine-id {
   font-family: monospace;
-  color: #7f8c8d;
+  color: #333;
   width: 10%;
+  background-color: transparent;
 }
 
 .medicine-name {
   font-weight: 600;
-  color: #2c3e50;
+  color: #333;
   width: 20%;
 }
 
 .medicine-formulation {
-  color: #34495e;
+  color: #333;
   width: 15%;
 }
 
@@ -209,7 +210,7 @@
 }
 
 .batch-quantity {
-  color: #2c3e50;
+  color: #333;
 }
 
 .actions-cell {
@@ -229,47 +230,29 @@
 }
 
 .delete-batch-btn {
-  background-color: #e74c3c;
-  color: white;
+  background-color: #fb9ea6;
+  color: #721c24;
 }
 
 .delete-batch-btn:hover {
-  background-color: #c0392b;
+  background-color: #f5c6cb;
 }
 
 .delete-medicine-btn {
-  background-color: #e74c3c;
-  color: white;
+  background-color: #fb9ea6;
+  color: #721c24;
   padding: 8px 16px;
   margin: 0 auto;
 }
 
 .delete-medicine-btn:hover {
-  background-color: #c0392b;
+  background-color: #f5c6cb;
 }
 
 /* Add Font Awesome icons */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
 /* Responsive styles */
-/* @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-  
-  .batch-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .delete-batch-btn {
-    align-self: flex-end;
-  }
-} */
-
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
