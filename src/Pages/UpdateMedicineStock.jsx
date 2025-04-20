@@ -20,6 +20,7 @@ function UpdateMedicineStock() {
     quantity: ""
   });
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
+  const [notification, setNotification] = useState(""); // Add notification state
 
   const PORT = process.env.PORT || 5002;
 
@@ -76,6 +77,13 @@ function UpdateMedicineStock() {
   };
 
   const handleQuantityChange = (index, value) => {
+    // Check for negative values
+    if (value !== "" && parseInt(value, 10) < 0) {
+      setNotification("Cannot add negative quantity!");
+      setTimeout(() => setNotification(""), 1000);
+      return;
+    }
+
     setUpdatedQuantities({
       ...updatedQuantities,
       [index]: value === "" ? "" : parseInt(value, 10)
@@ -136,6 +144,13 @@ function UpdateMedicineStock() {
 
   const handleNewEntryChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "quantity" && value !== "" && parseInt(value, 10) < 0) {
+      setNotification("Cannot add negative quantity!");
+      setTimeout(() => setNotification(""), 3000);
+      return;
+    }
+
     setNewEntry({
       ...newEntry,
       [name]: name === "quantity" ? (value === "" ? "" : parseInt(value, 10)) : value
@@ -324,6 +339,18 @@ function UpdateMedicineStock() {
       <h2>Update Medicine Stock</h2>
 
       {error && <div className="error-message">{error}</div>}
+      
+      {/* Add notification popup */}
+      {notification && (
+        <div className="update-medicine-popup-overlay">
+          <div className="update-medicine-popup">
+            <p>{notification}</p>
+            <button className="update-medicine-close-popup" onClick={() => setNotification("")}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {(!medicine) ? (
         <form onSubmit={handleFetchMedicine} className="medicine-id-form">
