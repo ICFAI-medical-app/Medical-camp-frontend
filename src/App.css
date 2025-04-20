@@ -30,8 +30,8 @@ html, body {
 }
 
 .footer {
-  background-color: #33b48b;
-  color: #fff;
+  background: linear-gradient(135deg, #81ffd7 0%, #78ccfc 100%);
+  color: #003e34;
   text-align: center;
   position: fixed;
   bottom: 0;

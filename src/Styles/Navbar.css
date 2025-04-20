@@ -1,5 +1,5 @@
 .navbar {
-  background-color: #33b48b;
+  background: linear-gradient(135deg, #81ffd7 0%, #78ccfc 100%);
   display: flex;
   align-items: center;
   padding: 12px 24px;
@@ -35,33 +35,34 @@
   margin-left: 50px;
 }
 .desktop-links li a {
-  color: #fff;
+  color: #004d40;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 .desktop-links li a:hover {
-  color: #f0f0f0;
+  color: #00332b;
 }
 
-/* mobile dropdown (unchanged) */
+/* mobile dropdown needs to match gradient */
 .nav-links {
   list-style: none;
   display: flex;
   margin: 0;
   padding: 0;
+  background: linear-gradient(135deg, #33b48b 0%, #2a8fc8 100%);
 }
 .nav-links li {
   margin-left: 50px;
 }
 .nav-links li a {
-  color: #fff;
+  color: #004d40;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 .nav-links li a:hover {
-  color: #f0f0f0;
+  color: #00332b;
 }
 
 /* hamburger */
@@ -70,12 +71,12 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #fff;
+  color: #00332b;
   cursor: pointer;
   margin-left: 20px;
 }
 
-/* desktop-only dropdown (no bullets) */
+/* desktop-only dropdown needs to match gradient */
 .desktop-menu {
   list-style: none;       /* remove bullets */
   margin: 0;
@@ -86,7 +87,7 @@
   right: 0;
   width: 200px;
   flex-direction: column;
-  background-color: #33b48b;
+  background: linear-gradient(135deg, #33b48b 0%, #2a8fc8 100%);
   padding-top: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   z-index: 100;
@@ -101,16 +102,16 @@
 .desktop-menu li a {
   display: block;
   padding: 8px 16px;
-  color: #fff;
+  color: #004d40;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
 }
 .desktop-menu li a:hover {
-  color: #f0f0f0;
+  color: #00332b;
 }
 
-/* logout */
+/* logout button needs to match new color scheme */
 .logout-container {
   display: flex;
   align-items: center;
@@ -118,7 +119,7 @@
 }
 .logout-btn {
   background-color: #fff;
-  color: #33b48b;
+  color: #00332b;
   border: none;
   border-radius: 4px;
   padding: 6px 16px;
@@ -145,7 +146,7 @@
     left: 0;
     width: 100%;
     flex-direction: column;
-    background-color: #33b48b;
+    background: linear-gradient(135deg, #33b48b 0%, #2a8fc8 100%);
     padding: 10px 0;
     box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     z-index: 100;
