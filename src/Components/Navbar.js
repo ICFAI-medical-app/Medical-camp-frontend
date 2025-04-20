@@ -37,17 +37,17 @@ const Navbar = () => {
 
   const adminNavLinks = [
     { path: ADMIN_DASH,             label: 'Admin Dashboard' },
+    { path: '/analytics',      label: 'Camp Analytics'},
     { path: '/doctor-availability',label: 'Doctor Availability' },
-    { path: '/add-doctor',          label: 'Add Doctor' },
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
-    { path: '/add-new-medicine',    label: 'Add New Medicine' },
     { path: '/get-doctors',         label: 'View Doctors',    menuOnly: true },
     { path: '/get-medicines',       label: 'View Medicines',  menuOnly: true },
     { path: '/get-volunteers',      label: 'View Volunteers', menuOnly: true },
     { path: '/view-patients',      label: 'View Patients', menuOnly: true },
+    { path: '/add-new-medicine',    label: 'Add New Medicine' ,    menuOnly: true },
+    { path: '/add-doctor',          label: 'Add Doctor' ,    menuOnly: true },
+    { path: '/add-volunteer',       label: 'Add Volunteer',    menuOnly: true  },
     { path: '/log',      label: 'View Logs', menuOnly: true },
-    { path: '/analytics',      label: 'Camp Analytics'},
-    { path: '/add-volunteer',       label: 'Add Volunteer' },
   ];
 
   const volunteerNavLinks = [
