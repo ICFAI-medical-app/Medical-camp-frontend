@@ -17,6 +17,7 @@ function Dashboard() {
     { title: "Patient registration", icon: "👤", path: "/patient-registration" },
     { title: "Vitals", icon: "💓", path: "/vitals" },
     { title: "Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
+    { title: "Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
     { title: "Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
     { title: "Medicine pickup", icon: "💊", path: "/medicine-pickup" },
   ];
