@@ -252,7 +252,7 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
 /* Responsive styles */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
@@ -267,5 +267,82 @@
   
   .delete-batch-btn {
     align-self: flex-end;
+  }
+} */
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .batch-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .delete-batch-btn {
+    align-self: flex-end;
+  }
+
+  /* Make table fully responsive */
+  .table-responsive {
+    overflow-x: hidden;
+  }
+
+  .expired-medicines-table,
+  .expired-medicines-table thead,
+  .expired-medicines-table tbody,
+  .expired-medicines-table th,
+  .expired-medicines-table td,
+  .expired-medicines-table tr {
+    display: block;
+  }
+
+  .expired-medicines-table thead tr {
+    /* hide header row */
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .expired-medicines-table tr {
+    margin: 0 0 1rem 0;
+    border: none;
+  }
+
+  .expired-medicines-table td {
+    /* add labels before each cell */
+    position: relative;
+    padding-left: 50%;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: normal;
+  }
+
+  .expired-medicines-table td:before {
+    position: absolute;
+    top: 12px;
+    left: 15px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .expired-medicines-table td:nth-of-type(1):before { content: "ID"; }
+  .expired-medicines-table td:nth-of-type(2):before { content: "Formulation"; }
+  .expired-medicines-table td:nth-of-type(3):before { content: "Batch Details"; }
+  .expired-medicines-table td:nth-of-type(4):before { content: "Actions"; }
+
+  /* Tweak button sizing */
+  .toggle-availability-btn,
+  .delete-batch-btn,
+  .delete-medicine-btn {
+    font-size: 0.9rem;
+    padding: 8px;
   }
 }
