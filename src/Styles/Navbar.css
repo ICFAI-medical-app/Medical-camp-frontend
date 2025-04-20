@@ -62,7 +62,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .nav-links li {
     margin-left: 20px;
   }
@@ -71,4 +71,59 @@
     padding: 4px 10px;
     font-size: 0.9rem;
   }
+} */
+
+/* hide hamburger on desktop */
+.menu-icon {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 20px;
 }
+
+@media (max-width: 768px) {
+  /* show hamburger */
+  .menu-icon {
+    display: block;
+  }
+
+  /* nav‑links hidden by default */
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 56px;               /* adjust if your navbar height changes */
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    background-color: #33b48b;
+    padding: 10px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+
+  /* show when open */
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links li {
+    margin: 8px 0;
+    text-align: center;
+  }
+
+  .nav-links li a {
+    display: block;
+    padding: 8px 0;
+    font-size: 1.1rem;
+  }
+
+  /* shrink logout button slightly */
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
+

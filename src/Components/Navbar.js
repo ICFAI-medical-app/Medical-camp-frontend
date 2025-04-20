@@ -1,3 +1,5 @@
+// src/Components/Navbar.js
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import "../Styles/Navbar.css";
@@ -9,12 +11,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const type = localStorage.getItem('userType');
     setIsLoggedIn(!!token);
-    setUserType(type); // "admin" or "volunteer"
+    setUserType(type);
+    setMenuOpen(false); // close menu on navigation
   }, [pathname]);
 
   const handleLogout = async () => {
@@ -24,13 +28,20 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // Dashboard links
-  const adminDashboardLink = { path: '/dashboard-admin', label: 'Admin Dashboard' };
-  const volunteerDashboardLink = { path: '/dashboard', label: 'Volunteer Dashboard' };
+  // Dashboard paths
+  const ADMIN_DASH = '/dashboard-admin';
+  const VOLUNTEER_DASH = '/dashboard';
+
+  // Determine if we should show the hamburger menu
+  const showMenuIcon =
+    isLoggedIn &&
+    (userType === 'admin' || userType === 'volunteer') &&
+    pathname !== ADMIN_DASH &&
+    pathname !== VOLUNTEER_DASH;
 
   // Full nav sets
   const adminNavLinks = [
-    adminDashboardLink,
+    { path: ADMIN_DASH, label: 'Admin Dashboard' },
     { path: '/doctor-availability', label: 'Doctor Availability' },
     { path: '/add-doctor', label: 'Add Doctor' },
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
@@ -42,7 +53,7 @@ const Navbar = () => {
   ];
 
   const volunteerNavLinks = [
-    volunteerDashboardLink,
+    { path: VOLUNTEER_DASH, label: 'Volunteer Dashboard' },
     { path: '/patient-registration', label: 'Patient Registration' },
     { path: '/vitals', label: 'Vitals' },
     { path: '/doctor-assigning', label: 'Doctor Assigning' },
@@ -51,30 +62,41 @@ const Navbar = () => {
     { path: '/medicine-verification', label: 'Medicine Verification' },
   ];
 
+  // Choose which links to show
   let linksToDisplay = [];
-
   if (isLoggedIn && userType === 'admin') {
-    // On admin dashboard → no links; otherwise show all admin links
-    linksToDisplay = pathname === adminDashboardLink.path
-      ? []
-      : adminNavLinks;
+    linksToDisplay = pathname === ADMIN_DASH ? [] : adminNavLinks;
   } else if (isLoggedIn && userType === 'volunteer') {
-    // On volunteer dashboard → no links; otherwise show all volunteer links
-    linksToDisplay = pathname === volunteerDashboardLink.path
-      ? []
-      : volunteerNavLinks;
+    linksToDisplay = pathname === VOLUNTEER_DASH ? [] : volunteerNavLinks;
   }
 
   return (
     <nav className="navbar">
       <div className="logo">
-        <Link to="/"><img src={SwechaLogo} alt="Swecha Logo" className="logo-img" /></Link>
+        <Link to="/">
+          <img src={SwechaLogo} alt="Swecha Logo" className="logo-img" />
+        </Link>
       </div>
 
-      <ul className="nav-links">
+      {showMenuIcon && (
+        <button
+          className="menu-icon"
+          onClick={() => setMenuOpen(o => !o)}
+          aria-label="Toggle menu"
+        >
+          ☰
+        </button>
+      )}
+
+      <ul className={`nav-links${menuOpen ? ' open' : ''}`}>
         {linksToDisplay.map((link, idx) => (
           <li key={idx}>
-            <Link to={link.path}>{link.label}</Link>
+            <Link
+              to={link.path}
+              onClick={() => setMenuOpen(false)} // close menu on select
+            >
+              {link.label}
+            </Link>
           </li>
         ))}
       </ul>
