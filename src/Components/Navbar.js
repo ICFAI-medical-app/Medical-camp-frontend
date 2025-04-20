@@ -1,5 +1,3 @@
-// src/Components/Navbar.js
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import "../Styles/Navbar.css";
@@ -28,47 +26,46 @@ const Navbar = () => {
     navigate('/');
   };
 
-  // Dashboard paths
   const ADMIN_DASH = '/dashboard-admin';
   const VOLUNTEER_DASH = '/dashboard';
 
-  // Determine if we should show the hamburger menu
   const showMenuIcon =
     isLoggedIn &&
     (userType === 'admin' || userType === 'volunteer') &&
     pathname !== ADMIN_DASH &&
     pathname !== VOLUNTEER_DASH;
 
-  // Full nav sets
   const adminNavLinks = [
-    { path: ADMIN_DASH, label: 'Admin Dashboard' },
-    { path: '/doctor-availability', label: 'Doctor Availability' },
-    { path: '/add-doctor', label: 'Add Doctor' },
+    { path: ADMIN_DASH,             label: 'Admin Dashboard' },
+    { path: '/doctor-availability',label: 'Doctor Availability' },
+    { path: '/add-doctor',          label: 'Add Doctor' },
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
-    { path: '/add-new-medicine', label: 'Add New Medicine' },
-    { path: '/get-doctors', label: 'View Doctors' },
-    { path: '/get-medicines', label: 'View Medicines' },
-    { path: '/get-volunteers', label: 'View Volunteers' },
-    { path: '/add-volunteer', label: 'Add Volunteer' },
+    { path: '/add-new-medicine',    label: 'Add New Medicine' },
+    { path: '/get-doctors',         label: 'View Doctors',    menuOnly: true },
+    { path: '/get-medicines',       label: 'View Medicines',  menuOnly: true },
+    { path: '/get-volunteers',      label: 'View Volunteers', menuOnly: true },
+    { path: '/add-volunteer',       label: 'Add Volunteer' },
   ];
 
   const volunteerNavLinks = [
-    { path: VOLUNTEER_DASH, label: 'Volunteer Dashboard' },
+    { path: VOLUNTEER_DASH,          label: 'Volunteer Dashboard' },
     { path: '/patient-registration', label: 'Patient Registration' },
-    { path: '/vitals', label: 'Vitals' },
-    { path: '/doctor-assigning', label: 'Doctor Assigning' },
-    { path: '/doctor-prescription', label: 'Doctor Prescription' },
-    { path: '/medicine-pickup', label: 'Medicine Pickup' },
-    { path: '/medicine-verification', label: 'Medicine Verification' },
+    { path: '/vitals',               label: 'Vitals' },
+    { path: '/doctor-assigning',     label: 'Doctor Assigning',    menuOnly: true },
+    { path: '/doctor-prescription',  label: 'Doctor Prescription', menuOnly: true },
+    { path: '/medicine-pickup',      label: 'Medicine Pickup',     menuOnly: true },
+    { path: '/medicine-verification',label: 'Medicine Verification' },
   ];
 
-  // Choose which links to show
   let linksToDisplay = [];
   if (isLoggedIn && userType === 'admin') {
     linksToDisplay = pathname === ADMIN_DASH ? [] : adminNavLinks;
   } else if (isLoggedIn && userType === 'volunteer') {
     linksToDisplay = pathname === VOLUNTEER_DASH ? [] : volunteerNavLinks;
   }
+
+  const mainLinks = linksToDisplay.filter(l => !l.menuOnly);
+  const menuLinks = linksToDisplay.filter(l => l.menuOnly);
 
   return (
     <nav className="navbar">
@@ -78,28 +75,51 @@ const Navbar = () => {
         </Link>
       </div>
 
-      {showMenuIcon && (
-        <button
-          className="menu-icon"
-          onClick={() => setMenuOpen(o => !o)}
-          aria-label="Toggle menu"
-        >
-          ☰
-        </button>
-      )}
+      {/* wrap all link elements so we can push them right of logo but left of logout */}
+      <div className="nav-group">
+        {/* desktop inline links */}
+        <ul className="desktop-links">
+          {mainLinks.map((link, idx) => (
+            <li key={idx}>
+              <Link to={link.path}>{link.label}</Link>
+            </li>
+          ))}
+        </ul>
 
-      <ul className={`nav-links${menuOpen ? ' open' : ''}`}>
-        {linksToDisplay.map((link, idx) => (
-          <li key={idx}>
-            <Link
-              to={link.path}
-              onClick={() => setMenuOpen(false)} // close menu on select
+        {/* original mobile dropdown */}
+        <ul className={`nav-links${menuOpen ? ' open' : ''}`}>
+          {linksToDisplay.map((link, idx) => (
+            <li key={idx}>
+              <Link to={link.path} onClick={() => setMenuOpen(false)}>
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {showMenuIcon && (
+          <>
+            <button
+              className="menu-icon"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Toggle menu"
             >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
+              ☰
+            </button>
+
+            {/* desktop‑only dropdown (no bullets) */}
+            <ul className={`desktop-menu${menuOpen ? ' open' : ''}`}>
+              {menuLinks.map((link, idx) => (
+                <li key={idx}>
+                  <Link to={link.path} onClick={() => setMenuOpen(false)}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
 
       {isLoggedIn && (
         <div className="logout-container">
