@@ -45,7 +45,7 @@ const Navbar = () => {
     { path: '/get-medicines',       label: 'View Medicines',  menuOnly: true },
     { path: '/get-volunteers',      label: 'View Volunteers', menuOnly: true },
     { path: '/view-patients',      label: 'View Patients', menuOnly: true },
-    { path: '/view-logs',      label: 'View Logs', menuOnly: true },
+    { path: '/log',      label: 'View Logs', menuOnly: true },
     { path: '/analytics',      label: 'Camp Analytics'},
     { path: '/add-volunteer',       label: 'Add Volunteer' },
   ];
