@@ -57,7 +57,6 @@ const Navbar = () => {
     { path: '/doctor-assigning',     label: 'Doctor Assigning',    menuOnly: true },
     { path: '/doctor-prescription',  label: 'Doctor Prescription', menuOnly: true },
     { path: '/medicine-pickup',      label: 'Medicine Pickup',     menuOnly: true },
-    { path: '/medicine-verification',label: 'Medicine Verification' },
   ];
 
   let linksToDisplay = [];
