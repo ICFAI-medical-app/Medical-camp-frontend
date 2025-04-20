@@ -52,12 +52,15 @@ export default function ViewQueue() {
         book_no: bookNo,
         doc_name: doctor.doctor_name,
       });
+
       // Remove from queue
       await privateAxios.delete('/api/queue/remove', { data: { book_no: bookNo } });
 
       setStatus((s) => ({ ...s, [doctor.doctor_id]: 'Assigned' }));
-      // Clear the queue entry locally
-      setQueues((q) => ({ ...q, [doctor.doctor_id]: null }));
+
+      // Show popup and reload
+      alert(`Doctor ${doctor.doctor_name} assigned to Book #${bookNo}`);
+      window.location.reload();
     } catch (err) {
       console.error('Assign error:', err);
       setStatus((s) => ({

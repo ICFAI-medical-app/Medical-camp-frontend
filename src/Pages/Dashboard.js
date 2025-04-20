@@ -18,6 +18,7 @@ function Dashboard() {
     { title: "Vitals", icon: "💓", path: "/vitals" },
     { title: "Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
     { title: "Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
+    { title: "View Queues", icon: "📋", path: "/view-queue" },
     { title: "Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
     { title: "Medicine pickup", icon: "💊", path: "/medicine-pickup" },
   ];

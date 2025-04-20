@@ -56,6 +56,7 @@ const Navbar = () => {
     { path: '/vitals',               label: 'Vitals' },
     { path: '/doctor-assigning',     label: 'Doctor Assigning',    menuOnly: true },
     { path: '/doctor-assigning-automatic',     label: 'Doctor Assigning Automatic',    menuOnly: true },
+    { path: '/view-queue',  label: 'View Queues', menuOnly: true },
     { path: '/doctor-prescription',  label: 'Doctor Prescription', menuOnly: true },
     { path: '/medicine-pickup',      label: 'Medicine Pickup',     menuOnly: true },
   ];
