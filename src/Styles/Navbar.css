@@ -1,5 +1,5 @@
 .navbar {
-  background: linear-gradient(135deg, #81ffd7 0%, #78ccfc 100%);
+  background: linear-gradient(135deg, #a0f0d0 0%, #b3e5fc 100%);
   display: flex;
   align-items: center;
   padding: 12px 24px;
@@ -87,7 +87,7 @@
   right: 0;
   width: 200px;
   flex-direction: column;
-  background: linear-gradient(135deg, #33b48b 0%, #2a8fc8 100%);
+  background: linear-gradient(135deg, #a4f9de 0%, #a4ddfe 100%);
   padding-top: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   z-index: 100;
@@ -102,7 +102,7 @@
 .desktop-menu li a {
   display: block;
   padding: 8px 16px;
-  color: #004d40;
+  color: #013f34;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
