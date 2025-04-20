@@ -28,6 +28,7 @@ import './App.css';
 import AddVolunteer from './Pages/AddVolunteer';
 import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerProfile from './Pages/VolunteerProfile';
+import PatientProfile from './Pages/PatientProfile';
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
             <Route path="/get-volunteers" element={<ProtectedRoute requiredType="admin"><ViewVolunteers /></ProtectedRoute>} />
             <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
+            <Route path="/patient/:id" element={<ProtectedRoute requiredType="admin"><PatientProfile /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />

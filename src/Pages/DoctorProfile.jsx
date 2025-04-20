@@ -11,6 +11,7 @@ const DoctorProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [analytics, setAnalytics] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -18,6 +19,7 @@ const DoctorProfile = () => {
 
   useEffect(() => {
     fetchDoctorData();
+    fetchDoctorAnalytics();
   }, [id]);
 
   const fetchDoctorData = async () => {
@@ -33,6 +35,15 @@ const DoctorProfile = () => {
       alert('Error fetching doctor information');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDoctorAnalytics = async () => {
+    try {
+      const response = await privateAxios.get(`/api/admin/doctor_analytics/${id}`);
+      setAnalytics(response.data);
+    } catch (error) {
+      console.error('Error fetching doctor analytics:', error);
     }
   };
 
@@ -144,6 +155,12 @@ const DoctorProfile = () => {
         alert('Failed to delete doctor. Please try again.');
       }
     }
+  };
+
+  const formatMonthYear = (timestamp) => {
+    const [year, month] = timestamp.split('-');
+    const date = new Date(year, month - 1);
+    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
   };
 
   if (loading) {
@@ -287,6 +304,24 @@ const DoctorProfile = () => {
                 <strong>Sex:</strong> 
                 <span>{doctor.doctor_sex || 'Not specified'}</span>
               </div>
+              {/* Add Analytics Section */}
+              {analytics && (
+                <div className="doctor-analytics-section">
+                  <h3 className="analytics-title">Camp Visit History</h3>
+                  <div className="visit-count">
+                    Total Camp Visits: <span>{analytics.visitCount}</span>
+                  </div>
+                  <div className="visit-timeline">
+                    {analytics.visits
+                      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+                      .map((visit, index) => (
+                        <div key={index} className="visit-entry">
+                          {formatMonthYear(visit.timestamp)}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
