@@ -155,8 +155,54 @@ function VolunteerProfile() {
         </div>
         {isEditing ? (
           <div className="volunteer-edit-form">
-            {/* form fields */}
-            {/* (omitted for brevity, same as earlier) */}
+            <div className="form-group">
+              <label htmlFor="user_name">Name:</label>
+              <input
+                type="text"
+                id="user_name"
+                name="user_name"
+                value={editableVolunteer.user_name || ''}
+                onChange={handleInputChange}
+                className={validationErrors.user_name ? 'error' : ''}
+              />
+              {validationErrors.user_name && <div className="error-message">{validationErrors.user_name}</div>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="user_email">Email:</label>
+              <input
+                type="email"
+                id="user_email"
+                name="user_email"
+                value={editableVolunteer.user_email || ''}
+                onChange={handleInputChange}
+                className={validationErrors.user_email ? 'error' : ''}
+              />
+              {validationErrors.user_email && <div className="error-message">{validationErrors.user_email}</div>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="user_phone_no">Phone Number:</label>
+              <input
+                type="text"
+                id="user_phone_no"
+                name="user_phone_no"
+                value={editableVolunteer.user_phone_no || ''}
+                onChange={handleInputChange}
+                className={validationErrors.user_phone_no ? 'error' : ''}
+              />
+              {validationErrors.user_phone_no && <div className="error-message">{validationErrors.user_phone_no}</div>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="user_age">Age:</label>
+              <input
+                type="number"
+                id="user_age"
+                name="user_age"
+                value={editableVolunteer.user_age || ''}
+                onChange={handleInputChange}
+                className={validationErrors.user_age ? 'error' : ''}
+              />
+              {validationErrors.user_age && <div className="error-message">{validationErrors.user_age}</div>}
+            </div>
           </div>
         ) : (
           <>
