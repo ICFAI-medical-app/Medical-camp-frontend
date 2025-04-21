@@ -85,27 +85,70 @@ const DoctorProfile = () => {
     }
   };
 
+  // Function to display validation errors temporarily
+  const showTemporaryError = (field, message) => {
+    setValidationErrors(prev => ({
+      ...prev,
+      [field]: message
+    }));
+    
+    // Clear the error message after 5 seconds
+    setTimeout(() => {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: null
+      }));
+    }, 5000);
+    
+    return false; // Return false to indicate validation failure
+  };
+
   const validateForm = () => {
-    const errors = {};
+    let isValid = true;
     
+    // Name validation - required field with minimum length
     if (!editableDoctor.doctor_name || editableDoctor.doctor_name.trim() === '') {
-      errors.doctor_name = "Name is required";
+      isValid = showTemporaryError('name', "Name is required");
+    } else if (editableDoctor.doctor_name.trim().length < 2) {
+      isValid = showTemporaryError('name', "Name must be at least 2 characters");
     }
     
+    // Specialization validation - required field
     if (!editableDoctor.specialization || editableDoctor.specialization.trim() === '') {
-      errors.specialization = "Specialization is required";
+      isValid = showTemporaryError('specialization', "Specialization is required");
     }
     
-    // Add more validation as needed
+    // Phone number validation - must be 10 digits if provided
+    if (editableDoctor.doctor_phone_no && editableDoctor.doctor_phone_no.trim() !== '') {
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneRegex.test(editableDoctor.doctor_phone_no.trim())) {
+        isValid = showTemporaryError('phone', "Phone number must be 10 digits");
+      }
+    }
     
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    // Email validation - valid email format if provided
+    if (editableDoctor.doctor_email && editableDoctor.doctor_email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editableDoctor.doctor_email.trim())) {
+        isValid = showTemporaryError('email', "Please enter a valid email address");
+      }
+    }
+    
+    // Age validation - must be a reasonable number if provided
+    if (editableDoctor.doctor_age) {
+      const age = parseInt(editableDoctor.doctor_age);
+      if (isNaN(age) || age <= 0 || age > 130) {
+        isValid = showTemporaryError('age', "Age must be between 0 and 130");
+      }
+    }
+    
+    return isValid;
   };
 
   const handleSave = async () => {
     // Validate form before submitting
     if (!validateForm()) {
-      return;
+      return; // Stop submission if validation fails
     }
     
     setSaving(true);
@@ -217,10 +260,10 @@ const DoctorProfile = () => {
                 name="name"
                 value={editableDoctor.doctor_name || ''}
                 onChange={handleInputChange}
-                className={`form-control ${validationErrors.doctor_name ? 'error-input' : ''}`}
+                className={`form-control ${validationErrors.name ? 'error-input' : ''}`}
               />
-              {validationErrors.doctor_name && (
-                <div className="error-message">{validationErrors.doctor_name}</div>
+              {validationErrors.name && (
+                <div className="error-message">{validationErrors.name}</div>
               )}
             </div>
             <div className="form-group">
@@ -241,8 +284,12 @@ const DoctorProfile = () => {
                 name="phone"
                 value={editableDoctor.doctor_phone_no || ''}
                 onChange={handleInputChange}
-                className="form-control"
+                className={`form-control ${validationErrors.phone ? 'error-input' : ''}`}
+                placeholder="10-digit number"
               />
+              {validationErrors.phone && (
+                <div className="error-message">{validationErrors.phone}</div>
+              )}
             </div>
             <div className="form-group">
               <label>Email</label>
@@ -250,9 +297,12 @@ const DoctorProfile = () => {
                 name="email"
                 value={editableDoctor.doctor_email || ''}
                 onChange={handleInputChange}
-                className="form-control"
+                className={`form-control ${validationErrors.email ? 'error-input' : ''}`}
                 type="email"
               />
+              {validationErrors.email && (
+                <div className="error-message">{validationErrors.email}</div>
+              )}
             </div>
             <div className="form-group">
               <label>Age</label>
@@ -260,9 +310,12 @@ const DoctorProfile = () => {
                 name="age"
                 value={editableDoctor.doctor_age || ''}
                 onChange={handleInputChange}
-                className="form-control"
+                className={`form-control ${validationErrors.age ? 'error-input' : ''}`}
                 type="number"
               />
+              {validationErrors.age && (
+                <div className="error-message">{validationErrors.age}</div>
+              )}
             </div>
             <div className="form-group">
               <label>Sex</label>

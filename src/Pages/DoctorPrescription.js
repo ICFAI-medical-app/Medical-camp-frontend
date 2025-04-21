@@ -7,7 +7,7 @@ function DoctorPrescription() {
   const navigate = useNavigate();
   const [bookNo, setBookNo] = useState('');
   const [prescriptions, setPrescriptions] = useState([
-    { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
+    { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
   ]);
   // Holds fetched medicine info per row
   const [medicineDetails, setMedicineDetails] = useState([]);
@@ -17,11 +17,16 @@ function DoctorPrescription() {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
       if (i === index) {
         const updated = { ...prescription, [field]: value };
-        const trueCount =
-          (updated.morning ? 1 : 0) +
-          (updated.afternoon ? 1 : 0) +
-          (updated.night ? 1 : 0);
-        updated.quantity = updated.days * trueCount;
+        
+        // Only calculate quantity for medicine items (not non-medicine items)
+        if (updated.isMedicine && field !== 'quantity') {
+          const trueCount =
+            (updated.morning ? 1 : 0) +
+            (updated.afternoon ? 1 : 0) +
+            (updated.night ? 1 : 0);
+          updated.quantity = updated.days * trueCount;
+        }
+        
         return updated;
       }
       return prescription;
@@ -29,7 +34,7 @@ function DoctorPrescription() {
 
     setPrescriptions(updatedPrescriptions);
 
-    // Fetch medicine info when ID changes
+    // Fetch medicine info when ID changes (for both medicine and non-medicine items)
     if (field === 'medicine_id' && value !== '') {
       try {
         const response = await privateAxios.get(`/api/inventory/${value}`);
@@ -38,16 +43,56 @@ function DoctorPrescription() {
         setMedicineDetails(detailsCopy);
       } catch (err) {
         const detailsCopy = [...medicineDetails];
-        detailsCopy[index] = { error: 'Medicine not found' };
+        detailsCopy[index] = { error: 'Item not found' };
         setMedicineDetails(detailsCopy);
       }
     }
   };
 
+  const handlePrescriptionTypeChange = (index, isMedicine) => {
+    const updatedPrescriptions = prescriptions.map((prescription, i) => {
+      if (i === index) {
+        // Reset fields based on type
+        if (isMedicine) {
+          return {
+            ...prescription,
+            isMedicine: true,
+            medicine_id: '',
+            days: 0,
+            morning: false,
+            afternoon: false,
+            night: false,
+            quantity: 0
+          };
+        } else {
+          return {
+            ...prescription,
+            isMedicine: false,
+            medicine_id: '',
+            quantity: 0,
+            // Don't need these for non-medicine items
+            days: 0,
+            morning: false,
+            afternoon: false,
+            night: false
+          };
+        }
+      }
+      return prescription;
+    });
+
+    // Clear medicine details for this row
+    const updatedMedicineDetails = [...medicineDetails];
+    updatedMedicineDetails[index] = null;
+    
+    setPrescriptions(updatedPrescriptions);
+    setMedicineDetails(updatedMedicineDetails);
+  };
+
   const addPrescriptionRow = () => {
     setPrescriptions([
       ...prescriptions,
-      { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
+      { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
     ]);
     setMedicineDetails([...medicineDetails, null]);
   };
@@ -59,18 +104,32 @@ function DoctorPrescription() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Format the prescriptions for the backend
+    const formattedPrescriptions = prescriptions.map(p => {
+      if (p.isMedicine) {
+        return {
+          medicine_id: p.medicine_id.toString(),
+          dosage_schedule: {
+            days: Number(p.days),
+            morning: p.morning,
+            afternoon: p.afternoon,
+            night: p.night,
+          },
+          quantity: p.quantity,
+        };
+      } else {
+        return {
+          medicine_id: p.medicine_id || "NON-MED", // Special identifier for non-medicines
+          quantity: Number(p.quantity),
+          is_medicine: false
+        };
+      }
+    });
+
     const payload = {
       book_no: bookNo,
-      prescriptions: prescriptions.map((p) => ({
-        medicine_id: p.medicine_id.toString(),
-        dosage_schedule: {
-          days: Number(p.days),
-          morning: p.morning,
-          afternoon: p.afternoon,
-          night: p.night,
-        },
-        quantity: p.quantity,
-      })),
+      prescriptions: formattedPrescriptions
     };
 
     try {
@@ -83,7 +142,7 @@ function DoctorPrescription() {
         setMessage('Prescription submitted successfully!');
         setBookNo('');
         setPrescriptions([
-          { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0 }
+          { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
         ]);
         setMedicineDetails([]);
       } else {
@@ -112,6 +171,18 @@ function DoctorPrescription() {
           <h3 className="doctor-prescription-subheading">Medicines</h3>
           {prescriptions.map((prescription, index) => (
             <div key={index} className="doctor-prescription-row">
+              {/* Type Toggle */}
+              <div className="prescription-type-toggle">
+                <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`} 
+                     onClick={() => handlePrescriptionTypeChange(index, true)}>
+                  Medicine
+                </div>
+                <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`} 
+                     onClick={() => handlePrescriptionTypeChange(index, false)}>
+                  Non-Medicine
+                </div>
+              </div>
+
               <div className="doctor-prescription-form-group">
                 <label>Medicine ID</label>
                 <input
@@ -129,9 +200,9 @@ function DoctorPrescription() {
                       <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
                     ) : (
                       <>
-                        <p><strong>Formulation:</strong> {medicineDetails[index].medicine_formulation}</p>
+                        <p><strong>{prescription.isMedicine ? "Formulation" : "Item"}:</strong> {medicineDetails[index].medicine_formulation}</p>
                         <ul>
-                          {medicineDetails[index].details.map((med, i) => (
+                          {medicineDetails[index].details && medicineDetails[index].details.map((med, i) => (
                             <li key={i}>
                               {med.medicine_name} — Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
                             </li>
@@ -143,55 +214,75 @@ function DoctorPrescription() {
                 )}
               </div>
 
-              <div className="doctor-prescription-form-group">
-                <label>Days</label>
-                <input
-                  type="number"
-                  value={prescription.days === 0 ? '' : prescription.days}
-                  onChange={(e) =>
-                    handlePrescriptionChange(index, 'days', Number(e.target.value))
-                  }
-                  required
-                  placeholder="e.g. 3"
-                />
-              </div>
+              {prescription.isMedicine ? (
+                // Medicine-specific fields
+                <>
+                  <div className="doctor-prescription-form-group">
+                    <label>Days</label>
+                    <input
+                      type="number"
+                      value={prescription.days === 0 ? '' : prescription.days}
+                      onChange={(e) =>
+                        handlePrescriptionChange(index, 'days', Number(e.target.value))
+                      }
+                      required
+                      placeholder="e.g. 3"
+                    />
+                  </div>
 
-              <div className="doctor-prescription-form-group doctor-prescription-checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={prescription.morning}
-                    onChange={(e) =>
-                      handlePrescriptionChange(index, 'morning', e.target.checked)
-                    }
-                  />
-                  Morning
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={prescription.afternoon}
-                    onChange={(e) =>
-                      handlePrescriptionChange(index, 'afternoon', e.target.checked)
-                    }
-                  />
-                  Afternoon
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={prescription.night}
-                    onChange={(e) =>
-                      handlePrescriptionChange(index, 'night', e.target.checked)
-                    }
-                  />
-                  Night
-                </label>
-              </div>
+                  <div className="doctor-prescription-form-group doctor-prescription-checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={prescription.morning}
+                        onChange={(e) =>
+                          handlePrescriptionChange(index, 'morning', e.target.checked)
+                        }
+                      />
+                      Morning
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={prescription.afternoon}
+                        onChange={(e) =>
+                          handlePrescriptionChange(index, 'afternoon', e.target.checked)
+                        }
+                      />
+                      Afternoon
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={prescription.night}
+                        onChange={(e) =>
+                          handlePrescriptionChange(index, 'night', e.target.checked)
+                        }
+                      />
+                      Night
+                    </label>
+                  </div>
 
-              <div className="doctor-prescription-form-group">
-                <strong>Calculated Quantity:</strong> {prescription.quantity}
-              </div>
+                  <div className="doctor-prescription-form-group">
+                    <strong>Calculated Quantity:</strong> {prescription.quantity}
+                  </div>
+                </>
+              ) : (
+                // Non-Medicine quantity field
+                <div className="doctor-prescription-form-group">
+                  <label>Quantity</label>
+                  <input
+                    type="number"
+                    value={prescription.quantity === 0 ? '' : prescription.quantity}
+                    onChange={(e) =>
+                      handlePrescriptionChange(index, 'quantity', Number(e.target.value))
+                    }
+                    required
+                    placeholder="Enter quantity"
+                    min="1"
+                  />
+                </div>
+              )}
 
               <button
                 type="button"
@@ -209,7 +300,7 @@ function DoctorPrescription() {
               className="doctor-prescription-add-btn"
               onClick={addPrescriptionRow}
             >
-              Add Medicine
+              Add Item
             </button>
           </div>
 

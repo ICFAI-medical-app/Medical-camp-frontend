@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import '../Styles/PatientProfile.css';
 
 function PatientProfile() {
@@ -194,6 +195,48 @@ function PatientProfile() {
                   <div className="visit-count">
                     Total Clinic Visits: <span>{analytics.visitCount}</span>
                   </div>
+
+                  {analytics.bpData && analytics.bpData.length > 0 && (
+                    <>
+                      <h3 className="analytics-title">Blood Pressure Trends</h3>
+                      <div className="bp-chart">
+                        <ResponsiveContainer width="100%" height={300}>
+                          <LineChart data={analytics.bpData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis 
+                              dataKey="timestamp" 
+                              tickFormatter={(timestamp) => {
+                                const [year, month] = timestamp.split('-');
+                                return `${month}/${year.slice(2)}`;
+                              }}
+                            />
+                            <YAxis domain={[60, 180]} />
+                            <Tooltip
+                              labelFormatter={(timestamp) => {
+                                const [year, month] = timestamp.split('-');
+                                return `${month}/${year}`;
+                              }}
+                            />
+                            <Legend />
+                            <Line 
+                              type="monotone" 
+                              dataKey="systolic" 
+                              stroke="#8884d8" 
+                              name="Systolic"
+                              dot={{ r: 4 }}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="diastolic" 
+                              stroke="#82ca9d" 
+                              name="Diastolic"
+                              dot={{ r: 4 }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
