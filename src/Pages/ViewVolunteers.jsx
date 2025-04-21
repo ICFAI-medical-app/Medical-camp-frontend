@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
 import { privateAxios } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/ViewVolunteer.css';
@@ -7,10 +6,9 @@ import '../Styles/ViewVolunteer.css';
 function ViewVolunteers() {
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   
-  const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
-
   useEffect(() => {
     fetchVolunteers();
   }, []);
@@ -18,7 +16,6 @@ function ViewVolunteers() {
   const fetchVolunteers = async () => {
     setLoading(true);
     try {
-      // const response = await axios.get(`${BACKEND_URL}/api/admin/get_volunteers`);
       const response = await privateAxios.get('/api/admin/get_volunteers');
       setVolunteers(response.data);
     } catch (error) {
@@ -33,6 +30,15 @@ function ViewVolunteers() {
     // Navigate to volunteer profile page
     navigate(`/volunteer/${volunteerId}`);
   };
+  
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  // Filter volunteers based on search query
+  const filteredVolunteers = volunteers.filter(volunteer => 
+    volunteer.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="volunteer-container">
@@ -57,6 +63,15 @@ function ViewVolunteers() {
       ) : (
         <>
           <div className="actions-bar">
+            <div className="volunteer-search-box">
+              <input
+                type="text"
+                placeholder="Search volunteers by name..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="volunteer-search-input"
+              />
+            </div>
             <button 
               className="add-volunteer-button" 
               onClick={() => navigate('/add-volunteer')}
@@ -75,15 +90,21 @@ function ViewVolunteers() {
                 </tr>
               </thead>
               <tbody>
-                {volunteers.map((volunteer) => (
-                  <tr key={volunteer._id} onClick={() => handleRowClick(volunteer._id)}>
-                    <td>{volunteer.user_name}</td>
-                    <td>{volunteer.user_phone_no || '-'}</td>
-                    <td className="action-cell">
-                      <div className="tap-details">Tap to view details</div>
-                    </td>
+                {filteredVolunteers.length > 0 ? (
+                  filteredVolunteers.map((volunteer) => (
+                    <tr key={volunteer._id} onClick={() => handleRowClick(volunteer._id)}>
+                      <td>{volunteer.user_name}</td>
+                      <td>{volunteer.user_phone_no || '-'}</td>
+                      <td className="action-cell">
+                        <div className="tap-details">Tap to view details</div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="no-results">No volunteers found matching your search</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
