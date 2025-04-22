@@ -161,12 +161,14 @@ function ViewMedicines() {
                                     </td>
 
                                     <td className="actions-cell">
-                                        <button
-                                            className="delete-medicine-btn"
-                                            onClick={() => handleDeleteMedicine(medicine.medicine_id)}
-                                        >
-                                            <i className="fas fa-trash"></i> Delete All
-                                        </button>
+                                        {!showExpiredOnly && ( // Only show the "Delete All" button if the filter is not selected
+                                            <button
+                                                className="delete-medicine-btn"
+                                                onClick={() => handleDeleteMedicine(medicine.medicine_id)}
+                                            >
+                                                <i className="fas fa-trash"></i> Delete All
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

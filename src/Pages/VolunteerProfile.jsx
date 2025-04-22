@@ -77,6 +77,8 @@ function VolunteerProfile() {
     }
     if (!editableVolunteer.user_phone_no || editableVolunteer.user_phone_no.trim() === '') {
       errors.user_phone_no = "Phone number is required";
+    } else if (!/^\d{10}$/.test(editableVolunteer.user_phone_no)) {
+      errors.user_phone_no = "Phone number must be exactly 10 digits";
     }
     if (!editableVolunteer.user_age || isNaN(editableVolunteer.user_age) || editableVolunteer.user_age < 18) {
       errors.user_age = "Age must be at least 18";
@@ -95,7 +97,8 @@ function VolunteerProfile() {
       alert('Volunteer information updated successfully');
     } catch (error) {
       console.error('Error updating volunteer:', error);
-      alert('Failed to update volunteer information. Please try again.');
+      const errorMessage = error.response?.data?.message || 'Failed to update volunteer information. Please try again.';
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -188,6 +191,9 @@ function VolunteerProfile() {
                 value={editableVolunteer.user_phone_no || ''}
                 onChange={handleInputChange}
                 className={validationErrors.user_phone_no ? 'error' : ''}
+                pattern="^(\d{10})?$"
+                title="Phone number must be exactly 10 digits or empty"
+                maxLength="10"
               />
               {validationErrors.user_phone_no && <div className="error-message">{validationErrors.user_phone_no}</div>}
             </div>

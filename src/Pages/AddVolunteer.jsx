@@ -140,14 +140,14 @@ const AddVolunteer = () => {
                 </div>
 
                 <div className="add-volunteer-actions">
-                    <button
+                    {/* <button
                         type="button"
                         onClick={() => navigate('/dashboard-admin')}
                         className="add-volunteer-cancel"
                         disabled={isLoading}
                     >
                         Cancel
-                    </button>
+                    </button> */}
                     <button
                         type="submit"
                         className="add-volunteer-submit"
