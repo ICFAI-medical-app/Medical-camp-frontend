@@ -105,6 +105,9 @@ const AddVolunteer = () => {
                         onChange={handleChange}
                         placeholder="Enter phone number"
                         required
+                        pattern="^(\d{10})?$"
+                        title="Phone number must be exactly 10 digits or empty"
+                        maxLength="10"
                     />
                 </div>
 

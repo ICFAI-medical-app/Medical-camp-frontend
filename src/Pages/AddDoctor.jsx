@@ -45,7 +45,11 @@ function AddDoctor() {
     const validateForm = () => {
         if (!formData.doctor_name) return "Doctor name is required";
         if (!formData.doctor_phone_no) return "Phone number is required";
-        // if (!formData.specialization) return "Specialization is required";
+        // Check if phone number is exactly 10 digits
+        if (!/^\d{10}$/.test(formData.doctor_phone_no)) {
+            return "Phone number must be exactly 10 digits";
+        }
+        if (!formData.specialization) return "Specialization is required";
 
         // Check email format only if email is provided
         if (formData.doctor_email && !/\S+@\S+\.\S+/.test(formData.doctor_email)) {
@@ -139,6 +143,9 @@ function AddDoctor() {
                                 placeholder="Phone"
                                 value={formData.doctor_phone_no}
                                 onChange={handleInputChange}
+                                pattern="^(\d{10})?$"
+                                title="Phone number must be exactly 10 digits or empty"
+                                maxLength="10"
                             />
                         </div>
                         <div className="add-doctor-group">

@@ -27,6 +27,7 @@ function PatientRegistration() {
 
   const handleBookNumberSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/patients/${formData.bookNumber}`);
       const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
@@ -155,6 +156,8 @@ function PatientRegistration() {
               value={formData.phoneNumber}
               onChange={handleChange}
               maxLength="10"
+              pattern="^(\d{10})?$"
+              title="Phone number must be exactly 10 digits or empty"
             />
           </div>
           <div className="patient-registration-form-group">
