@@ -14,16 +14,16 @@ function DashboardAdmin() {
   );
 
   const cardData = [
-    {title: "View Doctors" , icon: "👨‍⚕️" , path: "/get-doctors"},
-    { title: "Add Doctor", icon: "👨‍⚕️", path: "/add-doctor" },
-    { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
-    { title: "View Patients", icon: "😷", path: "/view-patients" },
-    { title: "Update the medicine stock", icon: "💊", path: "/update-medicine-stock" },
-    { title: "Add a new medicine to inventory", icon: "💊", path: "/add-new-medicine" },
-    { title: "View Medicines", icon: "💊", path: "/get-medicines" },
-    { title: "Add Volunteer", icon: "👥", path: "/add-volunteer" },
-    { title: "View Volunteers", icon: "👥", path: "/get-volunteers" },
     { title: "Camp Analytics", icon: "📊", path: "/analytics" },
+    { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
+    { title: "Update Medicine Stock", icon: "💊", path: "/update-medicine-stock" },
+    {title: "View Doctors" , icon: "👨‍⚕️" , path: "/get-doctors"},
+    { title: "View Medicines", icon: "💊", path: "/get-medicines" },
+    { title: "View Volunteers", icon: "👥", path: "/get-volunteers" },
+    { title: "View Patients", icon: "😷", path: "/view-patients" },
+    { title: "Add New Medicine", icon: "💊", path: "/add-new-medicine" },
+    { title: "Add Doctor", icon: "👨‍⚕️", path: "/add-doctor" },
+    { title: "Add Volunteer", icon: "👥", path: "/add-volunteer" },
     { title: "View Logs", icon: "📜", path: "/log" },
   ];
 
