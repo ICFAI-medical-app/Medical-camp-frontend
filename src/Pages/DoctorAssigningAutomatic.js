@@ -98,18 +98,22 @@ export default function DoctorAssigningAutomatic() {
         <div className="doctor-assigning-automatic-form-group">
           <label>Select Doctor(s)</label>
           <div className="doctor-assigning-automatic-checkbox-group">
-            {doctors.map((doctor) => (
-              <label key={doctor._id}>
-                <input
-                  type="checkbox"
-                  name="doctor_names"
-                  value={doctor.doctor_name}
-                  checked={formData.doctor_names.includes(doctor.doctor_name)}
-                  onChange={handleCheckboxChange}
-                />
-                {doctor.doctor_name} ({doctor.specialization})
-              </label>
-            ))}
+            {doctors.length > 0 ? (
+              doctors.map((doctor) => (
+                <label key={doctor._id}>
+                  <input
+                    type="checkbox"
+                    name="doctor_names"
+                    value={doctor.doctor_name}
+                    checked={formData.doctor_names.includes(doctor.doctor_name)}
+                    onChange={handleCheckboxChange}
+                  />
+                  {doctor.doctor_name} ({doctor.specialization})
+                </label>
+              ))
+            ) : (
+              <p>No doctors available</p>
+            )}
           </div>
         </div>
 

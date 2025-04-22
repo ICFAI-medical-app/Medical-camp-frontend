@@ -68,19 +68,23 @@ function DoctorAssigning() {
         <div className="doctor-assigning-form-group">
           <label>Doctor Assigned</label>
           <div className="doctor-assigning-radio-group">
-            {doctors.map((doctor) => (
-              <label key={doctor._id}>
-                <input
-                  type="radio"
-                  name="doc_name"
-                  value={doctor.doctor_name}
-                  checked={formData.doc_name === doctor.doctor_name}
-                  onChange={handleChange}
-                  required
-                />
-                {doctor.doctor_name} ({doctor.specialization})
-              </label>
-            ))}
+            {doctors.length > 0 ? (
+              doctors.map((doctor) => (
+                <label key={doctor._id}>
+                  <input
+                    type="radio"
+                    name="doc_name"
+                    value={doctor.doctor_name}
+                    checked={formData.doc_name === doctor.doctor_name}
+                    onChange={handleChange}
+                    required
+                  />
+                  {doctor.doctor_name} ({doctor.specialization})
+                </label>
+              ))
+            ) : (
+              <p>No doctors available</p>
+            )}
           </div>
         </div>
         <button type="submit" className="doctor-assigning-submit-btn">Submit</button>

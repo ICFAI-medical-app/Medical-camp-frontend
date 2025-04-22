@@ -97,36 +97,40 @@ export default function ViewQueue() {
     <div className="view-queues-container">
       <h1 className="view-queues-title">Doctor Queues</h1>
       {error && <div className="view-queues-error">{error}</div>}
-      <ul className="view-queues-list">
-        {doctors.map((doc) => {
-          const bookNo = queues[doc.doctor_id];
-          const count = queueCounts[doc.doctor_id];
-          return (
-            <li key={doc.doctor_id} className="view-queues-item">
-              <strong>{doc.doctor_name}</strong>
-              {' '}[Queue length: {count === undefined ? 'Loading...' : count}]:
-              {' '}
-              {bookNo === undefined
-                ? 'Loading next...'
-                : bookNo === null
-                ? 'No queue'
-                : `Next → Book #${bookNo}`}
-              {bookNo && (
-                <button
-                  className="view-queues-assign-btn"
-                  onClick={() => handleAssign(doc)}
-                  disabled={status[doc.doctor_id] === 'Assigned'}
-                >
-                  {status[doc.doctor_id] || 'Assign'}
-                </button>
-              )}
-              {status[doc.doctor_id] && (
-                <span className="view-queues-status">{status[doc.doctor_id]}</span>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      {doctors.length > 0 ? (
+        <ul className="view-queues-list">
+          {doctors.map((doc) => {
+            const bookNo = queues[doc.doctor_id];
+            const count = queueCounts[doc.doctor_id];
+            return (
+              <li key={doc.doctor_id} className="view-queues-item">
+                <strong>{doc.doctor_name}</strong>
+                {' '}[Queue length: {count === undefined ? 'Loading...' : count}]:
+                {' '}
+                {bookNo === undefined
+                  ? 'Loading next...'
+                  : bookNo === null
+                  ? 'No queue'
+                  : `Next → Book #${bookNo}`}
+                {bookNo && (
+                  <button
+                    className="view-queues-assign-btn"
+                    onClick={() => handleAssign(doc)}
+                    disabled={status[doc.doctor_id] === 'Assigned'}
+                  >
+                    {status[doc.doctor_id] || 'Assign'}
+                  </button>
+                )}
+                {status[doc.doctor_id] && (
+                  <span className="view-queues-status">{status[doc.doctor_id]}</span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="no-doctors-message">No doctors available</p>
+      )}
     </div>
   );
 }
