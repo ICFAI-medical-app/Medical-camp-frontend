@@ -411,7 +411,6 @@ function UpdateMedicineStock() {
                           value={updatedExpiryDates[index] || ''}
                           onChange={(e) => handleExpiryDateChange(index, e.target.value)}
                           className="expiry-date-input"
-                          min={new Date().toISOString().split('T')[0]}
                         />
                         <button
                           className="action-btn update-date-btn"
