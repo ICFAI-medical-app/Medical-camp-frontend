@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import axios from "axios";
 import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/PatientRegistration.css";
@@ -15,21 +14,120 @@ function PatientRegistration() {
     oldNew: '',
     eid: ''
   });
+  
+  const [fieldErrors, setFieldErrors] = useState({
+    bookNumber: '',
+    name: '',
+    phoneNumber: '',
+    age: '',
+    gender: '',
+    area: '',
+    oldNew: '',
+    eid: ''
+  });
+  
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false); // Track if book number is submitted
+  const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Field validation function
+  const validateField = (name, value) => {
+    let errorMessage = '';
+    
+    switch (name) {
+      case 'bookNumber':
+        if (!value) {
+          errorMessage = 'Book number is required';
+        } else if (isNaN(value) || parseInt(value) <= 0) {
+          errorMessage = 'Book number must be a positive number';
+        }
+        break;
+      case 'name':
+        if (!value && isBookNumberSubmitted) {
+          errorMessage = 'Name is required';
+        }
+        break;
+      case 'phoneNumber':
+        if (value && !/^\d{10}$/.test(value)) {
+          errorMessage = 'Phone number must be exactly 10 digits';
+        }
+        break;
+      case 'age':
+        if (value && (isNaN(value) || parseInt(value) <= 0 || parseInt(value) > 150)) {
+          errorMessage = 'Age must be a valid number between 1 and 150';
+        }
+        break;
+      case 'oldNew':
+        if (!value && isBookNumberSubmitted) {
+          errorMessage = 'Please select Old or New';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    return errorMessage;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Clear field error when user starts typing
+    setFieldErrors({ ...fieldErrors, [name]: '' });
+  };
+
+  const validateBookNumberForm = () => {
+    const error = validateField('bookNumber', formData.bookNumber);
+    setFieldErrors({ ...fieldErrors, bookNumber: error });
+    return !error;
+  };
+
+  const validatePatientForm = () => {
+    const newErrors = {};
+    let isValid = true;
+    
+    // Only validate required fields
+    const requiredFields = ['name', 'oldNew'];
+    requiredFields.forEach(field => {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        newErrors[field] = error;
+        isValid = false;
+      }
+    });
+    
+    // Validate optional fields only if they have a value
+    const optionalFields = ['phoneNumber', 'age', 'eid'];
+    optionalFields.forEach(field => {
+      if (formData[field]) {
+        const error = validateField(field, formData[field]);
+        if (error) {
+          newErrors[field] = error;
+          isValid = false;
+        }
+      }
+    });
+    
+    setFieldErrors({ ...fieldErrors, ...newErrors });
+    return isValid;
   };
 
   const handleBookNumberSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate book number before submission
+    if (!validateBookNumberForm()) {
+      return;
+    }
+    
     setError('');
+    setMessage('');
+    setIsLoading(true);
+    
     try {
-      // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/patients/${formData.bookNumber}`);
       const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
       if (response.data) {
         // Load patient data into the form
@@ -78,13 +176,25 @@ function PatientRegistration() {
         setError(error.response?.data?.message || 'An error occurred while fetching patient data.');
         setMessage('');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validatePatientForm()) {
+      setError('Please correct the errors before submitting');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+    
     try {
-      // const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/patients`, {
       const response = await privateAxios.post('/api/patients', {
         book_no: formData.bookNumber,
         patient_name: formData.name,
@@ -105,6 +215,8 @@ function PatientRegistration() {
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred while saving patient data.');
       setMessage('');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,16 +228,26 @@ function PatientRegistration() {
       {!isBookNumberSubmitted ? (
         <form onSubmit={handleBookNumberSubmit} className="patient-registration-form">
           <div className="patient-registration-form-group">
-            <label>Book Number</label>
+            <label>
+              Book Number <span className="required">*</span>
+            </label>
             <input
               type="number"
               name="bookNumber"
               value={formData.bookNumber}
               onChange={handleChange}
-              required
+              className={fieldErrors.bookNumber ? "error-input" : ""}
+              placeholder="Enter patient book number"
             />
+            {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
           </div>
-          <button type="submit" className="patient-registration-submit-btn">Submit</button>
+          <button 
+            type="submit" 
+            className="patient-registration-submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : "Submit"}
+          </button>
         </form>
       ) : (
         <form onSubmit={handleSubmit} className="patient-registration-form">
@@ -140,13 +262,18 @@ function PatientRegistration() {
             />
           </div>
           <div className="patient-registration-form-group">
-            <label>Name</label>
+            <label>
+              Name <span className="required">*</span>
+            </label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
+              className={fieldErrors.name ? "error-input" : ""}
+              placeholder="Enter patient name"
             />
+            {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
           </div>
           <div className="patient-registration-form-group">
             <label>Phone Number</label>
@@ -156,9 +283,10 @@ function PatientRegistration() {
               value={formData.phoneNumber}
               onChange={handleChange}
               maxLength="10"
-              pattern="^(\d{10})?$"
-              title="Phone number must be exactly 10 digits or empty"
+              placeholder="Enter 10-digit phone number (optional)"
+              className={fieldErrors.phoneNumber ? "error-input" : ""}
             />
+            {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
           </div>
           <div className="patient-registration-form-group">
             <label>Age</label>
@@ -167,7 +295,10 @@ function PatientRegistration() {
               name="age"
               value={formData.age}
               onChange={handleChange}
+              placeholder="Enter patient age (optional)"
+              className={fieldErrors.age ? "error-input" : ""}
             />
+            {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
           </div>
           <div className="patient-registration-form-group">
             <label>Gender</label>
@@ -201,10 +332,13 @@ function PatientRegistration() {
               name="area"
               value={formData.area}
               onChange={handleChange}
+              placeholder="Enter patient area (optional)"
             />
           </div>
           <div className="patient-registration-form-group">
-            <label>Old / New</label>
+            <label>
+              Old / New <span className="required">*</span>
+            </label>
             <div className="patient-registration-radio-group">
               <label>
                 <input
@@ -227,6 +361,7 @@ function PatientRegistration() {
                 New
               </label>
             </div>
+            {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
           </div>
           <div className="patient-registration-form-group">
             <label>EID</label>
@@ -235,9 +370,18 @@ function PatientRegistration() {
               name="eid"
               value={formData.eid}
               onChange={handleChange}
+              placeholder="Enter patient EID (optional)"
+              className={fieldErrors.eid ? "error-input" : ""}
             />
+            {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
           </div>
-          <button type="submit" className="patient-registration-submit-btn">Save</button>
+          <button 
+            type="submit" 
+            className="patient-registration-submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
         </form>
       )}
     </div>

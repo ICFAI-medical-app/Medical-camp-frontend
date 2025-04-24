@@ -327,3 +327,9 @@
     justify-content: space-between;
   }
 }
+
+/* Add this to your existing CSS */
+.empty-field {
+  color: #999;
+  font-style: italic;
+}

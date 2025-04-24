@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-// import axios from "axios";
 import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/AddMedicine.css";
-
 
 function AddMedicine() {
   const navigate = useNavigate();
@@ -13,10 +11,38 @@ function AddMedicine() {
     expiry_date: "",
     quantity: ""
   });
+  
+  const [fieldErrors, setFieldErrors] = useState({
+    medicine_formulation: "",
+    medicine_name: "",
+    expiry_date: "",
+    quantity: ""
+  });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const PORT = process.env.PORT || 5002;
+
+  const validateField = (name, value) => {
+    let errorMessage = "";
+    
+    if (!value.toString().trim()) {
+      return "This field is required";
+    }
+    
+    switch (name) {
+      case "quantity":
+        const qty = parseInt(value);
+        if (isNaN(qty) || qty <= 0) {
+          errorMessage = "Quantity must be a positive number";
+        }
+        break;
+      default:
+        break;
+    }
+    
+    return errorMessage;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,19 +50,45 @@ function AddMedicine() {
       ...formData,
       [name]: name === "quantity" ? (value === "" ? "" : parseInt(value, 10)) : value
     });
+    
+    // Clear field error when user starts typing
+    setFieldErrors({
+      ...fieldErrors,
+      [name]: ""
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+    
+    // Validate each field
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) {
+        newErrors[key] = error;
+        isValid = false;
+      }
+    });
+    
+    setFieldErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      setError("Please correct the errors before submitting");
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      // const response = await axios.post(
-      //   `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine`,
-      //   formData
-      // );
       const response = await privateAxios.post(
         `/api/admin/add_new_medicine`,
         formData
@@ -49,10 +101,6 @@ function AddMedicine() {
         expiry_date: "",
         quantity: ""
       });
-
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 2000);
     } catch (error) {
       console.error("Error adding medicine:", error);
       setError(
@@ -73,7 +121,9 @@ function AddMedicine() {
       
       <form onSubmit={handleSubmit} className="add-medicine-form">
         <div className="add-medicine-group">
-          <label htmlFor="add-medicine-formulation">Medicine Formulation</label>
+          <label htmlFor="add-medicine-formulation">
+            Medicine Formulation <span className="required">*</span>
+          </label>
           <input
             type="text"
             id="add-medicine-formulation"
@@ -81,12 +131,15 @@ function AddMedicine() {
             value={formData.medicine_formulation}
             onChange={handleChange}
             placeholder="Enter medicine formulation (e.g., Tablet, Syrup)"
-            required
+            className={fieldErrors.medicine_formulation ? "error-input" : ""}
           />
+          {fieldErrors.medicine_formulation && <div className="field-error">{fieldErrors.medicine_formulation}</div>}
         </div>
 
         <div className="add-medicine-group">
-          <label htmlFor="add-medicine-name">Medicine Name</label>
+          <label htmlFor="add-medicine-name">
+            Medicine Name <span className="required">*</span>
+          </label>
           <input
             type="text"
             id="add-medicine-name"
@@ -94,24 +147,30 @@ function AddMedicine() {
             value={formData.medicine_name}
             onChange={handleChange}
             placeholder="Enter medicine name"
-            required
+            className={fieldErrors.medicine_name ? "error-input" : ""}
           />
+          {fieldErrors.medicine_name && <div className="field-error">{fieldErrors.medicine_name}</div>}
         </div>
 
         <div className="add-medicine-group">
-          <label htmlFor="add-expiry-date">Expiry Date</label>
+          <label htmlFor="add-expiry-date">
+            Expiry Date <span className="required">*</span>
+          </label>
           <input
             type="date"
             id="add-expiry-date"
             name="expiry_date"
             value={formData.expiry_date}
             onChange={handleChange}
-            required
+            className={fieldErrors.expiry_date ? "error-input" : ""}
           />
+          {fieldErrors.expiry_date && <div className="field-error">{fieldErrors.expiry_date}</div>}
         </div>
 
         <div className="add-medicine-group">
-          <label htmlFor="add-quantity">Quantity</label>
+          <label htmlFor="add-quantity">
+            Quantity <span className="required">*</span>
+          </label>
           <input
             type="number"
             id="add-quantity"
@@ -120,8 +179,9 @@ function AddMedicine() {
             onChange={handleChange}
             placeholder="Enter quantity"
             min="1"
-            required
+            className={fieldErrors.quantity ? "error-input" : ""}
           />
+          {fieldErrors.quantity && <div className="field-error">{fieldErrors.quantity}</div>}
         </div>
 
         <div className="add-medicine-actions">

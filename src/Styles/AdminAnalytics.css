@@ -133,6 +133,32 @@
   border-radius: 5px;
 }
 
+.required {
+  color: #e74c3c;
+  margin-left: 3px;
+}
+
+.error-input {
+  border-color: #e74c3c !important;
+  background-color: #fff8f8;
+}
+
+.field-error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.month-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
 @media screen and (max-width: 600px) {
   .analytics-container {
     margin: 20px 10px;

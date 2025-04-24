@@ -1,8 +1,15 @@
-// Updated VolunteerProfile.js with analytics section
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/VolunteerProfile.css';
+
+// Helper function to display empty values consistently
+const displayValue = (value, fallbackText = 'N/A') => {
+  if (value === null || value === undefined || value === '') {
+    return <span className="empty-field">{fallbackText}</span>;
+  }
+  return value;
+};
 
 function VolunteerProfile() {
   const [volunteer, setVolunteer] = useState(null);
@@ -214,10 +221,10 @@ function VolunteerProfile() {
           <>
             <h2>{volunteer.user_name}</h2>
             <div className="volunteer-details-container">
-              <div className="volunteer-detail"><strong>User ID:</strong><span>{volunteer.user_id}</span></div>
-              <div className="volunteer-detail"><strong>Email:</strong><span>{volunteer.user_email}</span></div>
-              <div className="volunteer-detail"><strong>Phone:</strong><span>{volunteer.user_phone_no}</span></div>
-              <div className="volunteer-detail"><strong>Age:</strong><span>{volunteer.user_age}</span></div>
+              <div className="volunteer-detail"><strong>User ID:</strong><span>{displayValue(volunteer.user_id)}</span></div>
+              <div className="volunteer-detail"><strong>Email:</strong><span>{displayValue(volunteer.user_email)}</span></div>
+              <div className="volunteer-detail"><strong>Phone:</strong><span>{displayValue(volunteer.user_phone_no)}</span></div>
+              <div className="volunteer-detail"><strong>Age:</strong><span>{displayValue(volunteer.user_age)}</span></div>
             </div>
             {analytics && (
               <div className="volunteer-analytics-section">

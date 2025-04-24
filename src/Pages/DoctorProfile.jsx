@@ -4,6 +4,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/DoctorProfile.css';
 
+// Add this function at the top level of your component or in a utilities file
+const displayValue = (value, fallbackText = 'N/A') => {
+  if (value === null || value === undefined || value === '') {
+    return <span className="empty-field">{fallbackText}</span>;
+  }
+  return value;
+};
+
 const DoctorProfile = () => {
   const [doctor, setDoctor] = useState(null);
   const [editableDoctor, setEditableDoctor] = useState(null);
@@ -339,23 +347,23 @@ const DoctorProfile = () => {
             <div className="doctor-details-container">
               <div className="doctor-detail">
                 <strong>Specialization:</strong> 
-                <span>{doctor.specialization}</span>
+                <span>{displayValue(doctor.specialization)}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Phone:</strong> 
-                <span>{doctor.doctor_phone_no}</span>
+                <span>{displayValue(doctor.doctor_phone_no)}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Email:</strong> 
-                <span>{doctor.doctor_email}</span>
+                <span>{displayValue(doctor.doctor_email)}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Age:</strong> 
-                <span>{doctor.doctor_age}</span>
+                <span>{displayValue(doctor.doctor_age)}</span>
               </div>
               <div className="doctor-detail">
                 <strong>Sex:</strong> 
-                <span>{doctor.doctor_sex || 'Not specified'}</span>
+                <span>{displayValue(doctor.doctor_sex)}</span>
               </div>
               {/* Add Analytics Section */}
               {analytics && (

@@ -3,73 +3,79 @@
 import React, { useState, useEffect } from 'react';
 import { privateAxios } from '../api/axios';
 import '../Styles/ViewQueue.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function ViewQueue() {
   const [doctors, setDoctors] = useState([]);
   const [queues, setQueues] = useState({});
-  const [queueCounts, setQueueCounts] = useState({});       // new state for counts
+  const [queueCounts, setQueueCounts] = useState({});
   const [error, setError] = useState('');
   const [status, setStatus] = useState({});
+  const [loadingItem, setLoadingItem] = useState({});
+  const [isLoading, setIsLoading] = useState(true); // Main loading state
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
+        // Fetch doctors
         const res = await privateAxios.get('/api/doctor-assign/get_doctors');
         setDoctors(res.data);
+        
+        if (res.data.length > 0) {
+          const map = {};
+          const countMap = {};
+          
+          // Fetch queue information for each doctor
+          await Promise.all(
+            res.data.map(async (doc) => {
+              try {
+                setLoadingItem(prev => ({ ...prev, [doc.doctor_id]: true }));
+                
+                // Fetch next patient in queue
+                const queueRes = await privateAxios.get(`/api/queue/next/${doc.doctor_id}`);
+                map[doc.doctor_id] = queueRes.data.book_no;
+                
+                // Fetch queue count
+                const countRes = await privateAxios.get(`/api/queue/count/${doc.doctor_id}`);
+                countMap[doc.doctor_id] = countRes.data.queueCount;
+              } catch (err) {
+                if (err.response?.status === 404) {
+                  map[doc.doctor_id] = null;
+                } else {
+                  map[doc.doctor_id] = 'Error';
+                  console.error(`Error fetching data for doctor ${doc.doctor_id}:`, err);
+                }
+                countMap[doc.doctor_id] = 0;
+              } finally {
+                setLoadingItem(prev => ({ ...prev, [doc.doctor_id]: false }));
+              }
+            })
+          );
+          
+          setQueues(map);
+          setQueueCounts(countMap);
+        }
       } catch (err) {
         console.error('Error fetching doctors:', err);
         setError(err.response?.data?.message || 'Error loading doctors');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchDoctors();
+    fetchData();
   }, []);
-
-  useEffect(() => {
-    if (doctors.length === 0) return;
-
-    // fetch the next book_no for assignment (existing logic)
-    const fetchQueues = async () => {
-      const map = {};
-      await Promise.all(
-        doctors.map(async (doc) => {
-          try {
-            const res = await privateAxios.get(`/api/queue/next/${doc.doctor_id}`);
-            map[doc.doctor_id] = res.data.book_no;
-          } catch (err) {
-            if (err.response?.status === 404) map[doc.doctor_id] = null;
-            else map[doc.doctor_id] = 'Error';
-          }
-        })
-      );
-      setQueues(map);
-    };
-
-    // fetch the queue length for each doctor (new logic)
-    const fetchQueueCounts = async () => {
-      const countMap = {};
-      await Promise.all(
-        doctors.map(async (doc) => {
-          try {
-            const res = await privateAxios.get(`/api/queue/count/${doc.doctor_id}`);
-            countMap[doc.doctor_id] = res.data.queueCount;
-          } catch (err) {
-            console.error(`Error fetching count for doctor ${doc.doctor_id}`, err);
-            countMap[doc.doctor_id] = 0;
-          }
-        })
-      );
-      setQueueCounts(countMap);
-    };
-
-    fetchQueues();
-    fetchQueueCounts();
-  }, [doctors]);
 
   const handleAssign = async (doctor) => {
     const bookNo = queues[doctor.doctor_id];
     if (!bookNo) return;
+    
     try {
+      // Update status to indicate processing
+      setStatus((s) => ({ ...s, [doctor.doctor_id]: 'Processing...' }));
+      
       // Assign doctor to patient
       await privateAxios.post('/api/doctor-assign', {
         book_no: bookNo,
@@ -81,9 +87,11 @@ export default function ViewQueue() {
 
       setStatus((s) => ({ ...s, [doctor.doctor_id]: 'Assigned' }));
 
-      // Show popup and reload
-      alert(`Doctor ${doctor.doctor_name} assigned to Book #${bookNo}`);
-      window.location.reload();
+      // Show popup and reload after a brief delay to show the status
+      setTimeout(() => {
+        alert(`Doctor ${doctor.doctor_name} assigned to Book #${bookNo}`);
+        navigate('/view-queues'); // Redirect to the same page to refresh data
+      }, 500);
     } catch (err) {
       console.error('Assign error:', err);
       setStatus((s) => ({
@@ -92,6 +100,26 @@ export default function ViewQueue() {
       }));
     }
   };
+
+  const getStatusClass = (statusValue) => {
+    if (!statusValue) return '';
+    if (statusValue === 'Assigned') return 'status-assigned';
+    if (statusValue === 'Processing...') return 'status-processing';
+    return 'status-error';
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="view-queues-container">
+        <h1 className="view-queues-title">Doctor Queues</h1>
+        <div className="view-queues-loading-container">
+          <div className="view-queues-loading-spinner"></div>
+          <div className="view-queues-loading-text">Loading doctors and queues...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="view-queues-container">
@@ -102,28 +130,48 @@ export default function ViewQueue() {
           {doctors.map((doc) => {
             const bookNo = queues[doc.doctor_id];
             const count = queueCounts[doc.doctor_id];
+            const isItemLoading = loadingItem[doc.doctor_id];
             return (
               <li key={doc.doctor_id} className="view-queues-item">
-                <strong>{doc.doctor_name}</strong>
-                {' '}[Queue length: {count === undefined ? 'Loading...' : count}]:
-                {' '}
-                {bookNo === undefined
-                  ? 'Loading next...'
-                  : bookNo === null
-                  ? 'No queue'
-                  : `Next → Book #${bookNo}`}
-                {bookNo && (
-                  <button
-                    className="view-queues-assign-btn"
-                    onClick={() => handleAssign(doc)}
-                    disabled={status[doc.doctor_id] === 'Assigned'}
-                  >
-                    {status[doc.doctor_id] || 'Assign'}
-                  </button>
-                )}
-                {status[doc.doctor_id] && (
-                  <span className="view-queues-status">{status[doc.doctor_id]}</span>
-                )}
+                <div className="doctor-info">
+                  <span className="doctor-name">{doc.doctor_name}</span>
+                  <div className="queue-details">
+                    <span className="queue-count">Queue: {count === undefined ? '...' : count}</span>
+                    {isItemLoading ? (
+                      <span className="loading-text">
+                        <span className="loading-spinner"></span>
+                        Loading next patient...
+                      </span>
+                    ) : (
+                      bookNo === undefined ? (
+                        <span className="loading-text">Loading next patient...</span>
+                      ) : bookNo === null ? (
+                        <span className="no-queue">No patients in queue</span>
+                      ) : (
+                        <span className="next-patient">Next: Book #{bookNo}</span>
+                      )
+                    )}
+                  </div>
+                </div>
+                
+                <div className="view-queues-controls">
+                  {bookNo && (
+                    <button
+                      className="view-queues-assign-btn"
+                      onClick={() => handleAssign(doc)}
+                      disabled={status[doc.doctor_id] === 'Assigned' || status[doc.doctor_id] === 'Processing...'}
+                    >
+                      {status[doc.doctor_id] && status[doc.doctor_id] !== 'Error' 
+                        ? status[doc.doctor_id] 
+                        : 'Assign'}
+                    </button>
+                  )}
+                  {status[doc.doctor_id] === 'Error' && (
+                    <span className={`view-queues-status ${getStatusClass(status[doc.doctor_id])}`}>
+                      {status[doc.doctor_id]}
+                    </span>
+                  )}
+                </div>
               </li>
             );
           })}

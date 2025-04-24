@@ -96,6 +96,27 @@
   background-color: #0c0c0c;
 }
 
+.patient-registration-submit-btn:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.required {
+  color: #e74c3c;
+  margin-left: 3px;
+}
+
+.error-input {
+  border-color: #e74c3c !important;
+  background-color: #fff8f8;
+}
+
+.field-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
 @media screen and (max-width: 600px) {
   .patient-registration-container {
     margin: 20px auto;

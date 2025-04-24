@@ -1,6 +1,4 @@
-
 import React, { useState } from 'react';
-// import axios from 'axios';
 import { privateAxios } from '../api/axios';
 import '../Styles/AdminAnalytics.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -10,23 +8,22 @@ function AdminAnalytics() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldError, setFieldError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldError('');
+    
+    // Validate that month is selected
+    if (!monthYear) {
+      setFieldError('Please select a month to generate analytics');
+      return;
+    }
+    
     setLoading(true);
   
     try {
-      // const token = localStorage.getItem('authToken');
-      // const response = await axios.get(
-      //   `${process.env.REACT_APP_BACKEND}/api/admin/analytics`, {
-      //     params: { monthYear },
-      //     headers: {
-      //       'Authorization': `Bearer ${token}`
-      //     }
-      //   }
-      // );
-
       const response = await privateAxios.get('/api/admin/analytics', {
         params: { monthYear }
       });
@@ -38,6 +35,11 @@ function AdminAnalytics() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMonthChange = (e) => {
+    setMonthYear(e.target.value);
+    if (fieldError) setFieldError(''); // Clear field error when user starts typing
   };
 
   const ageGroupData = [
@@ -54,13 +56,16 @@ function AdminAnalytics() {
 
       <form onSubmit={handleSubmit} className="analytics-form">
         <div className="analytics-form-group">
-          <label>Select Month</label>
+          <label>
+            Select Month <span className="required">*</span>
+          </label>
           <input
             type="month"
             value={monthYear}
-            onChange={(e) => setMonthYear(e.target.value)}
-            required
+            onChange={handleMonthChange}
+            className={fieldError ? "month-input error-input" : "month-input"}
           />
+          {fieldError && <div className="field-error-message">{fieldError}</div>}
         </div>
 
         <button 

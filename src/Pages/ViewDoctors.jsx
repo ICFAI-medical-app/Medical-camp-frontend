@@ -5,26 +5,41 @@ import { privateAxios } from '../api/axios';
 
 function ViewDoctors() {
   const [doctors, setDoctors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [specializations, setSpecializations] = useState([]);
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = () => {
+    setIsLoading(true);
+    setError('');
+    
     privateAxios.get('/api/admin/get_doctors')
       .then(response => {
-        console.log(response.data);
         setDoctors(response.data);
         
         // Extract unique specializations for filter dropdown
-        const uniqueSpecializations = [...new Set(response.data.map(doctor => doctor.specialization))];
+        const uniqueSpecializations = [...new Set(
+          response.data
+            .map(doctor => doctor.specialization)
+            .filter(specialization => specialization) // Remove undefined/empty values
+        )];
         setSpecializations(uniqueSpecializations);
       })
       .catch(error => {
-        alert('Error fetching doctors');
-        console.log(error);
+        console.error('Error fetching doctors:', error);
+        setError('Failed to load doctors. Please try again later.');
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleRowClick = (doctorId) => {
     // Navigate to doctor profile page
@@ -55,65 +70,76 @@ function ViewDoctors() {
     <div className="doctor-container">
       <h1>Doctors</h1>
       
-      <div className="doctor-filters">
-        <div className="search-container">
-          <input 
-            type="text" 
-            placeholder="Search by doctor name" 
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="doctor-search-input"
-          />
-        </div>
-        
-        <div className="filter-container">
-          <select 
-            value={selectedSpecialization}
-            onChange={handleSpecializationChange}
-            className="specialization-filter"
-          >
-            <option value="">All Specializations</option>
-            {specializations.map((specialization, index) => (
-              <option key={index} value={specialization}>
-                {specialization}
-              </option>
-            ))}
-          </select>
-          
-          <button onClick={resetFilters} className="reset-filters-btn">
-            Reset Filters
-          </button>
-        </div>
-      </div>
+      {error && <div className="error-message">{error}</div>}
       
-      <div className="doctor-table-container">
-        <table className="doctor-table">
-          <thead>
-            <tr>
-              <th>Doctor Name</th>
-              <th>Specialization</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredDoctors.length > 0 ? (
-              filteredDoctors.map((doctor, index) => (
-                <tr key={index} onClick={() => handleRowClick(doctor._id || index)}>
-                  <td>{doctor.doctor_name}</td>
-                  <td>{doctor.specialization}</td>
-                  <td className="action-cell">
-                    <div className="tap-details">Tap for doctor details</div>
-                  </td>
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading doctors...</p>
+        </div>
+      ) : (
+        <>
+          <div className="doctor-filters">
+            <div className="search-container">
+              <input 
+                type="text" 
+                placeholder="Search by doctor name" 
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="doctor-search-input"
+              />
+            </div>
+            
+            <div className="filter-container">
+              <select 
+                value={selectedSpecialization}
+                onChange={handleSpecializationChange}
+                className="specialization-filter"
+              >
+                <option value="">All Specializations</option>
+                {specializations.map((specialization, index) => (
+                  <option key={index} value={specialization}>
+                    {specialization}
+                  </option>
+                ))}
+              </select>
+              
+              <button onClick={resetFilters} className="reset-filters-btn">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+          
+          <div className="doctor-table-container">
+            <table className="doctor-table">
+              <thead>
+                <tr>
+                  <th>Doctor Name</th>
+                  <th>Specialization</th>
+                  <th></th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" className="no-results">No doctors found matching your criteria</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {filteredDoctors.length > 0 ? (
+                  filteredDoctors.map((doctor, index) => (
+                    <tr key={doctor._id || index} onClick={() => handleRowClick(doctor._id || index)}>
+                      <td>{doctor.doctor_name}</td>
+                      <td>{doctor.specialization || 'General Practice'}</td>
+                      <td className="action-cell">
+                        <div className="tap-details">Tap for doctor details</div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="no-results">No doctors found matching your criteria</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 }

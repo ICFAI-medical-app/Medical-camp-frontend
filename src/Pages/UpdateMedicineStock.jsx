@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import axios from "axios";
 import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/UpdateMedicineStock.css";
@@ -20,15 +19,18 @@ function UpdateMedicineStock() {
     quantity: ""
   });
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
-  const [notification, setNotification] = useState(""); // Add notification state
-
-  const PORT = process.env.PORT || 5002;
+  const [notification, setNotification] = useState(""); 
+  const [fieldErrors, setFieldErrors] = useState({
+    medicineId: "",
+    medicine_name: "",
+    expiry_date: "",
+    quantity: ""
+  });
 
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
         setLoading(true);
-        // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_medicines`);
         const response = await privateAxios.get("/api/admin/get_medicines");
         setMedicines(response.data);
         setLoading(false);
@@ -42,15 +44,31 @@ function UpdateMedicineStock() {
     fetchMedicines();
   }, []);
 
+  const validateField = (name, value) => {
+    let error = "";
+    
+    if (value === null || value === undefined || value.toString().trim() === "") {
+      error = `This field is required`;
+    } else if (name === "quantity" && parseInt(value, 10) < 0) {
+      error = "Quantity cannot be negative";
+    }
+    
+    return error;
+  };
+
   const handleFetchMedicine = async (e) => {
     e.preventDefault();
-    if (!medicineId.trim()) {
-      setError("Please enter a medicine ID");
+    
+    const idError = validateField("medicineId", medicineId);
+    if (idError) {
+      setFieldErrors({...fieldErrors, medicineId: idError});
+      setError("Please select a medicine from the dropdown");
       return;
     }
-
+    
     setLoading(true);
     setError("");
+    setFieldErrors({...fieldErrors, medicineId: ""});
 
     try {
       const foundMedicine = medicines.find(med => med.medicine_id === medicineId);
@@ -77,10 +95,9 @@ function UpdateMedicineStock() {
   };
 
   const handleQuantityChange = (index, value) => {
-    // Check for negative values
     if (value !== "" && parseInt(value, 10) < 0) {
-      setNotification("Cannot add negative quantity!");
-      setTimeout(() => setNotification(""), 1000);
+      setNotification("Quantity cannot be negative!");
+      setTimeout(() => setNotification(""), 3000);
       return;
     }
 
@@ -91,6 +108,12 @@ function UpdateMedicineStock() {
   };
 
   const handleExpiryDateChange = (index, value) => {
+    const dateError = validateField("expiry_date", value);
+    if (dateError) {
+      setNotification(dateError);
+      setTimeout(() => setNotification(""), 3000);
+    }
+    
     setUpdatedExpiryDates({
       ...updatedExpiryDates,
       [index]: value
@@ -101,8 +124,9 @@ function UpdateMedicineStock() {
     const selectedDetail = medicine.medicine_details[index];
     const newExpiryDate = updatedExpiryDates[index];
 
-    if (!newExpiryDate) {
-      setError("Please select a new expiry date");
+    const dateError = validateField("expiry_date", newExpiryDate);
+    if (dateError) {
+      setError(dateError);
       return;
     }
 
@@ -113,9 +137,6 @@ function UpdateMedicineStock() {
       const oldFormattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
       const newFormattedDate = new Date(newExpiryDate).toISOString().split('T')[0];
 
-      // await axios.post(
-      //   `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_expiry_date`,
-      //   {
       await privateAxios.post(
         "/api/admin/update_medicine_expiry_date",
         {
@@ -144,9 +165,15 @@ function UpdateMedicineStock() {
 
   const handleNewEntryChange = (e) => {
     const { name, value } = e.target;
+    
+    const fieldError = validateField(name, value);
+    setFieldErrors({
+      ...fieldErrors,
+      [name]: fieldError
+    });
 
-    if (name === "quantity" && value !== "" && parseInt(value, 10) < 0) {
-      setNotification("Cannot add negative quantity!");
+    if (name === "quantity" && fieldError === "Quantity cannot be negative") {
+      setNotification("Quantity cannot be negative!");
       setTimeout(() => setNotification(""), 3000);
       return;
     }
@@ -157,56 +184,65 @@ function UpdateMedicineStock() {
     });
   };
 
-  const handleUpdateStock = async () => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
+  const handleUpdateBatch = async (index) => {
+    const selectedDetail = medicine.medicine_details[index];
+    
+    const quantityError = validateField("quantity", updatedQuantities[index]);
+    if (quantityError) {
+      setError(quantityError);
+      return;
+    }
 
     try {
-      const updatedMedicine = { ...medicine };
+      setLoading(true);
+      setError("");
 
-      updatedMedicine.medicine_details = medicine.medicine_details.map((detail, index) => ({
-        ...detail,
-        quantity: updatedQuantities[index]
-      }));
+      const formattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
 
-      updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
-        (total, detail) => total + detail.quantity, 0
-      );
-
-      // await axios.post(
-      //   `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
-      //   {
       await privateAxios.post(
         "/api/admin/update_medicine_stock",
         {
           medicine_id: medicineId,
-          expiry_date: new Date(),
-          quantity: updatedQuantities[0]
+          expiry_date: formattedDate,
+          quantity: updatedQuantities[index]
         }
       );
 
-      setSuccess("Batch updated successfully!");
+      const updatedMedicine = { ...medicine };
+      updatedMedicine.medicine_details[index].quantity = updatedQuantities[index];
+      updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
+        (total, detail) => total + detail.quantity, 0
+      );
 
       setMedicine(updatedMedicine);
       setMedicines(prev =>
         prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
       );
 
+      setSuccess("Batch updated successfully!");
     } catch (error) {
-      console.error("Error updating medicine stock:", error);
-      setError(
-        error.response?.data?.message ||
-        "An error occurred while updating medicine stock."
-      );
+      console.error("Error updating batch:", error);
+      setError(error.response?.data || "Failed to update batch");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddNewEntry = async () => {
-    if (!newEntry.medicine_name || !newEntry.expiry_date || !newEntry.quantity) {
-      setError("All fields are required for adding a new batch");
+    const nameError = validateField("medicine_name", newEntry.medicine_name);
+    const dateError = validateField("expiry_date", newEntry.expiry_date);
+    const quantityError = validateField("quantity", newEntry.quantity);
+    
+    const newFieldErrors = {
+      medicine_name: nameError,
+      expiry_date: dateError,
+      quantity: quantityError
+    };
+    
+    setFieldErrors({...fieldErrors, ...newFieldErrors});
+    
+    if (nameError || dateError || quantityError) {
+      setError("Please fill in all required fields correctly");
       return;
     }
 
@@ -226,10 +262,6 @@ function UpdateMedicineStock() {
 
       console.log("Adding new batch with payload:", payload);
 
-      // const response = await axios.post(
-      //   `${process.env.REACT_APP_BACKEND}/api/admin/add_new_medicine_details`,
-      //   payload
-      // );
       const response = await privateAxios.post(
         "/api/admin/add_new_medicine_details",
         payload
@@ -269,6 +301,13 @@ function UpdateMedicineStock() {
         expiry_date: "",
         quantity: ""
       });
+      
+      setFieldErrors({
+        ...fieldErrors,
+        medicine_name: "",
+        expiry_date: "",
+        quantity: ""
+      });
 
       setShowNewEntryForm(false);
 
@@ -288,59 +327,12 @@ function UpdateMedicineStock() {
     return date.toLocaleDateString();
   };
 
-  const handleUpdateBatch = async (index) => {
-    const selectedDetail = medicine.medicine_details[index];
-
-    try {
-      setLoading(true);
-      setError("");
-
-      const formattedDate = new Date(selectedDetail.expiry_date).toISOString().split('T')[0];
-
-      // await axios.post(
-      //   `${process.env.REACT_APP_BACKEND}/api/admin/update_medicine_stock`,
-      //   {
-      //     medicine_id: medicineId,
-      //     expiry_date: formattedDate,
-      //     quantity: updatedQuantities[index]
-      //   }
-      // );
-      await privateAxios.post(
-        "/api/admin/update_medicine_stock",
-        {
-          medicine_id: medicineId,
-          expiry_date: formattedDate,
-          quantity: updatedQuantities[index]
-        }
-      );
-
-      const updatedMedicine = { ...medicine };
-      updatedMedicine.medicine_details[index].quantity = updatedQuantities[index];
-      updatedMedicine.total_quantity = updatedMedicine.medicine_details.reduce(
-        (total, detail) => total + detail.quantity, 0
-      );
-
-      setMedicine(updatedMedicine);
-      setMedicines(prev =>
-        prev.map(med => med.medicine_id === medicineId ? updatedMedicine : med)
-      );
-
-      setSuccess("Batch updated successfully!");
-    } catch (error) {
-      console.error("Error updating batch:", error);
-      setError(error.response?.data || "Failed to update batch");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="update-medicine-container">
       <h2>Update Medicine Stock</h2>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="update-medicine-error">{error}</div>}
       
-      {/* Add notification popup */}
       {notification && (
         <div className="update-medicine-popup-overlay">
           <div className="update-medicine-popup">
@@ -355,13 +347,17 @@ function UpdateMedicineStock() {
       {(!medicine) ? (
         <form onSubmit={handleFetchMedicine} className="medicine-id-form">
           <div className="form-group">
-            <label htmlFor="medicine_id">Select Medicine</label>
+            <label htmlFor="medicine_id">
+              Select Medicine <span className="required">*</span>
+            </label>
             <select
               id="medicine_id"
               value={medicineId}
-              onChange={(e) => setMedicineId(e.target.value)}
-              required
-              className="medicine-select"
+              onChange={(e) => {
+                setMedicineId(e.target.value);
+                setFieldErrors({...fieldErrors, medicineId: ""});
+              }}
+              className={fieldErrors.medicineId ? "form-control error-input" : "form-control"}
             >
               <option value="">-- Select a Medicine --</option>
               {medicines.map(med => (
@@ -370,11 +366,12 @@ function UpdateMedicineStock() {
                 </option>
               ))}
             </select>
+            {fieldErrors.medicineId && <div className="error-message">{fieldErrors.medicineId}</div>}
           </div>
           <button
             type="submit"
             className="submit-btn"
-            disabled={loading || !medicineId}
+            disabled={loading}
           >
             {loading ? "Loading..." : "Fetch Medicine"}
           </button>
@@ -402,7 +399,6 @@ function UpdateMedicineStock() {
                 {medicine.medicine_details.map((detail, index) => (
                   <tr key={index}>
                     <td>{detail.medicine_name}</td>
-                    {/* <td>{formatDate(detail.expiry_date)}</td> */}
                     <td>
                       <div className="expiry-date-container">
                         <span>{formatDate(detail.expiry_date)}</span>
@@ -449,7 +445,9 @@ function UpdateMedicineStock() {
               <h4>Add New Batch</h4>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="medicine_name">Medicine Name</label>
+                  <label htmlFor="medicine_name">
+                    Medicine Name <span className="required">*</span>
+                  </label>
                   <input
                     type="text"
                     id="medicine_name"
@@ -458,11 +456,15 @@ function UpdateMedicineStock() {
                     onChange={handleNewEntryChange}
                     placeholder="Enter medicine name"
                     required
+                    className={fieldErrors.medicine_name ? "form-control error-input" : "form-control"}
                   />
+                  {fieldErrors.medicine_name && <div className="error-message">{fieldErrors.medicine_name}</div>}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="expiry_date">Expiry Date</label>
+                  <label htmlFor="expiry_date">
+                    Expiry Date <span className="required">*</span>
+                  </label>
                   <input
                     type="date"
                     id="expiry_date"
@@ -470,11 +472,15 @@ function UpdateMedicineStock() {
                     value={newEntry.expiry_date}
                     onChange={handleNewEntryChange}
                     required
+                    className={fieldErrors.expiry_date ? "form-control error-input" : "form-control"}
                   />
+                  {fieldErrors.expiry_date && <div className="error-message">{fieldErrors.expiry_date}</div>}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="quantity">Quantity</label>
+                  <label htmlFor="quantity">
+                    Quantity <span className="required">*</span>
+                  </label>
                   <input
                     type="number"
                     id="quantity"
@@ -484,7 +490,9 @@ function UpdateMedicineStock() {
                     placeholder="Enter quantity"
                     min="1"
                     required
+                    className={fieldErrors.quantity ? "form-control error-input" : "form-control"}
                   />
+                  {fieldErrors.quantity && <div className="error-message">{fieldErrors.quantity}</div>}
                 </div>
               </div>
 
@@ -495,6 +503,12 @@ function UpdateMedicineStock() {
                   onClick={() => {
                     setShowNewEntryForm(false);
                     setNewEntry({
+                      medicine_name: "",
+                      expiry_date: "",
+                      quantity: ""
+                    });
+                    setFieldErrors({
+                      ...fieldErrors,
                       medicine_name: "",
                       expiry_date: "",
                       quantity: ""
@@ -528,6 +542,7 @@ function UpdateMedicineStock() {
               onClick={() => {
                 setMedicine(null);
                 setMedicineId("");
+                setFieldErrors({...fieldErrors, medicineId: ""});
               }}
             >
               Back to Medicine Selection

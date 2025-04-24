@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
 import { privateAxios } from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorAvailability.css';
 
 function DoctorAvailability() {
     const [doctorList, setDoctorList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [updatingDoctor, setUpdatingDoctor] = useState(null); // Track which doctor is being updated
+    const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
-    const PORT = process.env.PORT || 5002;
 
     useEffect(() => {
-        // axios.get(`${process.env.REACT_APP_BACKEND}/api/admin/get_doctors`)
+        fetchDoctors();
+    }, []);
+    
+    const fetchDoctors = () => {
+        setIsLoading(true);
         privateAxios.get('/api/admin/get_doctors')
             .then((response) => {
                 setDoctorList(response.data);
             })
             .catch((error) => {
                 console.log(error);
+                alert('Error fetching doctors. Please try again.');
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
-    }, []);
+    };
+
     const handleDoctorClick = (id) => {
         navigate(`/doctor/${id}`); // Navigate to the doctor details page
     };
@@ -26,16 +36,38 @@ function DoctorAvailability() {
     const toggleDoctorAvailability = (id) => {
         const doctor = doctorList.find((doc) => doc._id === id);
         const updatedAvailability = !doctor.doctor_availability;
-        // axios.put(`${process.env.REACT_APP_BACKEND}/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
-        privateAxios.put(`/api/admin/update_doctor_availability/${id}`, { doctor_availability: updatedAvailability })
+        
+        // Set the updating state for this doctor
+        setUpdatingDoctor(id);
+        // Clear any previous success message
+        setSuccessMessage('');
+        
+        privateAxios.put(`/api/admin/update_doctor_availability/${id}`, { 
+            doctor_availability: updatedAvailability 
+        })
         .then((response) => {
-                setDoctorList(doctorList.map((doc) =>
-                    doc._id === id ? response.data : doc
-                ));
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+            setDoctorList(doctorList.map((doc) =>
+                doc._id === id ? response.data : doc
+            ));
+            
+            // Show success message
+            const doctorName = response.data.doctor_name;
+            const status = updatedAvailability ? 'available' : 'unavailable';
+            setSuccessMessage(`Dr. ${doctorName} has been marked as ${status}`);
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                setSuccessMessage('');
+            }, 3000);
+        })
+        .catch((error) => {
+            console.log(error);
+            alert('Failed to update doctor availability. Please try again.');
+        })
+        .finally(() => {
+            // Clear the updating state for this doctor
+            setUpdatingDoctor(null);
+        });
     }
 
     return (
@@ -44,8 +76,19 @@ function DoctorAvailability() {
                 <h1>Doctor Availability</h1>
             </header>
 
+            {successMessage && (
+                <div className="success-message">
+                    {successMessage}
+                </div>
+            )}
+            
             <main className="doctor-availability-main">
-                {doctorList.length > 0 ? (
+                {isLoading ? (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <p>Loading doctors...</p>
+                    </div>
+                ) : doctorList.length > 0 ? (
                     <table className="doctor-availability-table">
                         <thead>
                             <tr>
@@ -69,13 +112,16 @@ function DoctorAvailability() {
                                     </td>
                                     <td>
                                         <button
-                                            className="toggle-availability-btn"
+                                            className={`toggle-availability-btn ${updatingDoctor === doctor._id ? 'updating-btn' : ''}`}
                                             onClick={(e) => {
                                                 e.stopPropagation(); // Prevent row click
                                                 toggleDoctorAvailability(doctor._id);
                                             }}
+                                            disabled={updatingDoctor === doctor._id}
                                         >
-                                            {doctor.doctor_availability ? 'Mark Unavailable' : 'Mark Available'}
+                                            {updatingDoctor === doctor._id ? 
+                                                'Updating...' : 
+                                                (doctor.doctor_availability ? 'Mark Unavailable' : 'Mark Available')}
                                         </button>
                                     </td>
                                 </tr>

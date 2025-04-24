@@ -4,6 +4,14 @@ import { privateAxios } from '../api/axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import '../Styles/PatientProfile.css';
 
+// Helper function to display empty values consistently
+const displayValue = (value, fallbackText = 'N/A') => {
+  if (value === null || value === undefined || value === '') {
+    return <span className="empty-field">{fallbackText}</span>;
+  }
+  return value;
+};
+
 function PatientProfile() {
   const [patient, setPatient] = useState(null);
   const [editablePatient, setEditablePatient] = useState(null);
@@ -170,23 +178,23 @@ function PatientProfile() {
             <div className="patient-details-container">
               <div className="patient-detail">
                 <strong>Book Number:</strong>
-                <span>{patient.book_no}</span>
+                <span>{displayValue(patient.book_no)}</span>
               </div>
               <div className="patient-detail">
                 <strong>Age:</strong>
-                <span>{patient.patient_age}</span>
+                <span>{displayValue(patient.patient_age)}</span>
               </div>
               <div className="patient-detail">
                 <strong>Sex:</strong>
-                <span>{patient.patient_sex}</span>
+                <span>{displayValue(patient.patient_sex)}</span>
               </div>
               <div className="patient-detail">
                 <strong>Phone:</strong>
-                <span>{patient.patient_phone_no}</span>
+                <span>{displayValue(patient.patient_phone_no)}</span>
               </div>
               <div className="patient-detail">
                 <strong>Area:</strong>
-                <span>{patient.patient_area}</span>
+                <span>{displayValue(patient.patient_area)}</span>
               </div>
               
               {analytics && (
