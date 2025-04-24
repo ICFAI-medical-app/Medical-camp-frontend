@@ -90,7 +90,7 @@ export default function ViewQueue() {
       // Show popup and reload after a brief delay to show the status
       setTimeout(() => {
         alert(`Doctor ${doctor.doctor_name} assigned to Book #${bookNo}`);
-        navigate('/view-queues'); // Redirect to the same page to refresh data
+        navigate('/view-queue'); // Redirect to the same page to refresh data
       }, 500);
     } catch (err) {
       console.error('Assign error:', err);
