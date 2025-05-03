@@ -86,6 +86,7 @@ function ViewVolunteers() {
                 <tr>
                   <th>Name</th>
                   <th>Phone</th>
+                  <th>Password</th>
                   <th></th>
                 </tr>
               </thead>
@@ -95,6 +96,7 @@ function ViewVolunteers() {
                     <tr key={volunteer._id} onClick={() => handleRowClick(volunteer._id)}>
                       <td>{volunteer.user_name}</td>
                       <td>{volunteer.user_phone_no || '-'}</td>
+                      <td>{volunteer.user_password}</td> {/* Add password column */}
                       <td className="action-cell">
                         <div className="tap-details">Tap to view details</div>
                       </td>
@@ -102,7 +104,7 @@ function ViewVolunteers() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" className="no-results">No volunteers found matching your search</td>
+                    <td colSpan="4" className="no-results">No volunteers found matching your search</td>
                   </tr>
                 )}
               </tbody>

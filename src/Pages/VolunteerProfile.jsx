@@ -216,6 +216,16 @@ function VolunteerProfile() {
               />
               {validationErrors.user_age && <div className="error-message">{validationErrors.user_age}</div>}
             </div>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="text"
+                name="user_password"
+                value={editableVolunteer.user_password || ''}
+                onChange={handleInputChange}
+                className="form-control"
+              />
+            </div>
           </div>
         ) : (
           <>
@@ -225,6 +235,10 @@ function VolunteerProfile() {
               <div className="volunteer-detail"><strong>Email:</strong><span>{displayValue(volunteer.user_email)}</span></div>
               <div className="volunteer-detail"><strong>Phone:</strong><span>{displayValue(volunteer.user_phone_no)}</span></div>
               <div className="volunteer-detail"><strong>Age:</strong><span>{displayValue(volunteer.user_age)}</span></div>
+              <div className="volunteer-detail">
+                <strong>Password:</strong>
+                <span>{displayValue(volunteer.user_password)}</span>
+              </div>
             </div>
             {analytics && (
               <div className="volunteer-analytics-section">
