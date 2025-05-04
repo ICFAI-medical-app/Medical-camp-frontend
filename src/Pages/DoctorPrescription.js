@@ -175,11 +175,11 @@ function DoctorPrescription() {
               <div className="prescription-type-toggle">
                 <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`} 
                      onClick={() => handlePrescriptionTypeChange(index, true)}>
-                  Medicine
+                  By Dosing Schedule
                 </div>
                 <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`} 
                      onClick={() => handlePrescriptionTypeChange(index, false)}>
-                  Non-Medicine
+                  By Quantity
                 </div>
               </div>
 
