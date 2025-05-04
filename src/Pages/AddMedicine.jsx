@@ -6,6 +6,7 @@ import "../Styles/AddMedicine.css";
 function AddMedicine() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    medicine_id: "",
     medicine_formulation: "",
     medicine_name: "",
     expiry_date: "",
@@ -13,6 +14,7 @@ function AddMedicine() {
   });
   
   const [fieldErrors, setFieldErrors] = useState({
+    medicine_id: "",
     medicine_formulation: "",
     medicine_name: "",
     expiry_date: "",
@@ -96,6 +98,7 @@ function AddMedicine() {
 
       setSuccess("Medicine added successfully!");
       setFormData({
+        medicine_id: "",
         medicine_formulation: "",
         medicine_name: "",
         expiry_date: "",
@@ -120,6 +123,22 @@ function AddMedicine() {
       {success && <div className="add-medicine-success">{success}</div>}
       
       <form onSubmit={handleSubmit} className="add-medicine-form">
+        <div className="add-medicine-group">
+          <label htmlFor="add-medicine-id">
+            Medicine ID <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="add-medicine-id"
+            name="medicine_id"
+            value={formData.medicine_id}
+            onChange={handleChange}
+            placeholder="Enter unique medicine ID"
+            className={fieldErrors.medicine_id ? "error-input" : ""}
+          />
+          {fieldErrors.medicine_id && <div className="field-error">{fieldErrors.medicine_id}</div>}
+        </div>
+        
         <div className="add-medicine-group">
           <label htmlFor="add-medicine-formulation">
             Medicine Formulation <span className="required">*</span>

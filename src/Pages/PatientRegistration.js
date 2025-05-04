@@ -59,10 +59,10 @@ function PatientRegistration() {
           errorMessage = 'Age must be a valid number between 1 and 150';
         }
         break;
-      case 'oldNew':
-        if (!value && isBookNumberSubmitted) {
-          errorMessage = 'Please select Old or New';
-        }
+      // case 'oldNew':
+      //   if (!value && isBookNumberSubmitted) {
+      //     errorMessage = 'Please select Old or New';
+      //   }
         break;
       default:
         break;
@@ -90,7 +90,7 @@ function PatientRegistration() {
     let isValid = true;
     
     // Only validate required fields
-    const requiredFields = ['name', 'oldNew'];
+    const requiredFields = ['name'];
     requiredFields.forEach(field => {
       const error = validateField(field, formData[field]);
       if (error) {
@@ -335,7 +335,7 @@ function PatientRegistration() {
               placeholder="Enter patient area (optional)"
             />
           </div>
-          <div className="patient-registration-form-group">
+          {/* <div className="patient-registration-form-group">
             <label>
               Old / New <span className="required">*</span>
             </label>
@@ -362,7 +362,7 @@ function PatientRegistration() {
               </label>
             </div>
             {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
-          </div>
+          </div> */}
           <div className="patient-registration-form-group">
             <label>EID</label>
             <input
