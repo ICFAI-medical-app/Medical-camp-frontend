@@ -6,12 +6,7 @@ import '../Styles/Login.css';
 const Login = () => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  const images = [
-    '/images/healthcare1.jpg',
-    '/images/healthcare2.jpg',
-    '/images/healthcare3.jpg',
-  ];
+  const [loading, setLoading] = useState(false); // Add loading state
 
   useEffect(() => {
     // Check for auth token and user type when component mounts
@@ -28,21 +23,13 @@ const Login = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, [images.length]);
-
   const handleVolunteerClick = () => {
+    setLoading(true); // Set loading to true
     navigate('/volunteer-login');
   };
 
   const handleAdminClick = () => {
+    setLoading(true); // Set loading to true
     navigate('/admin-login');
   };
 
@@ -56,8 +43,20 @@ const Login = () => {
           <div className="login-content">
             <h2 className="login-title">Login</h2>
             <div className="login-button-group">
-              <button onClick={handleVolunteerClick} className="login-volunteer-btn">Volunteer</button>
-              <button onClick={handleAdminClick} className="login-admin-btn">Admin</button>
+              <button 
+                onClick={handleVolunteerClick} 
+                className="login-volunteer-btn" 
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Volunteer'} {/* Show loading text */}
+              </button>
+              <button 
+                onClick={handleAdminClick} 
+                className="login-admin-btn" 
+                disabled={loading} // Disable button while loading
+              >
+                {loading ? 'Loading...' : 'Admin'} {/* Show loading text */}
+              </button>
             </div>
           </div>
         </div>

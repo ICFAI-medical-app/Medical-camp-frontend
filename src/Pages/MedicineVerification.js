@@ -10,6 +10,7 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
     medicines_given: []
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   useEffect(() => {
     if (bookNo && showVerification) {
@@ -18,16 +19,17 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
   }, [bookNo, showVerification]);
 
   const fetchVerificationData = async () => {
+    setIsLoading(true); // Set loading to true when fetching starts
     try {
-      // const response = await axios.get(
-      //   `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-verification/${bookNo}`
-      // );
       const response = await privateAxios.get(
         `/api/patient-history/medicine-verification/${bookNo}`
       );
       setVerificationData(response.data);
+      setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch verification data');
+    } finally {
+      setIsLoading(false); // Set loading back to false after fetching
     }
   };
 
@@ -40,7 +42,9 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
         
         <div className="verification-section">
           <h3>Prescribed Medicines</h3>
-          {verificationData.medicines_prescribed.length > 0 ? (
+          {isLoading ? ( // Show loading state while fetching data
+            <p>Loading prescribed medicines...</p>
+          ) : verificationData.medicines_prescribed.length > 0 ? (
             <table className="verification-table">
               <thead>
                 <tr>
@@ -78,7 +82,9 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
         
         <div className="verification-section">
           <h3>Medicines Given</h3>
-          {verificationData.medicines_given.length > 0 ? (
+          {isLoading ? ( // Show loading state while fetching data
+            <p>Loading medicines given...</p>
+          ) : verificationData.medicines_given.length > 0 ? (
             <table className="verification-table">
               <thead>
                 <tr>
@@ -105,8 +111,9 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
         <button 
           className="medicine-pickup-close-popup"
           onClick={() => setShowVerification(false)}
+          disabled={isLoading} // Disable the button while loading
         >
-          Close
+          {isLoading ? 'Loading...' : 'Close'} {/* Show loading text */}
         </button>
       </div>
     </div>

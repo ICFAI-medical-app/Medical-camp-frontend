@@ -10,27 +10,30 @@ export default function DoctorAssigningAutomatic() {
   const [doctors, setDoctors] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   useEffect(() => {
     const fetchDoctors = async () => {
+      setIsLoading(true); // Set loading to true while fetching doctors
       try {
         const response = await privateAxios.get("/api/doctor-assign/get_doctors");
         setDoctors(response.data);
+        setError('');
       } catch (err) {
         console.error("Error fetching doctors:", err);
         setError(err.response?.data?.message || "Error fetching doctors");
+      } finally {
+        setIsLoading(false); // Set loading back to false after fetching
       }
     };
     fetchDoctors();
   }, []);
 
-  // Handle the book number input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle toggling each doctor checkbox
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
     setFormData((prev) => {
@@ -45,13 +48,16 @@ export default function DoctorAssigningAutomatic() {
     e.preventDefault();
     setMessage("");
     setError("");
+    setIsLoading(true); // Set loading to true when submitting starts
 
     if (!formData.bookNumber) {
       setError("Please enter a book number.");
+      setIsLoading(false); // Reset loading state
       return;
     }
     if (formData.doctor_names.length === 0) {
       setError("Please select at least one doctor.");
+      setIsLoading(false); // Reset loading state
       return;
     }
 
@@ -59,7 +65,6 @@ export default function DoctorAssigningAutomatic() {
       book_no: parseInt(formData.bookNumber, 10),
       doctor_names: formData.doctor_names,
     };
-    console.log("Submitting queue payload:", payload);
 
     try {
       const response = await privateAxios.post("/api/queue/add", payload);
@@ -71,6 +76,8 @@ export default function DoctorAssigningAutomatic() {
       console.error("Submission error:", err.response || err);
       const errMsg = err.response?.data?.message || err.message || "An error occurred";
       setError(errMsg);
+    } finally {
+      setIsLoading(false); // Set loading back to false after submission
     }
   };
 
@@ -92,6 +99,7 @@ export default function DoctorAssigningAutomatic() {
             value={formData.bookNumber}
             onChange={handleChange}
             required
+            disabled={isLoading} // Disable input while loading
           />
         </div>
 
@@ -107,6 +115,7 @@ export default function DoctorAssigningAutomatic() {
                     value={doctor.doctor_name}
                     checked={formData.doctor_names.includes(doctor.doctor_name)}
                     onChange={handleCheckboxChange}
+                    disabled={isLoading} // Disable checkbox while loading
                   />
                   {doctor.doctor_name} ({doctor.specialization})
                 </label>
@@ -117,8 +126,12 @@ export default function DoctorAssigningAutomatic() {
           </div>
         </div>
 
-        <button type="submit" className="doctor-assigning-automatic-submit-btn">
-          Submit
+        <button
+          type="submit"
+          className="doctor-assigning-automatic-submit-btn"
+          disabled={isLoading} // Disable button while loading
+        >
+          {isLoading ? 'Submitting...' : 'Submit'} {/* Show loading text */}
         </button>
       </form>
     </div>

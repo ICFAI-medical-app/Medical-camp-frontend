@@ -9,9 +9,9 @@ function DoctorPrescription() {
   const [prescriptions, setPrescriptions] = useState([
     { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
   ]);
-  // Holds fetched medicine info per row
   const [medicineDetails, setMedicineDetails] = useState([]);
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
@@ -37,6 +37,7 @@ function DoctorPrescription() {
     // Fetch medicine info when ID changes (for both medicine and non-medicine items)
     if (field === 'medicine_id' && value !== '') {
       try {
+        setIsLoading(true); // Set loading to true while fetching medicine details
         const response = await privateAxios.get(`/api/inventory/${value}`);
         const detailsCopy = [...medicineDetails];
         detailsCopy[index] = response.data;
@@ -45,6 +46,8 @@ function DoctorPrescription() {
         const detailsCopy = [...medicineDetails];
         detailsCopy[index] = { error: 'Item not found' };
         setMedicineDetails(detailsCopy);
+      } finally {
+        setIsLoading(false); // Set loading back to false after fetching
       }
     }
   };
@@ -104,6 +107,7 @@ function DoctorPrescription() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading to true when submitting starts
     
     // Format the prescriptions for the backend
     const formattedPrescriptions = prescriptions.map(p => {
@@ -137,7 +141,6 @@ function DoctorPrescription() {
         `/api/patient-history/doctor-prescription`,
         payload
       );
-      // Axios resolves non-2xx as exceptions, so response here indicates success
       if (response.status >= 200 && response.status < 300) {
         setMessage('Prescription submitted successfully!');
         setBookNo('');
@@ -150,6 +153,8 @@ function DoctorPrescription() {
       }
     } catch (error) {
       setMessage('Error: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setIsLoading(false); // Set loading back to false after submission
     }
   };
 
@@ -166,12 +171,12 @@ function DoctorPrescription() {
               onChange={(e) => setBookNo(e.target.value)}
               required
               placeholder="Enter Book No"
+              disabled={isLoading} // Disable input while loading
             />
           </div>
           <h3 className="doctor-prescription-subheading">Medicines</h3>
           {prescriptions.map((prescription, index) => (
             <div key={index} className="doctor-prescription-row">
-              {/* Type Toggle */}
               <div className="prescription-type-toggle">
                 <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`} 
                      onClick={() => handlePrescriptionTypeChange(index, true)}>
@@ -193,6 +198,7 @@ function DoctorPrescription() {
                   }
                   required
                   placeholder="e.g. 101"
+                  disabled={isLoading} // Disable input while loading
                 />
                 {medicineDetails[index] && (
                   <div className="doctor-prescription-medicine-info">
@@ -215,7 +221,6 @@ function DoctorPrescription() {
               </div>
 
               {prescription.isMedicine ? (
-                // Medicine-specific fields
                 <>
                   <div className="doctor-prescription-form-group">
                     <label>Days</label>
@@ -227,6 +232,7 @@ function DoctorPrescription() {
                       }
                       required
                       placeholder="e.g. 3"
+                      disabled={isLoading} // Disable input while loading
                     />
                   </div>
 
@@ -238,6 +244,7 @@ function DoctorPrescription() {
                         onChange={(e) =>
                           handlePrescriptionChange(index, 'morning', e.target.checked)
                         }
+                        disabled={isLoading} // Disable checkbox while loading
                       />
                       Morning
                     </label>
@@ -248,6 +255,7 @@ function DoctorPrescription() {
                         onChange={(e) =>
                           handlePrescriptionChange(index, 'afternoon', e.target.checked)
                         }
+                        disabled={isLoading} // Disable checkbox while loading
                       />
                       Afternoon
                     </label>
@@ -258,6 +266,7 @@ function DoctorPrescription() {
                         onChange={(e) =>
                           handlePrescriptionChange(index, 'night', e.target.checked)
                         }
+                        disabled={isLoading} // Disable checkbox while loading
                       />
                       Night
                     </label>
@@ -268,7 +277,6 @@ function DoctorPrescription() {
                   </div>
                 </>
               ) : (
-                // Non-Medicine quantity field
                 <div className="doctor-prescription-form-group">
                   <label>Quantity</label>
                   <input
@@ -280,6 +288,7 @@ function DoctorPrescription() {
                     required
                     placeholder="Enter quantity"
                     min="1"
+                    disabled={isLoading} // Disable input while loading
                   />
                 </div>
               )}
@@ -288,6 +297,7 @@ function DoctorPrescription() {
                 type="button"
                 className="doctor-prescription-remove-btn"
                 onClick={() => removePrescriptionRow(index)}
+                disabled={isLoading} // Disable button while loading
               >
                 Remove
               </button>
@@ -299,14 +309,19 @@ function DoctorPrescription() {
               type="button"
               className="doctor-prescription-add-btn"
               onClick={addPrescriptionRow}
+              disabled={isLoading} // Disable button while loading
             >
               Add Item
             </button>
           </div>
 
           <div className="doctor-prescription-btn-container">
-            <button type="submit" className="doctor-prescription-submit-btn">
-              Submit Prescription
+            <button 
+              type="submit" 
+              className="doctor-prescription-submit-btn"
+              disabled={isLoading} // Disable button while loading
+            >
+              {isLoading ? 'Submitting...' : 'Submit Prescription'} {/* Show loading text */}
             </button>
           </div>
         </form>

@@ -12,6 +12,7 @@ function MedicinePickup() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [showVerification, setShowVerification] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   const handleFetchPrescription = async () => {
     setError('');
@@ -24,10 +25,8 @@ function MedicinePickup() {
       return;
     }
 
+    setIsLoading(true); // Set loading to true when fetching starts
     try {
-      // const response = await axios.get(
-      //   `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup/${bookNo}`
-      // );
       const response = await privateAxios.get(
         `/api/patient-history/medicine-pickup/${bookNo}`
       );
@@ -49,6 +48,8 @@ function MedicinePickup() {
       setPrescribedMeds(medsWithInput);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch prescription.');
+    } finally {
+      setIsLoading(false); // Set loading back to false after fetching
     }
   };
 
@@ -111,14 +112,8 @@ function MedicinePickup() {
       return;
     }
 
+    setIsLoading(true); // Set loading to true when submitting starts
     try {
-      // const response = await axios.post(
-      //   `${process.env.REACT_APP_BACKEND}/api/patient-history/medicine-pickup`,
-      //   {
-      //     book_no: bookNo,
-      //     medicinesGiven
-      //   }
-      // );
       const response = await privateAxios.post(
         '/api/patient-history/medicine-pickup',
         {
@@ -129,10 +124,11 @@ function MedicinePickup() {
 
       setMessage(response.data.message || 'Medicines given updated successfully!');
       setPrescribedMeds([]);
-      // Set showVerification to true to display the verification component after successful submission
-      setShowVerification(true);
+      setShowVerification(true); // Show verification component after successful submission
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update medicines given.');
+    } finally {
+      setIsLoading(false); // Set loading back to false after submission
     }
   };
 
@@ -149,6 +145,7 @@ function MedicinePickup() {
             onChange={(e) => setBookNo(e.target.value)}
             required
             placeholder="Enter Book No"
+            disabled={isLoading} // Disable input while loading
           />
         </div>
 
@@ -157,20 +154,21 @@ function MedicinePickup() {
             type="button"
             className="medicine-pickup-fetch-btn"
             onClick={handleFetchPrescription}
+            disabled={isLoading} // Disable button while loading
           >
-            Fetch Prescription
+            {isLoading ? 'Fetching...' : 'Fetch Prescription'} {/* Show loading text */}
           </button>
         </div>
         
-        {/* Separate container for verify button to avoid overlap */}
         {bookNo && (
           <div className="medicine-pickup-btn-container">
             <button
               type="button"
               className="medicine-pickup-fetch-btn" 
               onClick={() => setShowVerification(true)}
+              disabled={isLoading} // Disable button while loading
             >
-              Verify Medicines
+              {isLoading ? 'Loading...' : 'Verify Medicines'} {/* Show loading text */}
             </button>
           </div>
         )}
@@ -180,7 +178,6 @@ function MedicinePickup() {
             <h3 className="medicine-pickup-subheading">Prescribed Medicines</h3>
 
             {prescribedMeds.map((med, medIndex) => {
-              // Calculate total quantity given for this medicine
               const totalGiven = med.batches.reduce(
                 (sum, batch) => sum + (parseInt(batch.quantity_taken) || 0), 
                 0
@@ -202,7 +199,6 @@ function MedicinePickup() {
                   </div>
                   
                   <div className="batches-row">
-                    {/* Limit to maximum 3 batches per row */}
                     {med.batches.map((batch, batchIndex) => (
                       <div key={batchIndex} className="batch-card">
                         <p><strong>Name:</strong> {batch.medicine_name}</p>
@@ -218,6 +214,7 @@ function MedicinePickup() {
                             onChange={(e) =>
                               handleQuantityChange(medIndex, batchIndex, e.target.value)
                             }
+                            disabled={isLoading} // Disable input while loading
                           />
                         </label>
                       </div>
@@ -228,8 +225,12 @@ function MedicinePickup() {
             })}
 
             <div className="medicine-pickup-btn-container">
-              <button type="submit" className="medicine-pickup-submit-btn">
-                Confirm Pickup
+              <button 
+                type="submit" 
+                className="medicine-pickup-submit-btn"
+                disabled={isLoading} // Disable button while loading
+              >
+                {isLoading ? 'Submitting...' : 'Confirm Pickup'} {/* Show loading text */}
               </button>
             </div>
           </form>
@@ -258,7 +259,6 @@ function MedicinePickup() {
         </div>
       )}
 
-      {/* Add the verification component */}
       <MedicineVerification 
         bookNo={bookNo}
         showVerification={showVerification}

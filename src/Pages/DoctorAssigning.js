@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import axios from "axios";
 import { privateAxios } from "../api/axios";
 import "../Styles/DoctorAssigning.css";
 
@@ -8,17 +7,20 @@ function DoctorAssigning() {
   const [doctors, setDoctors] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   useEffect(() => {
-    // Fetch the list of doctors from the backend
     const fetchDoctors = async () => {
+      setIsLoading(true); // Set loading to true while fetching doctors
       try {
-        // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/doctor-assign/get_doctors`);
         const response = await privateAxios.get('/api/doctor-assign/get_doctors');
         setDoctors(response.data);
+        setError('');
       } catch (error) {
         console.error('Error fetching doctors:', error);
         setError('Error fetching doctors');
+      } finally {
+        setIsLoading(false); // Set loading back to false after fetching
       }
     };
 
@@ -32,8 +34,8 @@ function DoctorAssigning() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading to true when submitting starts
     try {
-      // const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/doctor-assign`, {
       const response = await privateAxios.post('/api/doctor-assign', {
         book_no: formData.bookNumber,
         doc_name: formData.doc_name,
@@ -46,6 +48,8 @@ function DoctorAssigning() {
       console.error('Error:', error);
       setError(error.response?.data?.message || 'An error occurred');
       setMessage('');
+    } finally {
+      setIsLoading(false); // Set loading back to false after submission
     }
   };
 
@@ -63,12 +67,13 @@ function DoctorAssigning() {
             value={formData.bookNumber}
             onChange={handleChange}
             required
+            disabled={isLoading} // Disable input while loading
           />
         </div>
         <div className="doctor-assigning-form-group">
           <label>Doctor Assigned</label>
           <div className="doctor-assigning-radio-group">
-            {doctors.length > 0 ? (
+          {doctors.length > 0 ? (
               doctors.map((doctor) => (
                 <label key={doctor._id}>
                   <input
@@ -78,6 +83,7 @@ function DoctorAssigning() {
                     checked={formData.doc_name === doctor.doctor_name}
                     onChange={handleChange}
                     required
+                    disabled={isLoading} // Disable input while loading
                   />
                   {doctor.doctor_name} ({doctor.specialization})
                 </label>
@@ -87,7 +93,13 @@ function DoctorAssigning() {
             )}
           </div>
         </div>
-        <button type="submit" className="doctor-assigning-submit-btn">Submit</button>
+        <button
+          type="submit"
+          className="doctor-assigning-submit-btn"
+          disabled={isLoading} // Disable button while loading
+        >
+          {isLoading ? 'Submitting...' : 'Submit'} {/* Show loading text */}
+        </button>
       </form>
     </div>
   );

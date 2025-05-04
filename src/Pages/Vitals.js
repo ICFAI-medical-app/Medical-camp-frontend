@@ -16,10 +16,28 @@ function Vitals() {
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [bpError, setBpError] = useState(''); // Add state for BP validation error
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'bp') {
+      if (value) {
+        const parts = value.split('/');
+        if (
+          parts.length !== 2 || // Ensure there are exactly two parts
+          isNaN(Number(parts[0])) || // Ensure the first part is a number
+          isNaN(Number(parts[1])) // Ensure the second part is a number
+        ) {
+          setBpError('BP must be in the format systolic/diastolic (e.g., 120/80)');
+        } else {
+          setBpError(''); // Clear BP error if valid
+        }
+      } else {
+        setBpError(''); // Clear BP error if the field is empty
+      }
+    }
     setFormData({ ...formData, [name]: value });
   };
 
@@ -27,6 +45,7 @@ function Vitals() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Set loading to true when form submission starts
     try {
       // const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/vitals`, {
       const response = await privateAxios.post('/api/vitals', {
@@ -53,6 +72,8 @@ function Vitals() {
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred');
       setMessage('');
+    } finally {
+      setIsLoading(false); // Set loading back to false after submission
     }
   };
 
@@ -90,7 +111,13 @@ function Vitals() {
           <label>Last Meal and Time</label>
           <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} />
         </div>
-        <button type="submit" className="vitals-submit-btn">Submit</button>
+        <button 
+          type="submit" 
+          className="vitals-submit-btn" 
+          disabled={isLoading} // Disable button when loading
+        >
+          {isLoading ? 'Submitting...' : 'Submit'} {/* Show loading text */}
+        </button>      
       </form>
     </div>
   );
