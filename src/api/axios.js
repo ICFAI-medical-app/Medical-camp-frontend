@@ -1,6 +1,6 @@
 import axios from 'axios' ;
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
+const BACKEND_URL = 'http://backend:5002';
 
 const publicAxios = axios.create({
     baseURL: BACKEND_URL,
