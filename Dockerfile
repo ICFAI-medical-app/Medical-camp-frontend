@@ -4,6 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+# Set build-time environment variable from Docker Compose
+ARG REACT_APP_BACKEND
+ENV REACT_APP_BACKEND=$REACT_APP_BACKEND
 RUN npm run build
 
 FROM nginx:alpine
