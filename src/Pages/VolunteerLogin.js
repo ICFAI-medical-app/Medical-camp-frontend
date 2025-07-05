@@ -11,7 +11,7 @@ const VolunteerLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    //   const BACKEND_URL = 'https://yw8wo8go8ow4g8c0c48g084w.apps.swecha.org';
+    //   const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
 
     useEffect(() => {
         // Check for auth token and user type when component mounts
