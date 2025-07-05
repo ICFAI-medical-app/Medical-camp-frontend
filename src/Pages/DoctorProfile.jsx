@@ -23,7 +23,7 @@ const DoctorProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
+  const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
 
   useEffect(() => {
     fetchDoctorData();

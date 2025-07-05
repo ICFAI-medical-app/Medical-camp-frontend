@@ -11,7 +11,7 @@ const VolunteerLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    //   const BACKEND_URL = process.env.REACT_APP_BACKEND || 'http://localhost:5002';
+    //   const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
 
     useEffect(() => {
         // Check for auth token and user type when component mounts
