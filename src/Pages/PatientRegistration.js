@@ -207,11 +207,13 @@ function PatientRegistration() {
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
       setError('');
-      if (response.data.redirect) {
-        setTimeout(() => {
-          window.location.reload(); // Reload the page to reset the form
-        }, 2000); // Wait 2 seconds to display the success message
-      }
+      // if (response.data.redirect) {
+      //   // setTimeout(() => {
+      //   //   window.location.reload(); // Reload the page to reset the form
+      //   // }, 2000); // Wait 2 seconds to display the success message
+        
+      //   // navigate('/');
+      // }
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred while saving patient data.');
       setMessage('');
