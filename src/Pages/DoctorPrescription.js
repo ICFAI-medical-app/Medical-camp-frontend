@@ -12,6 +12,7 @@ function DoctorPrescription() {
   const [medicineDetails, setMedicineDetails] = useState([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [medicine_id, setMedicineId] = useState('');
 
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
@@ -190,16 +191,25 @@ function DoctorPrescription() {
 
               <div className="doctor-prescription-form-group">
                 <label>Medicine ID</label>
+            <div style={{display: 'flex'}}>
                 <input
-                  type="number"
-                  value={prescription.medicine_id}
-                  onChange={(e) =>
-                    handlePrescriptionChange(index, 'medicine_id', e.target.value)
-                  }
+                  type="text"
+                  value={medicine_id}
                   required
                   placeholder="e.g. 101"
                   disabled={isLoading} // Disable input while loading
+            onChange={(e)=> setMedicineId(e.target.value)}
                 />
+            <button
+            onClick={(e) =>{
+              e.preventDefault();
+                    handlePrescriptionChange(index, 'medicine_id', medicine_id)
+                  }
+            }
+
+            >fetch</button>
+            </div>
+
                 {medicineDetails[index] && (
                   <div className="doctor-prescription-medicine-info">
                     {medicineDetails[index].error ? (
