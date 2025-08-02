@@ -34,6 +34,12 @@
   transition: transform 0.3s ease,
 }
 
+.in-progress>.dashboard-card:hover {
+  background: url('../../public/Under-Construction.png') no-repeat center;
+  background-size: cover;
+  color: transparent;
+}
+
 .dashboard-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
