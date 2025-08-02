@@ -25,7 +25,7 @@ import VolunteerLogin from './Pages/VolunteerLogin'; // Import the new component
 import Footer from './Components/Footer';
 import DoctorProfile from './Pages/DoctorProfile';
 import ProtectedRoute from './Pages/ProtectedRoute';
-import AdminAnalytics from './Pages/AdminAnalytics';  
+import AdminAnalytics from './Pages/AdminAnalytics';
 import './App.css';
 import AddVolunteer from './Pages/AddVolunteer';
 import ViewVolunteers from './Pages/ViewVolunteers';
@@ -41,6 +41,7 @@ function App() {
         <div className="main-content">
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/volunteer-signup" element={<AddVolunteer fromLogin={true} />} />
             <Route path="/dashboard" element={<ProtectedRoute requiredType="volunteer"><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard-admin" element={<ProtectedRoute requiredType="admin"><DashboardAdmin /></ProtectedRoute>} />
             <Route path="/admin-login" element={<AdminLogin />} />
@@ -52,15 +53,15 @@ function App() {
             <Route path="/view-queue" element={<ProtectedRoute requiredType="volunteer"><ViewQueue /></ProtectedRoute>} />
             <Route path="/doctor-prescription" element={<ProtectedRoute requiredType="volunteer"><DoctorPrescription /></ProtectedRoute>} />
             <Route path="/medicine-pickup" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
-            <Route path="/log" element= {
+            <Route path="/log" element={
               <ProtectedRoute requiredType="admin">
                 <Log />
               </ProtectedRoute>
             } />
             {/* <Route path="/medicine-verification" element={<MedicineVerification />} /> */}
             <Route path="/add-volunteer" element={<ProtectedRoute requiredType="admin"><AddVolunteer /></ProtectedRoute>} />
-            <Route path="/add-doctor" element={<ProtectedRoute requiredType="admin"><AddDoctor/></ProtectedRoute>} />
-            <Route path="/doctor-availability" element={<ProtectedRoute requiredType="admin"><DoctorAvailability/></ProtectedRoute>} />
+            <Route path="/add-doctor" element={<ProtectedRoute requiredType="admin"><AddDoctor /></ProtectedRoute>} />
+            <Route path="/doctor-availability" element={<ProtectedRoute requiredType="admin"><DoctorAvailability /></ProtectedRoute>} />
             <Route path="/view-patients" element={<ProtectedRoute requiredType="admin"><ViewPatients /></ProtectedRoute>} />
             <Route path="/get-medicines" element={<ProtectedRoute requiredType="admin"><ViewMedicines /></ProtectedRoute>} />
             <Route path="/update-medicine-stock" element={<ProtectedRoute requiredType="admin"><UpdateMedicineStock /></ProtectedRoute>} />

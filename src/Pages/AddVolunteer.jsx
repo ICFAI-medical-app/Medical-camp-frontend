@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/AddVolunteer.css';
 
-const AddVolunteer = () => {
+const AddVolunteer = ({ fromLogin = false }) => {
     const [formData, setFormData] = useState({
         user_name: '',
         user_phone_no: '',
@@ -20,19 +20,20 @@ const AddVolunteer = () => {
         user_age: '',
         user_password: ''
     });
-
+    const [showOtpField, setShowOtpField] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [otp, setOtp] = useState('');
+    const [user_id, setUserId] = useState('-1');
     const navigate = useNavigate();
 
     const validateField = (name, value) => {
-        let errorMessage = '';
-        
+        let errorMessage = ''
         if (!value.trim()) {
             return 'This field is required';
         }
-        
+
         switch (name) {
             case 'user_email':
                 if (!/\S+@\S+\.\S+/.test(value)) {
@@ -58,14 +59,14 @@ const AddVolunteer = () => {
             default:
                 break;
         }
-        
+
         return errorMessage;
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        
+
         // Clear field error when user starts typing
         setFieldErrors({ ...fieldErrors, [name]: '' });
     };
@@ -73,7 +74,7 @@ const AddVolunteer = () => {
     const validateForm = () => {
         const newErrors = {};
         let isValid = true;
-        
+
         // Validate each field
         Object.keys(formData).forEach(key => {
             const error = validateField(key, formData[key]);
@@ -82,50 +83,85 @@ const AddVolunteer = () => {
                 isValid = false;
             }
         });
-        
+
         setFieldErrors(newErrors);
         return isValid;
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
+        if (showOtpField) {
+            setIsLoading(true);
+            setError('');
+            setMessage('');
+            await handleOtpVerification(formData.user_phone_no, otp);
+            return;
+        }
+
         // Validate form before submission
         if (!validateForm()) {
             setError('Please correct the errors before submitting');
             return;
         }
-        
+
         setIsLoading(true);
         setError('');
         setMessage('');
 
         try {
             const response = await privateAxios.post(
-                '/api/admin/add_volunteer',
+                '/api/admin/add_volunteer?verifyOtp=' + fromLogin,
                 formData
             );
 
-            setMessage('Volunteer added successfully!');
-            setFormData({
-                user_name: '',
-                user_phone_no: '',
-                user_email: '',
-                user_age: '',
-                user_password: ''
-            });
-
-            setTimeout(() => {
-                navigate('/get-volunteers');
-            }, 2000);
+            if (fromLogin) {
+                setUserId(response.data.volunteer.user_id)
+                setMessage('OTP sent to your phone!');
+                setShowOtpField(true);
+            }
+            else {
+                setMessage('Volunteer created successfully')
+                setFormData({
+                    user_name: '',
+                    user_phone_no: '',
+                    user_email: '',
+                    user_age: '',
+                    user_password: ''
+                });
+                setTimeout(() => {
+                    navigate('/get-volunteers');
+                }, 2000);
+            }
 
         } catch (error) {
             if (error.response && error.response.data) {
-                setError(error.response.data.message || 'Failed to add volunteer');
+                setError(error.response.data.message || 'Failed to verify OTP');
             } else {
                 setError('Server error. Please try again later.');
             }
-            console.error('Error adding volunteer:', error);
+            console.error('Error verifying OTP:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleOtpVerification = async (phone_no, otp) => {
+        console.log('user_id ' + user_id)
+        try {
+            const response = await privateAxios.post('/api/admin/verify-otp', {
+                phone_no: phone_no,
+                otp: otp,
+                user_id: user_id
+            });
+            setMessage('Account created successfully')
+            navigate('/')
+        } catch (error) {
+            if (error.response && error.response.data) {
+                setError(error.response.data.message || 'Failed to verify OTP');
+            } else {
+                setError('Server error. Please try again later.');
+            }
+            console.error('Error verifying OTP:', error);
         } finally {
             setIsLoading(false);
         }
@@ -222,13 +258,34 @@ const AddVolunteer = () => {
                     {fieldErrors.user_password && <div className="field-error">{fieldErrors.user_password}</div>}
                 </div>
 
+                {showOtpField && (
+                    <div className="add-volunteer-group">
+                        <label htmlFor="otp">
+                            OTP <span className="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="otp"
+                            name="otp"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            placeholder="Enter OTP"
+                            className={fieldErrors.otp ? "error-input" : ""}
+                        />
+                        {fieldErrors.otp && <div className="field-error">{fieldErrors.otp}</div>}
+                    </div>
+                )}
+
                 <div className="add-volunteer-actions">
                     <button
                         type="submit"
                         className="add-volunteer-submit"
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Adding...' : 'Add Volunteer'}
+                        {isLoading
+                            ? (showOtpField ? 'Verifying...' : 'Adding...')
+                            : (showOtpField ? 'Verify OTP' : 'Add Volunteer')
+                        }
                     </button>
                 </div>
             </form>
