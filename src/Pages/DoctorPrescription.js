@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorPrescription.css';
 import { privateAxios } from '../api/axios';
@@ -7,61 +7,104 @@ function DoctorPrescription() {
   const navigate = useNavigate();
   const [bookNo, setBookNo] = useState('');
   const [prescriptions, setPrescriptions] = useState([
-    { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
+    { medicine_id: '', medicine_formulation: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
   ]);
   const [medicineDetails, setMedicineDetails] = useState([]);
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [medicine_id, setMedicineId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handlePrescriptionChange = async (index, field, value) => {
-    const updatedPrescriptions = prescriptions.map((prescription, i) => {
-      if (i === index) {
-        const updated = { ...prescription, [field]: value };
-        
-        // Only calculate quantity for medicine items (not non-medicine items)
-        if (updated.isMedicine && field !== 'quantity') {
-          const trueCount =
-            (updated.morning ? 1 : 0) +
-            (updated.afternoon ? 1 : 0) +
-            (updated.night ? 1 : 0);
-          updated.quantity = updated.days * trueCount;
+  const searchTime = useRef([])
+   const handlePrescriptionChange = async (index, field, value) => {
+    let updatedPrescriptions;
+    if (field === 'medicine_id_formulation') {
+      updatedPrescriptions = prescriptions.map((prescription, i) => {
+        if (i === index) {
+          return {
+            ...prescription,
+            medicine_id: /^\d+$/.test(value) ? value : '',
+            medicine_formulation: /^\d+$/.test(value) ? '' : value,
+          };
         }
-        
-        return updated;
+        return prescription;
+      });
+      setPrescriptions(updatedPrescriptions);
+  
+      let detailsCopy = [...medicineDetails];
+  
+      // Clear previous search timer for this index
+      if (searchTime.current[index]) {
+        clearTimeout(searchTime.current[index]);
       }
-      return prescription;
-    });
-
-    setPrescriptions(updatedPrescriptions);
-
-    // Fetch medicine info when ID changes (for both medicine and non-medicine items)
-    if (field === 'medicine_id' && value !== '') {
-      try {
-        setIsLoading(true); // Set loading to true while fetching medicine details
-        const response = await privateAxios.get(`/api/inventory/${value}`);
-        const detailsCopy = [...medicineDetails];
-        detailsCopy[index] = response.data;
+  
+      // Clear result if field is empty
+      if (value.trim() === '') {
+        detailsCopy[index] = null;
         setMedicineDetails(detailsCopy);
-      } catch (err) {
-        const detailsCopy = [...medicineDetails];
-        detailsCopy[index] = { error: 'Item not found' };
-        setMedicineDetails(detailsCopy);
-      } finally {
-        setIsLoading(false); // Set loading back to false after fetching
+        return;
       }
+
+      // Check for minimum length to prevent searching on every keystroke
+      // if (!/^\d+$/.test(value) && value.trim().length < 3) {
+      //   detailsCopy[index] = { error: 'Please enter at least 3 letters to search by formulation.' };
+      //   setMedicineDetails(detailsCopy);
+      //   return;
+      // }
+  
+      // Set a new timer
+      searchTime.current[index] = setTimeout(async () => {
+        setIsLoading(true);
+        let response = null;
+        try {
+          if (/^\d+$/.test(value)) {
+            response = await privateAxios.get(`/api/inventory/${value}`);
+            if (!response.data || Object.keys(response.data).length === 0) {
+              response = await privateAxios.get(`/api/inventory/formulation/${(value)}`);
+            }
+          } else {
+            response = await privateAxios.get(`/api/inventory/formulation/${(value)}`);
+          }
+          detailsCopy[index] = response.data
+        } catch (err) {
+          detailsCopy[index] = { error: 'Item not found' };
+        } finally {
+          setMedicineDetails(detailsCopy);
+          setIsLoading(false);
+        }
+      }, 500); // 500ms delay
+    } else {
+      updatedPrescriptions = prescriptions.map((prescription, i) => {
+        if (i === index) {
+          const updated = { ...prescription, [field]: value };
+          if (updated.isMedicine && field !== 'quantity') {
+            const trueCount =
+              (updated.morning ? 1 : 0) +
+              (updated.afternoon ? 1 : 0) +
+              (updated.night ? 1 : 0);
+            updated.quantity = updated.days * trueCount;
+          }
+          return updated;
+        }
+        return prescription;
+      });
+      setPrescriptions(updatedPrescriptions);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      searchTime.current.forEach(timerId => clearTimeout(timerId));
+    };
+  }, []);
 
   const handlePrescriptionTypeChange = (index, isMedicine) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
       if (i === index) {
-        // Reset fields based on type
         if (isMedicine) {
           return {
             ...prescription,
             isMedicine: true,
             medicine_id: '',
+            medicine_formulation: '',
             days: 0,
             morning: false,
             afternoon: false,
@@ -73,8 +116,8 @@ function DoctorPrescription() {
             ...prescription,
             isMedicine: false,
             medicine_id: '',
+            medicine_formulation: '',
             quantity: 0,
-            // Don't need these for non-medicine items
             days: 0,
             morning: false,
             afternoon: false,
@@ -84,37 +127,36 @@ function DoctorPrescription() {
       }
       return prescription;
     });
-
-    // Clear medicine details for this row
+  
     const updatedMedicineDetails = [...medicineDetails];
     updatedMedicineDetails[index] = null;
-    
+  
     setPrescriptions(updatedPrescriptions);
     setMedicineDetails(updatedMedicineDetails);
   };
-
+  
   const addPrescriptionRow = () => {
     setPrescriptions([
       ...prescriptions,
-      { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
+      { medicine_id: '', medicine_formulation: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
     ]);
     setMedicineDetails([...medicineDetails, null]);
   };
-
+  
   const removePrescriptionRow = (index) => {
     setPrescriptions(prescriptions.filter((_, i) => i !== index));
     setMedicineDetails(medicineDetails.filter((_, i) => i !== index));
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading to true when submitting starts
-    
-    // Format the prescriptions for the backend
+    setIsLoading(true);
+  
     const formattedPrescriptions = prescriptions.map(p => {
       if (p.isMedicine) {
         return {
           medicine_id: p.medicine_id.toString(),
+          medicine_formulation: p.medicine_formulation,
           dosage_schedule: {
             days: Number(p.days),
             morning: p.morning,
@@ -125,18 +167,19 @@ function DoctorPrescription() {
         };
       } else {
         return {
-          medicine_id: p.medicine_id || "NON-MED", // Special identifier for non-medicines
+          medicine_id: p.medicine_id || "NON-MED",
+          medicine_formulation: p.medicine_formulation,
           quantity: Number(p.quantity),
           is_medicine: false
         };
       }
     });
-
+  
     const payload = {
       book_no: bookNo,
       prescriptions: formattedPrescriptions
     };
-
+  
     try {
       const response = await privateAxios.post(
         `/api/patient-history/doctor-prescription`,
@@ -146,7 +189,7 @@ function DoctorPrescription() {
         setMessage('Prescription submitted successfully!');
         setBookNo('');
         setPrescriptions([
-          { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
+          { medicine_id: '', medicine_formulation: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
         ]);
         setMedicineDetails([]);
       } else {
@@ -155,10 +198,10 @@ function DoctorPrescription() {
     } catch (error) {
       setMessage('Error: ' + (error.response?.data?.message || error.message));
     } finally {
-      setIsLoading(false); // Set loading back to false after submission
+      setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="doctor-prescription-container">
       <div className="doctor-prescription-card">
@@ -172,64 +215,75 @@ function DoctorPrescription() {
               onChange={(e) => setBookNo(e.target.value)}
               required
               placeholder="Enter Book No"
-              disabled={isLoading} // Disable input while loading
+              disabled={isLoading}
             />
           </div>
           <h3 className="doctor-prescription-subheading">Medicines</h3>
           {prescriptions.map((prescription, index) => (
             <div key={index} className="doctor-prescription-row">
               <div className="prescription-type-toggle">
-                <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`} 
-                     onClick={() => handlePrescriptionTypeChange(index, true)}>
+                <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`}
+                  onClick={() => handlePrescriptionTypeChange(index, true)}>
                   By Dosing Schedule
                 </div>
-                <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`} 
-                     onClick={() => handlePrescriptionTypeChange(index, false)}>
+                <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`}
+                  onClick={() => handlePrescriptionTypeChange(index, false)}>
                   By Quantity
                 </div>
               </div>
 
               <div className="doctor-prescription-form-group">
-                <label>Medicine ID</label>
-            <div style={{display: 'flex'}}>
+                <label>Medicine ID / Medicine Formulation </label>
                 <input
                   type="text"
-                  value={medicine_id}
+                  value={prescription.medicine_id || prescription.medicine_formulation}
+                  onChange={(e) =>
+                    handlePrescriptionChange(index, 'medicine_id_formulation', e.target.value)
+                  }
                   required
                   placeholder="e.g. 101"
-                  disabled={isLoading} // Disable input while loading
-            onChange={(e)=> setMedicineId(e.target.value)}
                 />
-            <button
-            onClick={(e) =>{
-              e.preventDefault();
-                    handlePrescriptionChange(index, 'medicine_id', medicine_id)
-                  }
-            }
-
-            >fetch</button>
-            </div>
-
-                {medicineDetails[index] && (
-                  <div className="doctor-prescription-medicine-info">
-                    {medicineDetails[index].error ? (
-                      <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
-                    ) : (
-                      <>
-                        <p><strong>{prescription.isMedicine ? "Formulation" : "Item"}:</strong> {medicineDetails[index].medicine_formulation}</p>
+              </div>
+             {medicineDetails[index] && (
+              <div className="doctor-prescription-medicine-info">
+                {medicineDetails[index].error ? (
+                  <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
+                ) : Array.isArray(medicineDetails[index]) ? (
+                  <ul>
+                    {medicineDetails[index].map((item, i) => (
+                      <li key={i}>
+                        <strong>{item.medicine_formulation}</strong>
                         <ul>
-                          {medicineDetails[index].details && medicineDetails[index].details.map((med, i) => (
-                            <li key={i}>
+                          {item.details.map((med, j) => (
+                            <li key={j}>
                               {med.medicine_name} — Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
                             </li>
                           ))}
                         </ul>
-                      </>
-                    )}
-                  </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <>
+                    <p>
+                      <strong>
+                        {prescription.isMedicine ? "Formulation" : "Item"}:
+                      </strong>{" "}
+                      {medicineDetails[index].medicine_formulation}
+                    </p>
+                    <ul>
+                      {medicineDetails[index].details &&
+                        medicineDetails[index].details.map((med, i) => (
+                          <li key={i}>
+                            {med.medicine_name} — Qty: {med.quantity} — Exp:{" "}
+                            {new Date(med.expiry_date).toLocaleDateString()}
+                          </li>
+                        ))}
+                    </ul>
+                  </>
                 )}
               </div>
-
+            )}
               {prescription.isMedicine ? (
                 <>
                   <div className="doctor-prescription-form-group">
@@ -238,11 +292,11 @@ function DoctorPrescription() {
                       type="number"
                       value={prescription.days === 0 ? '' : prescription.days}
                       onChange={(e) =>
-                        handlePrescriptionChange(index, 'days', Number(e.target.value))
+                        handlePrescriptionChange(index, 'days', (e.target.value))
                       }
                       required
                       placeholder="e.g. 3"
-                      disabled={isLoading} // Disable input while loading
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -254,7 +308,7 @@ function DoctorPrescription() {
                         onChange={(e) =>
                           handlePrescriptionChange(index, 'morning', e.target.checked)
                         }
-                        disabled={isLoading} // Disable checkbox while loading
+                        disabled={isLoading}
                       />
                       Morning
                     </label>
@@ -265,7 +319,7 @@ function DoctorPrescription() {
                         onChange={(e) =>
                           handlePrescriptionChange(index, 'afternoon', e.target.checked)
                         }
-                        disabled={isLoading} // Disable checkbox while loading
+                        disabled={isLoading}
                       />
                       Afternoon
                     </label>
@@ -276,7 +330,7 @@ function DoctorPrescription() {
                         onChange={(e) =>
                           handlePrescriptionChange(index, 'night', e.target.checked)
                         }
-                        disabled={isLoading} // Disable checkbox while loading
+                        disabled={isLoading}
                       />
                       Night
                     </label>
@@ -293,12 +347,12 @@ function DoctorPrescription() {
                     type="number"
                     value={prescription.quantity === 0 ? '' : prescription.quantity}
                     onChange={(e) =>
-                      handlePrescriptionChange(index, 'quantity', Number(e.target.value))
+                      handlePrescriptionChange(index, 'quantity', (e.target.value))
                     }
                     required
                     placeholder="Enter quantity"
                     min="1"
-                    disabled={isLoading} // Disable input while loading
+                    disabled={isLoading}
                   />
                 </div>
               )}
@@ -307,7 +361,7 @@ function DoctorPrescription() {
                 type="button"
                 className="doctor-prescription-remove-btn"
                 onClick={() => removePrescriptionRow(index)}
-                disabled={isLoading} // Disable button while loading
+                disabled={isLoading}
               >
                 Remove
               </button>
@@ -319,19 +373,19 @@ function DoctorPrescription() {
               type="button"
               className="doctor-prescription-add-btn"
               onClick={addPrescriptionRow}
-              disabled={isLoading} // Disable button while loading
+              disabled={isLoading}
             >
               Add Item
             </button>
           </div>
 
           <div className="doctor-prescription-btn-container">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="doctor-prescription-submit-btn"
-              disabled={isLoading} // Disable button while loading
+              disabled={isLoading}
             >
-              {isLoading ? 'Submitting...' : 'Submit Prescription'} {/* Show loading text */}
+              {isLoading ? 'Submitting...' : 'Submit Prescription'}
             </button>
           </div>
         </form>
