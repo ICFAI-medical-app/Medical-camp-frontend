@@ -14,21 +14,31 @@ function Dashboard() {
   );
 
   const cardData = [
-    { title: "Patient registration", icon: "👤", path: "/patient-registration" },
-    { title: "Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
-    { title: "Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
-    { title: "View Queues", icon: "📋", path: "/view-queue" },
-    { title: "Vitals", icon: "💓", path: "/vitals" },
-    { title: "Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
-    { title: "Medicine pickup", icon: "💊", path: "/medicine-pickup" },
+    { title: "1. Token Generation", icon: "🎟️", class:"in-progress" },
+    { title: "2. Patient registration", icon: "👤", path: "/patient-registration" },
+    { title: "3. Vitals", icon: "💓", path: "/vitals" },
+    { title: "4. Patients Waiting", icon: "⏳", class:"in-progress" },
+    { title: "5. Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
+    // { title: "5.2 Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
+    { title: "6. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
+    { title: "7. View Queues", icon: "📋", path: "/view-queue" },
+    { title: "8. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
+    { title: "9. Medicine pickup", icon: "💊", path: "/medicine-pickup" },
+    { title: "10. Medicine Verification", icon: "🔍", class:"in-progress" },
+    { title: "11. Medicine Delivery", icon: "🚚", class:"in-progress" },
+    { title: "12. Counselling", icon: "🗣️", class:"in-progress" },
+    { title: "13. Lab", icon: "🔬", class:"in-progress" },
+    { title: "14. Patient Support", icon: "🤝", class:"in-progress" },
+    { title: "15. Food", icon: "🍽️", class:"in-progress" },
   ];
+
 
   return (
     <div className="dashboard-container">
       <h1 className="dashboard-title">Dashboard</h1>
       <div className="dashboard-card-container">
         {cardData.map((card, index) => (
-          <Link to={card.path} key={index} className="dashboard-card-link">
+          <Link to={card.path} key={index} className={`dashboard-card-link ${card.class}`}>
             <Card title={card.title} icon={card.icon} />
           </Link>
         ))}
