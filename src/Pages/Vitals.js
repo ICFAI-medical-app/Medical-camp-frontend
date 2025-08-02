@@ -5,7 +5,7 @@ import { privateAxios } from '../api/axios';
 import '../Styles/Vitals.css';
 
 function Vitals() {
-  const [formData, setFormData] = useState({
+  const VitalEmptyData = {
     bookNumber: '',
     bp: '',
     pulse: '',
@@ -13,6 +13,9 @@ function Vitals() {
     weight: '',
     height: '',
     extra_note: ''
+  }
+  const [formData, setFormData] = useState({
+    ...VitalEmptyData
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -43,6 +46,27 @@ function Vitals() {
 
   const PORT = process.env.PORT || 5002;
 
+  const fetchVitals = async (e) =>{
+    console.log(e.target.value);
+    setIsLoading(true); // Set loading to true when fetching starts
+    try {
+      // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/vitals`);
+      const response = await privateAxios.get(`/api/vitals/${e.target.value}`);
+      setFormData({
+        ...response.data,
+      bookNumber:e.target.value}); // Set book number in form data
+
+      setMessage('Vitals fetched successfully!');
+      setError('');
+    } catch (error) {
+      VitalEmptyData.bookNumber = e.target.value; // Set book number in case of error
+      setFormData(VitalEmptyData);
+      setError(error.response?.data?.message || 'An error occurred while fetching vitals');
+      setMessage('');
+    } finally {
+      setIsLoading(false); // Set loading back to false after fetching
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when form submission starts
@@ -85,31 +109,35 @@ function Vitals() {
       <form onSubmit={handleSubmit} className="vitals-form">
         <div className="vitals-form-group">
           <label>Book Number</label>
-          <input type="number" name="bookNumber" value={formData.bookNumber} onChange={handleChange} required />
+          <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) =>{
+            handleChange(e);
+            fetchVitals(e);
+            
+          }} required />
         </div>
         <div className="vitals-form-group">
           <label>BP (systolic/diastolic)</label>
-          <input type="text" name="bp" value={formData.bp} onChange={handleChange} />
+          <input type="text" name="bp" value={formData.bp} onChange={handleChange} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Pulse</label>
-          <input type="number" name="pulse" value={formData.pulse} onChange={handleChange} />
+          <input type="text" name="pulse" value={formData.pulse} onChange={handleChange} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>RBS</label>
-          <input type="number" name="rbs" value={formData.rbs} onChange={handleChange} />
+          <input type="text" name="rbs" value={formData.rbs} onChange={handleChange} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Weight (kg)</label>
-          <input type="number" name="weight" value={formData.weight} onChange={handleChange} />
+          <input type="text" name="weight" value={formData.weight} onChange={handleChange} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Height (cm)</label>
-          <input type="number" name="height" value={formData.height} onChange={handleChange} />
+          <input type="text" name="height" value={formData.height} onChange={handleChange} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Last Meal and Time</label>
-          <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} />
+          <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} autoComplete='off' />
         </div>
         <button 
           type="submit" 
