@@ -1,6 +1,6 @@
 import axios from 'axios' ;
-
-const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
+// const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
+const BACKEND_URL = process.env.REACT_APP_BACKEND;
 
 const publicAxios = axios.create({
     baseURL: BACKEND_URL,
