@@ -35,10 +35,10 @@ function Vitals() {
         ) {
           setBpError('BP must be in the format systolic/diastolic (e.g., 120/80)');
         } else {
-          setBpError(''); // Clear BP error if valid
+          setBpError(''); 
         }
       } else {
-        setBpError(''); // Clear BP error if the field is empty
+        setBpError(''); 
       }
     }
     setFormData({ ...formData, [name]: value });
@@ -48,8 +48,9 @@ function Vitals() {
 
   const fetchVitals = async (e) =>{
     console.log(e.target.value);
-    setIsLoading(true); // Set loading to true when fetching starts
-    try {
+    setIsLoading(true); 
+    if(e.target.value !== ''){
+      try {
       // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/vitals`);
       const response = await privateAxios.get(`/api/vitals/${e.target.value}`);
       setFormData({
@@ -64,14 +65,19 @@ function Vitals() {
       setError(error.response?.data?.message || 'An error occurred while fetching vitals');
       setMessage('');
     } finally {
-      setIsLoading(false); // Set loading back to false after fetching
+      setIsLoading(false); 
     }
+    }else{
+      setFormData(VitalEmptyData);
+      setMessage('');
+      setError('');
+    }
+    
   }
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading to true when form submission starts
+    setIsLoading(true); 
     try {
-      // const response = await axios.post(`${process.env.REACT_APP_BACKEND}/api/vitals`, {
       const response = await privateAxios.post('/api/vitals', {
         book_no: formData.bookNumber,
         rbs: formData.rbs || null,
@@ -110,30 +116,59 @@ function Vitals() {
         <div className="vitals-form-group">
           <label>Book Number</label>
           <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) =>{
-            handleChange(e);
-            fetchVitals(e);
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {
+                 handleChange(e);
+              fetchVitals(e);
+            } else {
+              
+              setError('enter valid book number'); // Show error for invalid input
+            }
+           
             
           }} required />
         </div>
         <div className="vitals-form-group">
           <label>BP (systolic/diastolic)</label>
-          <input type="text" name="bp" value={formData.bp} onChange={handleChange} autoComplete='off' />
+          <input type="text" name="bp" value={formData.bp} onChange={(e) =>{
+            handleChange(e);
+          }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Pulse</label>
-          <input type="text" name="pulse" value={formData.pulse} onChange={handleChange} autoComplete='off'/>
+          <input type="text" name="pulse" value={formData.pulse} onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>RBS</label>
-          <input type="text" name="rbs" value={formData.rbs} onChange={handleChange} autoComplete='off'/>
+          <input type="text" name="rbs" value={formData.rbs} onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Weight (kg)</label>
-          <input type="text" name="weight" value={formData.weight} onChange={handleChange} autoComplete='off'/>
+          <input type="text" name="weight" value={formData.weight}  onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Height (cm)</label>
-          <input type="text" name="height" value={formData.height} onChange={handleChange} autoComplete='off'/>
+          <input type="text" name="height" value={formData.height}  onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Last Meal and Time</label>
