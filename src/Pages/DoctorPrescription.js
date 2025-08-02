@@ -17,7 +17,7 @@ function DoctorPrescription() {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
       if (i === index) {
         const updated = { ...prescription, [field]: value };
-        
+
         // Only calculate quantity for medicine items (not non-medicine items)
         if (updated.isMedicine && field !== 'quantity') {
           const trueCount =
@@ -26,7 +26,7 @@ function DoctorPrescription() {
             (updated.night ? 1 : 0);
           updated.quantity = updated.days * trueCount;
         }
-        
+
         return updated;
       }
       return prescription;
@@ -87,7 +87,7 @@ function DoctorPrescription() {
     // Clear medicine details for this row
     const updatedMedicineDetails = [...medicineDetails];
     updatedMedicineDetails[index] = null;
-    
+
     setPrescriptions(updatedPrescriptions);
     setMedicineDetails(updatedMedicineDetails);
   };
@@ -108,7 +108,7 @@ function DoctorPrescription() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading to true when submitting starts
-    
+
     // Format the prescriptions for the backend
     const formattedPrescriptions = prescriptions.map(p => {
       if (p.isMedicine) {
@@ -178,12 +178,12 @@ function DoctorPrescription() {
           {prescriptions.map((prescription, index) => (
             <div key={index} className="doctor-prescription-row">
               <div className="prescription-type-toggle">
-                <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`} 
-                     onClick={() => handlePrescriptionTypeChange(index, true)}>
+                <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`}
+                  onClick={() => handlePrescriptionTypeChange(index, true)}>
                   By Dosing Schedule
                 </div>
-                <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`} 
-                     onClick={() => handlePrescriptionTypeChange(index, false)}>
+                <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`}
+                  onClick={() => handlePrescriptionTypeChange(index, false)}>
                   By Quantity
                 </div>
               </div>
@@ -191,7 +191,7 @@ function DoctorPrescription() {
               <div className="doctor-prescription-form-group">
                 <label>Medicine ID</label>
                 <input
-                  type="number"
+                  type="text"
                   value={prescription.medicine_id}
                   onChange={(e) =>
                     handlePrescriptionChange(index, 'medicine_id', e.target.value)
@@ -316,8 +316,8 @@ function DoctorPrescription() {
           </div>
 
           <div className="doctor-prescription-btn-container">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="doctor-prescription-submit-btn"
               disabled={isLoading} // Disable button while loading
             >
