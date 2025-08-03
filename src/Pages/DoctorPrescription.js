@@ -14,28 +14,28 @@ function DoctorPrescription() {
   const [isLoading, setIsLoading] = useState(false);
 
   const searchTime = useRef([])
-   const handlePrescriptionChange = async (index, field, value) => {
+  const handlePrescriptionChange = async (index, field, value) => {
     let updatedPrescriptions;
     if (field === 'medicine_id_formulation') {
       updatedPrescriptions = prescriptions.map((prescription, i) => {
         if (i === index) {
           return {
             ...prescription,
-            medicine_id: /^\d+$/.test(value) ? value : '',
-            medicine_formulation: /^\d+$/.test(value) ? '' : value,
+            medicine_id: /^[\d\w]+$/.test(value) ? value : '',
+            medicine_formulation: /^[\d\w]+$/.test(value) ? '' : value,
           };
         }
         return prescription;
       });
       setPrescriptions(updatedPrescriptions);
-  
+
       let detailsCopy = [...medicineDetails];
-  
+
       // Clear previous search timer for this index
       if (searchTime.current[index]) {
         clearTimeout(searchTime.current[index]);
       }
-  
+
       // Clear result if field is empty
       if (value.trim() === '') {
         detailsCopy[index] = null;
@@ -49,13 +49,13 @@ function DoctorPrescription() {
       //   setMedicineDetails(detailsCopy);
       //   return;
       // }
-  
+
       // Set a new timer
       searchTime.current[index] = setTimeout(async () => {
         setIsLoading(true);
         let response = null;
         try {
-          if (/^\d+$/.test(value)) {
+          if (/^[\d\w]+$/.test(value)) {
             response = await privateAxios.get(`/api/inventory/${value}`);
             if (!response.data || Object.keys(response.data).length === 0) {
               response = await privateAxios.get(`/api/inventory/formulation/${(value)}`);
@@ -127,14 +127,14 @@ function DoctorPrescription() {
       }
       return prescription;
     });
-  
+
     const updatedMedicineDetails = [...medicineDetails];
     updatedMedicineDetails[index] = null;
-  
+
     setPrescriptions(updatedPrescriptions);
     setMedicineDetails(updatedMedicineDetails);
   };
-  
+
   const addPrescriptionRow = () => {
     setPrescriptions([
       ...prescriptions,
@@ -142,16 +142,16 @@ function DoctorPrescription() {
     ]);
     setMedicineDetails([...medicineDetails, null]);
   };
-  
+
   const removePrescriptionRow = (index) => {
     setPrescriptions(prescriptions.filter((_, i) => i !== index));
     setMedicineDetails(medicineDetails.filter((_, i) => i !== index));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     const formattedPrescriptions = prescriptions.map(p => {
       if (p.isMedicine) {
         return {
@@ -174,12 +174,12 @@ function DoctorPrescription() {
         };
       }
     });
-  
+
     const payload = {
       book_no: bookNo,
       prescriptions: formattedPrescriptions
     };
-  
+
     try {
       const response = await privateAxios.post(
         `/api/patient-history/doctor-prescription`,
@@ -201,7 +201,7 @@ function DoctorPrescription() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="doctor-prescription-container">
       <div className="doctor-prescription-card">
@@ -244,46 +244,46 @@ function DoctorPrescription() {
                   placeholder="e.g. 101"
                 />
               </div>
-             {medicineDetails[index] && (
-              <div className="doctor-prescription-medicine-info">
-                {medicineDetails[index].error ? (
-                  <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
-                ) : Array.isArray(medicineDetails[index]) ? (
-                  <ul>
-                    {medicineDetails[index].map((item, i) => (
-                      <li key={i}>
-                        <strong>{item.medicine_formulation}</strong>
-                        <ul>
-                          {item.details.map((med, j) => (
-                            <li key={j}>
-                              {med.medicine_name} — Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
+              {medicineDetails[index] && (
+                <div className="doctor-prescription-medicine-info">
+                  {medicineDetails[index].error ? (
+                    <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
+                  ) : Array.isArray(medicineDetails[index]) ? (
+                    <ul>
+                      {medicineDetails[index].map((item, i) => (
+                        <li key={i}>
+                          <strong>{item.medicine_formulation}</strong>
+                          <ul>
+                            {item.details.map((med, j) => (
+                              <li key={j}>
+                                {med.medicine_name} — Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <>
+                      <p>
+                        <strong>
+                          {prescription.isMedicine ? "Formulation" : "Item"}:
+                        </strong>{" "}
+                        {medicineDetails[index].medicine_formulation}
+                      </p>
+                      <ul>
+                        {medicineDetails[index].details &&
+                          medicineDetails[index].details.map((med, i) => (
+                            <li key={i}>
+                              {med.medicine_name} — Qty: {med.quantity} — Exp:{" "}
+                              {new Date(med.expiry_date).toLocaleDateString()}
                             </li>
                           ))}
-                        </ul>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <>
-                    <p>
-                      <strong>
-                        {prescription.isMedicine ? "Formulation" : "Item"}:
-                      </strong>{" "}
-                      {medicineDetails[index].medicine_formulation}
-                    </p>
-                    <ul>
-                      {medicineDetails[index].details &&
-                        medicineDetails[index].details.map((med, i) => (
-                          <li key={i}>
-                            {med.medicine_name} — Qty: {med.quantity} — Exp:{" "}
-                            {new Date(med.expiry_date).toLocaleDateString()}
-                          </li>
-                        ))}
-                    </ul>
-                  </>
-                )}
-              </div>
-            )}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
               {prescription.isMedicine ? (
                 <>
                   <div className="doctor-prescription-form-group">
