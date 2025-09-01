@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorPrescription.css';
 import { privateAxios } from '../api/axios';
@@ -12,6 +12,7 @@ function DoctorPrescription() {
   const [medicineDetails, setMedicineDetails] = useState([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const debounceTimeout = useRef(null);
 
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
@@ -35,19 +36,32 @@ function DoctorPrescription() {
     setPrescriptions(updatedPrescriptions);
 
     // Fetch medicine info when ID changes (for both medicine and non-medicine items)
-    if (field === 'medicine_id' && value !== '') {
-      try {
-        setIsLoading(true); // Set loading to true while fetching medicine details
-        const response = await privateAxios.get(`/api/inventory/${value}`);
+    if (field === 'medicine_id') {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+
+      if (value !== '') {
+        debounceTimeout.current = setTimeout(async () => {
+          try {
+            setIsLoading(true); // Set loading to true while fetching medicine details
+            const response = await privateAxios.get(`/api/inventory/${value}`);
+            const detailsCopy = [...medicineDetails];
+            detailsCopy[index] = response.data;
+            setMedicineDetails(detailsCopy);
+          } catch (err) {
+            const detailsCopy = [...medicineDetails];
+            detailsCopy[index] = { error: 'Item not found' };
+            setMedicineDetails(detailsCopy);
+          } finally {
+            setIsLoading(false); // Set loading back to false after fetching
+          }
+        }, 500); // Debounce for 500ms
+      } else {
+        // Clear medicine details if medicine_id is empty
         const detailsCopy = [...medicineDetails];
-        detailsCopy[index] = response.data;
+        detailsCopy[index] = null;
         setMedicineDetails(detailsCopy);
-      } catch (err) {
-        const detailsCopy = [...medicineDetails];
-        detailsCopy[index] = { error: 'Item not found' };
-        setMedicineDetails(detailsCopy);
-      } finally {
-        setIsLoading(false); // Set loading back to false after fetching
       }
     }
   };
@@ -198,7 +212,6 @@ function DoctorPrescription() {
                   }
                   required
                   placeholder="e.g. 101"
-                  disabled={isLoading} // Disable input while loading
                 />
                 {medicineDetails[index] && (
                   <div className="doctor-prescription-medicine-info">
