@@ -33,6 +33,7 @@ import VolunteerProfile from './Pages/VolunteerProfile';
 import PatientProfile from './Pages/PatientProfile';
 import Log from './Pages/Log';
 import VerifyMedicine from './Pages/VerifyMedicine';
+import TokenGeneration from './Pages/TokenGeneration'
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path="/volunteer-login" element={<VolunteerLogin />} /> {/* Add the new route */}
             <Route path="/patient-registration" element={<ProtectedRoute requiredType="volunteer"><PatientRegistration /></ProtectedRoute>} />
             <Route path="/vitals" element={<ProtectedRoute requiredType="volunteer"><Vitals /></ProtectedRoute>} />
+            <Route path="/token" element={<ProtectedRoute requiredType="volunteer"><TokenGeneration /></ProtectedRoute>} />
             <Route path="/doctor-assigning" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigning /></ProtectedRoute>} />
             <Route path="/doctor-assigning-automatic" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigningAutomatic /></ProtectedRoute>} />
             <Route path="/view-queue" element={<ProtectedRoute requiredType="volunteer"><ViewQueue /></ProtectedRoute>} />

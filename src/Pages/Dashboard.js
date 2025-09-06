@@ -14,7 +14,7 @@ function Dashboard() {
   );
 
   const cardData = [
-    { title: "1. Token Generation", icon: "🎟️", class:"in-progress" },
+    { title: "1. Token Generation", icon: "🎟️", path: "/token" },
     { title: "2. Patient registration", icon: "👤", path: "/patient-registration" },
     { title: "3. Vitals", icon: "💓", path: "/vitals" },
     { title: "4. Patients Waiting", icon: "⏳", class:"in-progress" },
