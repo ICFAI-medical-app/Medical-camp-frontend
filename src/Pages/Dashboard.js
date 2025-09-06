@@ -24,7 +24,7 @@ function Dashboard() {
     { title: "7. View Queues", icon: "📋", path: "/view-queue" },
     { title: "8. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
     { title: "9. Medicine pickup", icon: "💊", path: "/medicine-pickup" },
-    { title: "10. Medicine Verification", icon: "🔍", class:"in-progress" },
+    { title: "10. Medicine Verification", icon: "🔍", path:"/medicine-verification" },
     { title: "11. Medicine Delivery", icon: "🚚", class:"in-progress" },
     { title: "12. Counselling", icon: "🗣️", class:"in-progress" },
     { title: "13. Lab", icon: "🔬", class:"in-progress" },

@@ -8,6 +8,8 @@
   font-family: 'Arial', sans-serif;
 }
 
+
+
 .medicine-pickup-card{
   margin: 0px 20px 0px; /* Reduced side margins to allow more space for horizontal cards */
   padding: 0px 60px;
@@ -165,10 +167,20 @@
 
 .medicine-header {
   display: flex;
+  position: relative;
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #eaeaea;
+}
+
+.medicine-delete{
+  position: absolute;
+  right: 0;
+  top: 2.5rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .medicine-id {
@@ -354,5 +366,11 @@
   
   .medicine-id {
     margin-bottom: 0.5rem;
+  }
+
+  .medicine-delete{
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 }

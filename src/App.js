@@ -32,6 +32,7 @@ import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerProfile from './Pages/VolunteerProfile';
 import PatientProfile from './Pages/PatientProfile';
 import Log from './Pages/Log';
+import VerifyMedicine from './Pages/VerifyMedicine';
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
             <Route path="/view-queue" element={<ProtectedRoute requiredType="volunteer"><ViewQueue /></ProtectedRoute>} />
             <Route path="/doctor-prescription" element={<ProtectedRoute requiredType="volunteer"><DoctorPrescription /></ProtectedRoute>} />
             <Route path="/medicine-pickup" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
+            <Route path="/medicine-verification" element={<ProtectedRoute requiredType="volunteer"><VerifyMedicine /></ProtectedRoute>} />
             <Route path="/log" element={
               <ProtectedRoute requiredType="admin">
                 <Log />

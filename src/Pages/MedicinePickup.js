@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
 import { privateAxios } from '../api/axios';
 import '../Styles/MedicinePickup.css';
-import MedicineVerification from './MedicineVerification';
 
 function MedicinePickup() {
   const navigate = useNavigate();
@@ -11,14 +10,37 @@ function MedicinePickup() {
   const [prescribedMeds, setPrescribedMeds] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [showVerification, setShowVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
+
+
+  const handleMedicineDelete = async (medicine_id) => {
+      setError('');
+      setMessage('');
+
+      setIsLoading(true);
+      try{
+        const response = await privateAxios.delete(
+          `/api/patients/${bookNo}/medicine/${medicine_id}`
+        )
+
+        if(response.status == 200){
+          setMessage('Medicine Deleted Successfully');
+        }else{
+          setError(response.data.message);
+        }
+        setPrescribedMeds(prev => prev.filter(med => med._id !== medicine_id));
+      }catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch prescription.');
+      } finally {
+        setIsLoading(false); // Set loading back to false after fetching
+      }
+  }
+
 
   const handleFetchPrescription = async () => {
     setError('');
     setMessage('');
     setPrescribedMeds([]);
-    setShowVerification(false);
 
     if (!bookNo) {
       setError('Please enter a valid Book No.');
@@ -30,6 +52,8 @@ function MedicinePickup() {
       const response = await privateAxios.get(
         `/api/patient-history/medicine-pickup/${bookNo}`
       );
+
+      console.log(response.data);
 
       if (!response.data.medicines_prescribed || response.data.medicines_prescribed.length === 0) {
         setError('No medicines found for this patient.');
@@ -123,8 +147,7 @@ function MedicinePickup() {
       );
 
       setMessage(response.data.message || 'Medicines given updated successfully!');
-      setPrescribedMeds([]);
-      setShowVerification(true); // Show verification component after successful submission
+      setPrescribedMeds([]); // Show verification component after successful submission
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update medicines given.');
     } finally {
@@ -159,19 +182,6 @@ function MedicinePickup() {
             {isLoading ? 'Fetching...' : 'Fetch Prescription'} {/* Show loading text */}
           </button>
         </div>
-        
-        {bookNo && (
-          <div className="medicine-pickup-btn-container">
-            <button
-              type="button"
-              className="medicine-pickup-fetch-btn" 
-              onClick={() => setShowVerification(true)}
-              disabled={isLoading} // Disable button while loading
-            >
-              {isLoading ? 'Loading...' : 'Verify Medicines'} {/* Show loading text */}
-            </button>
-          </div>
-        )}
 
         {prescribedMeds.length > 0 && (
           <form onSubmit={handleSubmit} className="medicine-pickup-form">
@@ -187,6 +197,9 @@ function MedicinePickup() {
                 <div key={medIndex} className="medicine-block">
                   <div className="medicine-header">
                     <div className="medicine-id">{med.medicine_id}</div>
+                    <button type='button' onClick={() => handleMedicineDelete(med._id)} className='medicine-delete'>
+                      <svg fill="#d40707ff" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5.755,20.283,4,8H20L18.245,20.283A2,2,0,0,1,16.265,22H7.735A2,2,0,0,1,5.755,20.283ZM21,4H16V3a1,1,0,0,0-1-1H9A1,1,0,0,0,8,3V4H3A1,1,0,0,0,3,6H21a1,1,0,0,0,0-2Z"/></svg>
+                    </button>
                     <div className="medicine-details">
                       <p><strong>Formulation:</strong> {med.medicine_formulation}</p>
                       <p>
@@ -259,11 +272,6 @@ function MedicinePickup() {
         </div>
       )}
 
-      <MedicineVerification 
-        bookNo={bookNo}
-        showVerification={showVerification}
-        setShowVerification={setShowVerification}
-      />
     </div>
   );
 }
