@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
 import { privateAxios } from '../api/axios';
@@ -20,11 +20,13 @@ function Vitals() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [bpError, setBpError] = useState(''); // Add state for BP validation error
+  const [bookNumberError, setBookNumberError] = useState(''); // Add state for book number validation error
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name === 'bp') {
       if (value) {
         const parts = value.split('/');
@@ -40,40 +42,68 @@ function Vitals() {
       } else {
         setBpError(''); 
       }
+    } else if (name === 'bookNumber') {
+      const regex = /^[0-9]*$/; // Allow empty string for backspace
+      if (!regex.test(value)) {
+        setBookNumberError('Book Number must contain only digits');
+      } else {
+        setBookNumberError('');
+      }
     }
     setFormData({ ...formData, [name]: value });
   };
 
   const PORT = process.env.PORT || 5002;
 
-  const fetchVitals = async (e) =>{
-    console.log(e.target.value);
+  const debounce = (func, delay) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, delay);
+    };
+  };
+
+  const fetchVitals = async (value) =>{
+    console.log(value);
     setIsLoading(true); 
-    if(e.target.value !== ''){
+    if(value !== ''){
       try {
       // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/vitals`);
-      const response = await privateAxios.get(`/api/vitals/${e.target.value}`);
+      const response = await privateAxios.get(`/api/vitals/${value}`);
       setFormData({
         ...response.data,
-      bookNumber:e.target.value}); // Set book number in form data
+      bookNumber:value}); // Set book number in form data
 
       setMessage('Vitals fetched successfully!');
       setError('');
     } catch (error) {
-      VitalEmptyData.bookNumber = e.target.value; // Set book number in case of error
-      setFormData(VitalEmptyData);
-      setError(error.response?.data?.message || 'An error occurred while fetching vitals');
-      setMessage('');
+      if (error.response && error.response.status === 404) {
+        setFormData({ ...VitalEmptyData, bookNumber: value });
+        setMessage('No vitals found for this patient for the current month. Please enter new vitals.');
+        setError('');
+      } else {
+        setFormData({ ...VitalEmptyData, bookNumber: value }); // Ensure bookNumber is retained on other errors
+        setError(error.response?.data?.message || 'An error occurred while fetching vitals');
+        setMessage('');
+      }
     } finally {
       setIsLoading(false); 
     }
-    }else{
+    } else {
       setFormData(VitalEmptyData);
       setMessage('');
       setError('');
     }
-    
   }
+
+  const debouncedFetchVitals = useCallback(
+    debounce((value) => fetchVitals(value), 500),
+    []
+  );
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); 
@@ -116,17 +146,10 @@ function Vitals() {
         <div className="vitals-form-group">
           <label>Book Number</label>
           <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) =>{
-            const regex = /^[0-9]+$/;
-            if (regex.test(e.target.value) || e.target.value === '') {
-                 handleChange(e);
-              fetchVitals(e);
-            } else {
-              
-              setError('enter valid book number'); // Show error for invalid input
-            }
-           
-            
+            handleChange(e); // This updates formData and bookNumberError
+            debouncedFetchVitals(e.target.value); // Always call debounced fetch
           }} required />
+          {bookNumberError && <div className="vitals-error-msg">{bookNumberError}</div>}
         </div>
         <div className="vitals-form-group">
           <label>BP (systolic/diastolic)</label>
