@@ -141,6 +141,27 @@ function PatientRegistration() {
           oldNew: response.data.oldNew || '',
           eid: response.data.eid || ''
         });
+
+        // If eid is not present, generate a token and set it
+if (!response.data?.eid) {
+  try {
+    const tokenRes = await privateAxios.post('/api/token', {
+      bookNumber: formData.bookNumber,
+      gender: response.data?.patient_sex || 'unknown' // fallback in case gender not found
+    });
+
+    if (tokenRes.data?.tokenNumber) {
+      setFormData(prev => ({
+        ...prev,
+        eid: tokenRes.data.tokenNumber
+      }));
+    }
+  } catch (tokenError) {
+    console.error('Error generating token:', tokenError);
+  }
+}
+
+
         setMessage('Patient data loaded successfully!');
       } else {
         // If no data is found, load a blank form
