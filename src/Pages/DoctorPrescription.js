@@ -220,10 +220,11 @@ function DoctorPrescription() {
                     ) : (
                       <>
                         <p><strong>{prescription.isMedicine ? "Formulation" : "Item"}:</strong> {medicineDetails[index].medicine_formulation}</p>
+                        <p><strong>Available Stock:</strong> {medicineDetails[index].total_quantity}</p> {/* Display total_quantity */}
                         <ul>
                           {medicineDetails[index].details && medicineDetails[index].details.map((med, i) => (
                             <li key={i}>
-                              {med.medicine_name} — Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
+                              Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
                             </li>
                           ))}
                         </ul>
