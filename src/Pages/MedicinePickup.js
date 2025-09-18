@@ -28,7 +28,7 @@ function MedicinePickup() {
     setIsLoading(true); // Set loading to true when fetching starts
     try {
       const response = await privateAxios.get(
-        `/api/patient-history/medicine-pickup/${bookNo}`
+        `/api/patient-history/medicine-verification/${bookNo}`
       );
 
       console.log(response.data);
@@ -124,7 +124,7 @@ function MedicinePickup() {
     setIsLoading(true); // Set loading to true when submitting starts
     try {
       const response = await privateAxios.post(
-        '/api/patient-history/medicine-pickup',
+        '/api/patient-history/medicine-verification',
         {
           book_no: bookNo,
           medicinesGiven

@@ -55,8 +55,8 @@ function App() {
             <Route path="/doctor-assigning-automatic" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigningAutomatic /></ProtectedRoute>} />
             <Route path="/view-queue" element={<ProtectedRoute requiredType="volunteer"><ViewQueue /></ProtectedRoute>} />
             <Route path="/doctor-prescription" element={<ProtectedRoute requiredType="volunteer"><DoctorPrescription /></ProtectedRoute>} />
-            <Route path="/medicine-pickup" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
-            <Route path="/medicine-verification" element={<ProtectedRoute requiredType="volunteer"><VerifyMedicine /></ProtectedRoute>} />
+            <Route path="/medicine-verification" element={<ProtectedRoute requiredType="volunteer"><MedicinePickup /></ProtectedRoute>} />
+            <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><VerifyMedicine /></ProtectedRoute>} />
             <Route path="/log" element={
               <ProtectedRoute requiredType="admin">
                 <Log />

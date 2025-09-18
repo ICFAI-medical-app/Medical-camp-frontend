@@ -1,0 +1,73 @@
+.workflow-checklist-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.workflow-checklist-container h3 {
+  color: #343a40;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+.workflow-stages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.workflow-stage-item {
+  padding: 10px 0;
+  color: #6c757d;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px dashed #dee2e6;
+}
+
+.workflow-stage-item:last-child {
+  border-bottom: none;
+}
+
+.workflow-stage-item.current {
+  color: #007bff;
+  font-weight: bold;
+  background-color: #e7f3ff;
+  padding-left: 10px;
+  border-radius: 4px;
+}
+
+.workflow-stage-item.completed {
+  color: #28a745;
+  text-decoration: line-through;
+}
+
+.workflow-stage-item .checkmark {
+  margin-right: 8px;
+  font-weight: bold;
+  color: #28a745;
+}
+
+.workflow-checklist-loading,
+.workflow-checklist-error {
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.workflow-checklist-loading {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.workflow-checklist-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
