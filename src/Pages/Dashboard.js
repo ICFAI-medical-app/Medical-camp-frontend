@@ -25,7 +25,7 @@ function Dashboard() {
     { title: "8. Medicine status", icon: "🔍", path:"/medicine-verification" },
     { title: "9. Counselling", icon: "🗣️", class:"in-progress" },
     { title: "10. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
-    { title: "11. View Queues", icon: "📋", path: "/view-queue" },
+    { title: "11. View Queues", icon: "📋", class: "in-progress" },
     { title: "12. Medicine Delivery", icon: "🚚", class:"in-progress" },
     { title: "13. Lab", icon: "🔬", class:"in-progress" },
     { title: "14. Patient Support", icon: "🤝", class:"in-progress" },
