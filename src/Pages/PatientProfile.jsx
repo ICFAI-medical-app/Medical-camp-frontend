@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import WorkflowChecklist from '../Components/WorkflowChecklist'; // Import the new component
 import '../Styles/PatientProfile.css';
 
 // Helper function to display empty values consistently
@@ -204,11 +203,6 @@ function PatientProfile() {
                   <div className="visit-count">
                     Total Clinic Visits: <span>{analytics.visitCount}</span>
                   </div>
-
-                  {/* Workflow Checklist */}
-                  {patient.book_no && <WorkflowChecklist bookNo={patient.book_no} />}
-                  
-                  {/* End Workflow Checklist */}
 
                   {analytics.bpData && analytics.bpData.length > 0 && (
                     <>

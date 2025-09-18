@@ -12,7 +12,7 @@ function VerifyMedicine() {
   return (
     <div className="verify-medicine-container">
       <div className='verify-medicine-card'>
-        <h1>Patient Status</h1>
+        <h1>Medicine Verification</h1>
 
         <div className='verify-medicine-form-group'>
           <label htmlFor="">Book No: </label>
@@ -33,7 +33,7 @@ function VerifyMedicine() {
             onClick={() => setShowVerification(true)}
             disabled={isLoading} // Disable button while loading
           >
-            {isLoading ? 'Loading...' : 'Status'} {/* Show loading text */}
+            {isLoading ? 'Loading...' : 'Verify Medicines'} {/* Show loading text */}
           </button>
         </div>
       </div>

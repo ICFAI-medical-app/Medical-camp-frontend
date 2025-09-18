@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
 import { privateAxios } from '../api/axios';
 import '../Styles/MedicinePickup.css';
-import WorkflowChecklist from '../Components/WorkflowChecklist';
 
 function MedicineVerification({ bookNo, showVerification, setShowVerification }) {
   const [verificationData, setVerificationData] = useState({
@@ -23,7 +22,7 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
     setIsLoading(true); // Set loading to true when fetching starts
     try {
       const response = await privateAxios.get(
-        `/api/patient-history/patient-status/${bookNo}`
+        `/api/patient-history/medicine-verification/${bookNo}`
       );
       setVerificationData(response.data);
       setError('');
@@ -39,8 +38,7 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
   return (
     <div className="medicine-verification-overlay">
       <div className="medicine-verification-popup">
-        <h2>Status - Book #{bookNo}</h2>
-        <WorkflowChecklist bookNo={bookNo} />
+        <h2>Medicine Verification - Book #{bookNo}</h2>
         
         <div className="verification-section">
           <h3>Prescribed Medicines</h3>
