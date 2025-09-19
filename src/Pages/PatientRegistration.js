@@ -1,82 +1,25 @@
 import React, { useState } from "react";
 import { privateAxios } from "../api/axios";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import "../Styles/PatientRegistration.css";
 
-/**
- * NOTE:
- * - Phone rule implemented: 10 digits AND parseInt(first5) > 50000
- *   If you actually meant "each of the first 5 digits must be > 5",
- *   replace the phonePredicate check with:
- *     return val.slice(0,5).split('').every(d => Number(d) > 5);
- */
-
+// ✅ Zod schema with coercion to handle number inputs
 const patientSchema = z.object({
-  bookNumber: z.preprocess(
-    (v) => (v === undefined || v === null ? "" : String(v).trim()),
-    z
-      .string()
-      .min(1, "Book number is required")
-      .refine((val) => !isNaN(val) && parseInt(val, 10) > 0, {
-        message: "Book number must be a positive number",
-      })
-  ),
-
-  name: z.preprocess(
-    (v) => (v === undefined || v === null ? "" : String(v).trim()),
-    z.string().min(1, "Name is required")
-  ),
-
-  // Coerce phone to undefined when empty, otherwise to cleaned string of digits.
-  phoneNumber: z.preprocess(
-    (v) => {
-      if (v === undefined || v === null || v === "") return undefined;
-      // remove non-digits and return string
-      return String(v).replace(/\D/g, "");
-    },
-    z
-      .string()
-      .optional()
-      .refine(
-        (val) => {
-          if (val === undefined) return true; // optional
-          if (!/^\d{10}$/.test(val)) return false;
-          // numeric check on first 5 digits
-          const firstDigit = parseInt(val.slice(0, 1), 10);
-          return firstDigit > 5;
-        },
-        {
-          message:
-            "Phone must be exactly 10 digits and the first digit must be 5 or greater",
-        }
-      )
-  ),
-
-  age: z.preprocess(
-    (v) => {
-      if (v === undefined || v === null || v === "") return undefined;
-      // keep as string (we validate numeric range)
-      return String(v).trim();
-    },
-    z
-      .string()
-      .optional()
-      .refine((val) => {
-        if (val === undefined) return true;
-        const n = Number(val);
-        return !isNaN(n) && n > 0 && n <= 150;
-      }, { message: "Age must be a number between 1 and 150" })
-  ),
-
-  // Keep gender / oldNew optional to avoid blocking when not selected in UI.
-  gender: z.preprocess((v) => (v === "" || v === undefined ? undefined : v), z.enum(["male", "female"]).optional()),
-
-  area: z.preprocess((v) => (v === undefined || v === null ? undefined : String(v).trim()), z.string().optional()),
-
-  oldNew: z.preprocess((v) => (v === "" || v === undefined ? undefined : v), z.enum(["old", "new"], { required_error: "Please select Old or New" })),
-
-  eid: z.preprocess((v) => (v === undefined || v === null ? undefined : String(v).trim()), z.string().optional()),
+  bookNumber: z.coerce.string().min(1, "Book number is required"),
+  name: z.string().min(1, "Name is required"),
+  phoneNumber: z
+    .coerce.string()
+    .min(10, "Phone number must be 10 digits")
+    .max(10, "Phone number must be 10 digits")
+    .regex(/^[6-9]\d{9}$/, "Phone number must start with 6-9 and be 10 digits"),
+  age: z
+    .coerce.string()
+    .min(1, "Age is required")
+    .refine((val) => Number(val) > 0 && Number(val) <= 120, "Enter a valid age"),
+  gender: z.enum(["male", "female"], "Please select gender"),
+  area: z.string().min(1, "Area is required"),
+  oldNew: z.enum(["old", "new"], "Please select old/new"),
+  eid: z.string().optional(),
 });
 
 function PatientRegistration() {
@@ -91,80 +34,48 @@ function PatientRegistration() {
     eid: "",
   });
 
-  const [fieldErrors, setFieldErrors] = useState({
-    bookNumber: "",
-    name: "",
-    phoneNumber: "",
-    age: "",
-    gender: "",
-    area: "",
-    oldNew: "",
-    eid: "",
-  });
-
+  const [fieldErrors, setFieldErrors] = useState({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [showFullForm, setShowFullForm] = useState(false);
 
-  // sanitize phone as user types (only digits, max 10)
+  // Handle input change
   const handleChange = (e) => {
-    let { name, value } = e.target;
+    const { name, value } = e.target;
 
+    // Restrict phone number to digits only and max length 10
     if (name === "phoneNumber") {
-      value = String(value).replace(/\D/g, "").slice(0, 10);
+      if (!/^\d{0,10}$/.test(value)) return;
     }
 
-    // for radio buttons value comes as string already
     setFormData((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // returns { valid: boolean, errors: { field: message } }
-  const validateForm = (partial = false) => {
-    const schemaToUse = partial ? patientSchema.pick({ bookNumber: true }) : patientSchema;
-    const result = schemaToUse.safeParse(formData);
-
-    if (result.success) {
-      setFieldErrors({
-        bookNumber: "",
-        name: "",
-        phoneNumber: "",
-        age: "",
-        gender: "",
-        area: "",
-        oldNew: "",
-        eid: "",
+  // Zod validation
+  const validateFields = () => {
+    const result = patientSchema.safeParse(formData);
+    if (!result.success) {
+      const errors = {};
+      result.error.issues.forEach((err) => {
+        errors[err.path[0]] = err.message;
       });
-      return { valid: true, errors: {} };
-    } else {
-      const newErrors = {
-        bookNumber: "",
-        name: "",
-        phoneNumber: "",
-        age: "",
-        gender: "",
-        area: "",
-        oldNew: "",
-        eid: "",
-      };
-      if (result.error && Array.isArray(result.error.errors)) {
-        result.error.errors.forEach((err) => {
-          const key = err.path && err.path.length ? err.path[0] : "_form";
-          if (key && newErrors.hasOwnProperty(key)) newErrors[key] = err.message;
-          else newErrors._form = (newErrors._form ? newErrors._form + " " : "") + err.message;
-        });
-      }
-      setFieldErrors(newErrors);
-      return { valid: false, errors: newErrors };
+      setFieldErrors(errors);
+      return false;
     }
+    setFieldErrors({});
+    return true;
   };
 
+  // Step 1: Fetch patient by book number
   const handleBookNumberSubmit = async (e) => {
     e.preventDefault();
-    const res = validateForm(true);
-    if (!res.valid) return;
+
+    if (!formData.bookNumber) {
+      setFieldErrors({ bookNumber: "Book number is required" });
+      return;
+    }
 
     setError("");
     setMessage("");
@@ -172,9 +83,10 @@ function PatientRegistration() {
 
     try {
       const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
+
       if (response.data) {
         setFormData({
-          bookNumber: response.data.book_no,
+          bookNumber: response.data.book_no || formData.bookNumber,
           name: response.data.patient_name || "",
           phoneNumber: response.data.patient_phone_no || "",
           age: response.data.patient_age || "",
@@ -183,59 +95,42 @@ function PatientRegistration() {
           oldNew: response.data.oldNew || "",
           eid: response.data.eid || "",
         });
-
-        if (!response.data?.eid) {
-          try {
-            const tokenRes = await privateAxios.post("/api/token", {
-              bookNumber: formData.bookNumber,
-              gender: response.data?.patient_sex || "unknown",
-            });
-            if (tokenRes.data?.tokenNumber) {
-              setFormData((prev) => ({ ...prev, eid: tokenRes.data.tokenNumber }));
-            }
-          } catch (tokenError) {
-            console.error("Error generating token:", tokenError);
-          }
-        }
-
         setMessage("Patient data loaded successfully!");
       } else {
-        setMessage("No patient found. Please fill out the form.");
-        setFormData((prev) => ({ ...prev, name: "", phoneNumber: "", age: "", gender: "", area: "", oldNew: "", eid: "" }));
+        setMessage("No patient found. Please fill in details manually.");
+        setFormData((prev) => ({
+          ...prev,
+          name: "",
+          phoneNumber: "",
+          age: "",
+          gender: "",
+          area: "",
+          oldNew: "",
+          eid: "",
+        }));
       }
-      setError("");
-      setIsBookNumberSubmitted(true);
+
+      setShowFullForm(true);
     } catch (err) {
-      if (err.response && err.response.status === 404) {
-        setMessage("No patient found. Please fill out the form.");
-        setIsBookNumberSubmitted(true);
-      } else {
-        setError(err.response?.data?.message || "An error occurred while fetching patient data.");
-        setMessage("");
-      }
+      console.error("Fetch Error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "An error occurred while fetching patient data.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
+  // Step 2: Full form submit
+  const handleFullFormSubmit = async (e) => {
     e.preventDefault();
 
-    const { valid, errors } = validateForm(false);
-    if (!valid) {
-      // Show phone-specific message if phone is the failing field,
-      // otherwise show the generic message.
-      if (errors.phoneNumber) setError(errors.phoneNumber);
-      else setError("Please correct the errors before submitting");
-      return;
-    }
+    if (!validateFields()) return;
 
-    setIsLoading(true);
     setError("");
     setMessage("");
+    setIsLoading(true);
 
     try {
-      const response = await privateAxios.post("/api/patients", {
+      const payload = {
         book_no: formData.bookNumber,
         patient_name: formData.name,
         patient_age: formData.age,
@@ -244,11 +139,14 @@ function PatientRegistration() {
         patient_area: formData.area,
         oldNew: formData.oldNew,
         eid: formData.eid,
-      });
-      setMessage(response.data.message || "Patient data saved successfully!");
+      };
+
+      const response = await privateAxios.post("/api/patients", payload);
+
+      setMessage(response.data?.message || "✅ Patient data saved successfully!");
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred while saving patient data.");
-      setMessage("");
+      console.error("Save Error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "❌ Failed to save patient data.");
     } finally {
       setIsLoading(false);
     }
@@ -261,110 +159,169 @@ function PatientRegistration() {
       {message && <div className="patient-registration-success-msg">{message}</div>}
       {error && <div className="patient-registration-error-msg">{error}</div>}
 
-      <form onSubmit={!isBookNumberSubmitted ? handleBookNumberSubmit : handleSubmit} className="patient-registration-form">
-        <div className="patient-registration-form-group">
-          <label>
-            Book Number <span className="required">*</span>
-          </label>
-          <input
-            type="number"
-            name="bookNumber"
-            value={formData.bookNumber}
-            onChange={handleChange}
-            className={fieldErrors.bookNumber ? "error-input" : ""}
-            placeholder="Enter patient book number"
-            disabled={isBookNumberSubmitted}
-          />
-          {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
-        </div>
+      {/* STEP 1: Book Number */}
+      {!showFullForm && (
+        <form onSubmit={handleBookNumberSubmit} className="patient-registration-form">
+          <div className="patient-registration-form-group">
+            <label>
+              Book Number <span className="required">*</span>
+            </label>
+            <input
+              type="number"
+              name="bookNumber"
+              value={formData.bookNumber}
+              onChange={handleChange}
+              className={fieldErrors.bookNumber ? "error-input" : ""}
+              placeholder="Enter patient book number"
+            />
+            {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
+          </div>
 
-        {!isBookNumberSubmitted && (
           <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
             {isLoading ? "Loading..." : "Submit"}
           </button>
-        )}
+        </form>
+      )}
 
-        {isBookNumberSubmitted && (
-          <>
-            <div className="patient-registration-form-group">
-              <label>
-                Name <span className="required">*</span>
-              </label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} className={fieldErrors.name ? "error-input" : ""} />
-              {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
-            </div>
+      {/* STEP 2: Full Form */}
+      {showFullForm && (
+        <form onSubmit={handleFullFormSubmit} className="patient-registration-form">
+          {/* Book Number */}
+          <div className="patient-registration-form-group">
+            <label>Book Number</label>
+            <input type="text" name="bookNumber" value={formData.bookNumber} readOnly />
+          </div>
 
-            <div className="patient-registration-form-group">
-              <label>Phone Number</label>
-              <input
-                type="text"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                maxLength="10"
-                placeholder="Enter 10-digit phone number"
-                className={fieldErrors.phoneNumber ? "error-input" : ""}
-              />
-              {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
-            </div>
+          {/* Name */}
+          <div className="patient-registration-form-group">
+            <label>Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter patient name"
+              className={fieldErrors.name ? "error-input" : ""}
+            />
+            {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
+          </div>
 
-            <div className="patient-registration-form-group">
-              <label>Age</label>
-              <input type="number" name="age" value={formData.age} onChange={handleChange} className={fieldErrors.age ? "error-input" : ""} />
-              {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
-            </div>
-          </>
-        )}
+          {/* Phone Number */}
+          <div className="patient-registration-form-group">
+            <label>Phone Number</label>
+            <input
+              type="number"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="Enter phone number"
+              className={fieldErrors.phoneNumber ? "error-input" : ""}
+            />
+            {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
+          </div>
 
+          {/* Age */}
+          <div className="patient-registration-form-group">
+            <label>Age</label>
+            <input
+              type="number"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              placeholder="Enter age"
+              className={fieldErrors.age ? "error-input" : ""}
+            />
+            {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
+          </div>
+
+          {/* Gender */}
           <div className="patient-registration-form-group">
             <label>Gender</label>
-            <div className="patient-registration-radio-group">
+            <div className="radio-group">
               <label>
-                <input type="radio" name="gender" value="male" checked={formData.gender === "male"} onChange={handleChange} />
+                <input
+                  type="radio"
+                  name="gender"
+                  value="male"
+                  checked={formData.gender === "male"}
+                  onChange={handleChange}
+                />
                 Male
               </label>
               <label>
-                <input type="radio" name="gender" value="female" checked={formData.gender === "female"} onChange={handleChange} />
+                <input
+                  type="radio"
+                  name="gender"
+                  value="female"
+                  checked={formData.gender === "female"}
+                  onChange={handleChange}
+                />
                 Female
               </label>
             </div>
             {fieldErrors.gender && <div className="field-error">{fieldErrors.gender}</div>}
           </div>
 
+          {/* Area */}
           <div className="patient-registration-form-group">
             <label>Area</label>
-            <input type="text" name="area" value={formData.area} onChange={handleChange} />
+            <input
+              type="text"
+              name="area"
+              value={formData.area}
+              onChange={handleChange}
+              placeholder="Enter area"
+              className={fieldErrors.area ? "error-input" : ""}
+            />
+            {fieldErrors.area && <div className="field-error">{fieldErrors.area}</div>}
           </div>
 
+          {/* Old/New */}
           <div className="patient-registration-form-group">
-            <label>
-              Old / New <span className="required">*</span>
-            </label>
-            <div className="patient-registration-radio-group">
+            <label>Old/New</label>
+            <div className="radio-group">
               <label>
-                <input type="radio" name="oldNew" value="old" checked={formData.oldNew === "old"} onChange={handleChange} />
+                <input
+                  type="radio"
+                  name="oldNew"
+                  value="old"
+                  checked={formData.oldNew === "old"}
+                  onChange={handleChange}
+                />
                 Old
               </label>
               <label>
-                <input type="radio" name="oldNew" value="new" checked={formData.oldNew === "new"} onChange={handleChange} />
+                <input
+                  type="radio"
+                  name="oldNew"
+                  value="new"
+                  checked={formData.oldNew === "new"}
+                  onChange={handleChange}
+                />
                 New
               </label>
             </div>
             {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
           </div>
 
+          {/* EID (now editable) */}
           <div className="patient-registration-form-group">
             <label>EID</label>
-            <input type="text" name="eid" value={formData.eid} onChange={handleChange} className={fieldErrors.eid ? "error-input" : ""} />
+            <input
+              type="text"
+              name="eid"
+              value={formData.eid}
+              onChange={handleChange}
+              placeholder="Enter EID"
+            />
             {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
           </div>
 
-          {isBookNumberSubmitted && (
-            <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save"}
-            </button>
-          )}
+          <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save Patient"}
+          </button>
         </form>
+      )}
     </div>
   );
 }
