@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { privateAxios } from "../api/axios";
 import { z } from "zod";
 import "../Styles/PatientRegistration.css";
@@ -38,7 +38,103 @@ function PatientRegistration() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showFullForm, setShowFullForm] = useState(false);
+
+  // Debounce mechanism for fetching patient data
+  const debounce = (func, delay) => {
+    let timeout;
+    return function(...args) {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+  };
+
+  const fetchPatientData = useCallback(
+    debounce(async (bookNum) => {
+      if (!bookNum) {
+        setFormData((prev) => ({
+          ...prev,
+          name: "",
+          phoneNumber: "",
+          age: "",
+          gender: "",
+          area: "",
+          oldNew: "",
+          eid: "",
+        }));
+        setMessage("");
+        setError("");
+        setIsLoading(false);
+        return;
+      }
+
+      setError("");
+      setMessage("");
+      setIsLoading(true);
+
+      try {
+        const response = await privateAxios.get(`/api/patients/${bookNum}`);
+
+        if (response.data) {
+          setFormData((prev) => ({
+            ...prev,
+            bookNumber: response.data.book_no || bookNum,
+            name: response.data.patient_name || "",
+            phoneNumber: response.data.patient_phone_no || "",
+            age: response.data.patient_age || "",
+            gender: response.data.patient_sex || "",
+            area: response.data.patient_area || "",
+            oldNew: "old", // Mark as "old" if patient found
+            eid: response.data.eid || "",
+          }));
+          setMessage("Patient data loaded successfully!");
+        } else {
+          setMessage("No patient found. Please fill in details for new registration.");
+          setFormData((prev) => ({
+            ...prev,
+            name: "",
+            phoneNumber: "",
+            age: "",
+            gender: "",
+            area: "",
+            oldNew: "new", // Mark as "new" if patient not found
+            eid: "",
+          }));
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err.response?.data || err.message);
+        if (err.response?.status === 404) {
+          setMessage("No patient found for this book number. Please fill in details for new registration.");
+          setFormData((prev) => ({
+            ...prev,
+            name: "",
+            phoneNumber: "",
+            age: "",
+            gender: "",
+            area: "",
+            oldNew: "new", // Mark as "new" if patient not found
+            eid: "",
+          }));
+          setError(""); // Clear any previous errors
+        } else {
+          setError(err.response?.data?.message || "An error occurred while fetching patient data.");
+          setFormData((prev) => ({
+            ...prev,
+            name: "",
+            phoneNumber: "",
+            age: "",
+            gender: "",
+            area: "",
+            oldNew: "new", // Default to "new" on error
+            eid: "",
+          }));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500), // Debounce for 500ms
+    []
+  );
 
   // Handle input change
   const handleChange = (e) => {
@@ -51,6 +147,10 @@ function PatientRegistration() {
 
     setFormData((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+
+    if (name === "bookNumber") {
+      fetchPatientData(value);
+    }
   };
 
   // Zod validation
@@ -68,58 +168,7 @@ function PatientRegistration() {
     return true;
   };
 
-  // Step 1: Fetch patient by book number
-  const handleBookNumberSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.bookNumber) {
-      setFieldErrors({ bookNumber: "Book number is required" });
-      return;
-    }
-
-    setError("");
-    setMessage("");
-    setIsLoading(true);
-
-    try {
-      const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
-
-      if (response.data) {
-        setFormData({
-          bookNumber: response.data.book_no || formData.bookNumber,
-          name: response.data.patient_name || "",
-          phoneNumber: response.data.patient_phone_no || "",
-          age: response.data.patient_age || "",
-          gender: response.data.patient_sex || "",
-          area: response.data.patient_area || "",
-          oldNew: response.data.oldNew || "",
-          eid: response.data.eid || "",
-        });
-        setMessage("Patient data loaded successfully!");
-      } else {
-        setMessage("No patient found. Please fill in details manually.");
-        setFormData((prev) => ({
-          ...prev,
-          name: "",
-          phoneNumber: "",
-          age: "",
-          gender: "",
-          area: "",
-          oldNew: "",
-          eid: "",
-        }));
-      }
-
-      setShowFullForm(true);
-    } catch (err) {
-      console.error("Fetch Error:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "An error occurred while fetching patient data.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Step 2: Full form submit
+  // Main form submit handler for saving/updating patient data
   const handleFullFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -159,169 +208,156 @@ function PatientRegistration() {
       {message && <div className="patient-registration-success-msg">{message}</div>}
       {error && <div className="patient-registration-error-msg">{error}</div>}
 
-      {/* STEP 1: Book Number */}
-      {!showFullForm && (
-        <form onSubmit={handleBookNumberSubmit} className="patient-registration-form">
-          <div className="patient-registration-form-group">
+      <form onSubmit={handleFullFormSubmit} className="patient-registration-form">
+        {/* Book Number - always editable, triggers fetch */}
+        <div className="patient-registration-form-group">
+          <label>
+            Book Number <span className="required">*</span>
+          </label>
+          <input
+            type="number"
+            name="bookNumber"
+            value={formData.bookNumber}
+            onChange={handleChange}
+            className={fieldErrors.bookNumber ? "error-input" : ""}
+            placeholder="Enter patient book number"
+            required
+            autoFocus
+          />
+          {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
+        </div>
+
+        {/* Name */}
+        <div className="patient-registration-form-group">
+          <label>Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter patient name"
+            className={fieldErrors.name ? "error-input" : ""}
+          />
+          {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
+        </div>
+
+        {/* Phone Number */}
+        <div className="patient-registration-form-group">
+          <label>Phone Number</label>
+          <input
+            type="number"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            placeholder="Enter phone number"
+            className={fieldErrors.phoneNumber ? "error-input" : ""}
+          />
+          {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
+        </div>
+
+        {/* Age */}
+        <div className="patient-registration-form-group">
+          <label>Age</label>
+          <input
+            type="number"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
+            placeholder="Enter age"
+            className={fieldErrors.age ? "error-input" : ""}
+          />
+          {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
+        </div>
+
+        {/* Gender */}
+        <div className="patient-registration-form-group">
+          <label>Gender</label>
+          <div className="radio-group">
             <label>
-              Book Number <span className="required">*</span>
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={formData.gender === "male"}
+                onChange={handleChange}
+              />
+              Male
             </label>
-            <input
-              type="number"
-              name="bookNumber"
-              value={formData.bookNumber}
-              onChange={handleChange}
-              className={fieldErrors.bookNumber ? "error-input" : ""}
-              placeholder="Enter patient book number"
-            />
-            {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={formData.gender === "female"}
+                onChange={handleChange}
+              />
+              Female
+            </label>
           </div>
+          {fieldErrors.gender && <div className="field-error">{fieldErrors.gender}</div>}
+        </div>
 
-          <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
-            {isLoading ? "Loading..." : "Submit"}
-          </button>
-        </form>
-      )}
+        {/* Area */}
+        <div className="patient-registration-form-group">
+          <label>Area</label>
+          <input
+            type="text"
+            name="area"
+            value={formData.area}
+            onChange={handleChange}
+            placeholder="Enter area"
+            className={fieldErrors.area ? "error-input" : ""}
+          />
+          {fieldErrors.area && <div className="field-error">{fieldErrors.area}</div>}
+        </div>
 
-      {/* STEP 2: Full Form */}
-      {showFullForm && (
-        <form onSubmit={handleFullFormSubmit} className="patient-registration-form">
-          {/* Book Number */}
-          <div className="patient-registration-form-group">
-            <label>Book Number</label>
-            <input type="text" name="bookNumber" value={formData.bookNumber} readOnly />
+        {/* Old/New */}
+        <div className="patient-registration-form-group">
+          <label>Old/New</label>
+          <div className="radio-group">
+            <label>
+              <input
+                type="radio"
+                name="oldNew"
+                value="old"
+                checked={formData.oldNew === "old"}
+                onChange={handleChange}
+              />
+              Old
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="oldNew"
+                value="new"
+                checked={formData.oldNew === "new"}
+                onChange={handleChange}
+              />
+              New
+            </label>
           </div>
+          {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
+        </div>
 
-          {/* Name */}
-          <div className="patient-registration-form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter patient name"
-              className={fieldErrors.name ? "error-input" : ""}
-            />
-            {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
-          </div>
+        {/* EID (editable) */}
+        <div className="patient-registration-form-group">
+          <label>EID</label>
+          <input
+            type="text"
+            name="eid"
+            value={formData.eid}
+            onChange={handleChange}
+            placeholder="Enter EID"
+          />
+          {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
+        </div>
 
-          {/* Phone Number */}
-          <div className="patient-registration-form-group">
-            <label>Phone Number</label>
-            <input
-              type="number"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-              className={fieldErrors.phoneNumber ? "error-input" : ""}
-            />
-            {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
-          </div>
-
-          {/* Age */}
-          <div className="patient-registration-form-group">
-            <label>Age</label>
-            <input
-              type="number"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              placeholder="Enter age"
-              className={fieldErrors.age ? "error-input" : ""}
-            />
-            {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
-          </div>
-
-          {/* Gender */}
-          <div className="patient-registration-form-group">
-            <label>Gender</label>
-            <div className="radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="male"
-                  checked={formData.gender === "male"}
-                  onChange={handleChange}
-                />
-                Male
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="female"
-                  checked={formData.gender === "female"}
-                  onChange={handleChange}
-                />
-                Female
-              </label>
-            </div>
-            {fieldErrors.gender && <div className="field-error">{fieldErrors.gender}</div>}
-          </div>
-
-          {/* Area */}
-          <div className="patient-registration-form-group">
-            <label>Area</label>
-            <input
-              type="text"
-              name="area"
-              value={formData.area}
-              onChange={handleChange}
-              placeholder="Enter area"
-              className={fieldErrors.area ? "error-input" : ""}
-            />
-            {fieldErrors.area && <div className="field-error">{fieldErrors.area}</div>}
-          </div>
-
-          {/* Old/New */}
-          <div className="patient-registration-form-group">
-            <label>Old/New</label>
-            <div className="radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="oldNew"
-                  value="old"
-                  checked={formData.oldNew === "old"}
-                  onChange={handleChange}
-                />
-                Old
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="oldNew"
-                  value="new"
-                  checked={formData.oldNew === "new"}
-                  onChange={handleChange}
-                />
-                New
-              </label>
-            </div>
-            {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
-          </div>
-
-          {/* EID (now editable) */}
-          <div className="patient-registration-form-group">
-            <label>EID</label>
-            <input
-              type="text"
-              name="eid"
-              value={formData.eid}
-              onChange={handleChange}
-              placeholder="Enter EID"
-            />
-            {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
-          </div>
-
+        <div className="patient-registration-form-actions">
           <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
             {isLoading ? "Saving..." : "Save Patient"}
           </button>
-        </form>
-      )}
+        </div>
+      </form>
     </div>
   );
 }
