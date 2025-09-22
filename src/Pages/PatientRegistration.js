@@ -186,7 +186,7 @@ function PatientRegistration() {
         patient_sex: formData.gender,
         patient_phone_no: formData.phoneNumber,
         patient_area: formData.area,
-        oldNew: formData.oldNew,
+        old_or_new: formData.oldNew, // Changed key to old_or_new
         eid: formData.eid,
       };
 
