@@ -23,7 +23,7 @@ function Dashboard() {
     { title: "6. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
     { title: "7. Medicine verification", icon: "💊", path: "/medicine-pickup" },
     { title: "8. Medicine status", icon: "🔍", path:"/medicine-verification" },
-    { title: "9. Counselling", icon: "🗣️", class:"in-progress" },
+    { title: "9. Counselling", icon: "🗣️", path:"/counselling" },
     { title: "10. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
     { title: "11. View Queues", icon: "📋", class: "in-progress" },
     { title: "12. Medicine Delivery", icon: "🚚", class:"in-progress" },
