@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { privateAxios } from '../api/axios'
+import { privateAxios } from '../api/axios';
+import PatientRegistration from './PatientRegistration'; // Import PatientRegistration
 
 const TokenGenerator = () => {
   const [bookNumber, setBookNumber] = useState('');
   const [gender, setGender] = useState('');
   const [tokenInfo, setTokenInfo] = useState(null);
+  const [patientInfo, setPatientInfo] = useState(null);
   const [error, setError] = useState('');
+  const [showRegistration, setShowRegistration] = useState(false); // New state
 
   const generateToken = async () => {
     if (!bookNumber || !gender) {
@@ -14,21 +17,40 @@ const TokenGenerator = () => {
     }
 
     try {
-      const response = await privateAxios.post('/api/token', {
+      // Reset states
+      setError('');
+      setPatientInfo(null);
+      setTokenInfo(null);
+      setShowRegistration(false);
+
+      // 1. Fetch patient info
+      const patientRes = await privateAxios.get(`/api/patients/${bookNumber}`);
+      setPatientInfo(patientRes.data);
+
+      // 2. Generate token
+      const tokenRes = await privateAxios.post('/api/token', {
         bookNumber,
         gender,
       });
 
-	    setTokenInfo({
-  bookNumber,
-  gender,
-  tokenNumber: response.data.tokenNumber,
-  alreadyExists: response.data.alreadyExists || false,
-});
-      setError('');
+      setTokenInfo({
+        bookNumber,
+        gender,
+        tokenNumber: tokenRes.data.tokenNumber,
+        alreadyExists: tokenRes.data.alreadyExists || false,
+      });
     } catch (err) {
-      console.error('Token generation failed:', err);
-      setError('Failed to generate token.');
+      console.error('Error in generating token:', err);
+      if (err.response && err.response.status === 404) {
+        // If patient not found, show registration form
+        setShowRegistration(true);
+        setError('');
+      } else {
+        setError('Failed to fetch patient or generate token.');
+        setShowRegistration(false);
+      }
+      setPatientInfo(null);
+      setTokenInfo(null);
     }
   };
 
@@ -60,18 +82,35 @@ const TokenGenerator = () => {
 
       {error && <p style={styles.error}>{error}</p>}
 
-      {tokenInfo && (
-        <div style={styles.result}>
-          <p><strong>Booking ID:</strong> {tokenInfo.bookNumber}</p>
-          <p><strong>Gender:</strong> {tokenInfo.gender}</p>
-          <p><strong>Token Number:</strong> {tokenInfo.tokenNumber}</p>
+      {/* Show patient and token info */}
+      {patientInfo && tokenInfo && (
+        <div style={styles.resultContainer}>
+          <div style={styles.box}>
+            <h4>Patient Info</h4>
+            <p><strong>Name:</strong> {patientInfo.patient_name}</p>
+            <p><strong>Age:</strong> {patientInfo.patient_age}</p>
+            <p><strong>Phone:</strong> {patientInfo.patient_phone_no}</p>
+          </div>
+          <div style={styles.box}>
+            <h4>Token Info</h4>
+            <p><strong>Booking ID:</strong> {tokenInfo.bookNumber}</p>
+            <p><strong>Gender:</strong> {tokenInfo.gender}</p>
+            <p><strong>Token Number:</strong> {tokenInfo.tokenNumber}</p>
+            {tokenInfo.alreadyExists && (
+              <p style={{ color: 'orange' }}>
+                You have already been assigned a token for today.
+              </p>
+            )}
+          </div>
         </div>
       )}
-	  {tokenInfo?.alreadyExists && (
-  <p style={{ color: 'orange' }}>
-    You have already been assigned a token for today.
-  </p>
-)}
+
+      {/* Show registration form if patient not found */}
+      {showRegistration && (
+        <div style={{ marginTop: '2rem' }}>
+          <PatientRegistration initialBookNumber={bookNumber} />
+        </div>
+      )}
     </div>
   );
 };
@@ -79,7 +118,7 @@ const TokenGenerator = () => {
 const styles = {
   container: {
     padding: '1.5rem',
-    maxWidth: '400px',
+    maxWidth: '600px',
     margin: '0 auto',
     fontFamily: 'Arial, sans-serif',
   },
@@ -107,13 +146,20 @@ const styles = {
     color: 'red',
     marginTop: '0.5rem',
   },
-  result: {
+  resultContainer: {
     marginTop: '1.5rem',
+    display: 'flex',
+    gap: '20px',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  box: {
+    flex: '1 1 250px',
     padding: '1rem',
     backgroundColor: '#f1f1f1',
-    borderRadius: '4px',
+    borderRadius: '6px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
   },
 };
 
 export default TokenGenerator;
-
