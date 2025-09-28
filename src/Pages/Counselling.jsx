@@ -23,7 +23,14 @@ function Counselling() {
 
     setIsLoading(true);
     try {
-      const response = await privateAxios.post('/api/counselling', { book_no: bookNumber });
+      const counsellingData = {
+        date: new Date().toISOString(),
+        notes: "Counselling session attended." 
+      };
+      const response = await privateAxios.post('/api/patientHistory/counselling', { 
+        book_no: bookNumber,
+        counsellingData: counsellingData
+      });
       setMessage(response.data.message);
       setBookNumber(''); // Clear the input after successful submission
     } catch (err) {
