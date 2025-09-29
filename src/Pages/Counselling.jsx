@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { privateAxios } from "../api/axios";
-import "../Styles/Counselling.css";
+import React, { useState } from 'react';
+import { privateAxios } from '../api/axios';
+import '../Styles/Counselling.css';
 
 function Counselling() {
   const [bookNumber, setBookNumber] = useState('');
+  const [patientId, setPatientId] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,18 +24,25 @@ function Counselling() {
 
     setIsLoading(true);
     try {
-      const counsellingData = {
-        date: new Date().toISOString(),
-        notes: "Counselling session attended." 
-      };
-      const response = await privateAxios.post('/api/patientHistory/counselling', { 
-        book_no: bookNumber,
-        counsellingData: counsellingData
-      });
+      // Fetch patient data to get patientId
+      const patientRes = await privateAxios.get(`/api/patients/${bookNumber}`);
+      const patientId = patientRes.data._id;
+      setPatientId(patientId);
+
+      const response = await privateAxios.post(
+        '/api/patient-history/counselling',
+        {
+          patientId: patientId,
+          book_no: bookNumber,
+        }
+      );
       setMessage(response.data.message);
       setBookNumber(''); // Clear the input after successful submission
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred while saving counselling data.');
+      setError(
+        err.response?.data?.message ||
+          'An error occurred while saving counselling data.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -57,8 +65,12 @@ function Counselling() {
             required
           />
         </div>
-        <button type="submit" className="counselling-submit-btn" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Counselling Data"}
+        <button
+          type="submit"
+          className="counselling-submit-btn"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Saving...' : 'Save Counselling Data'}
         </button>
       </form>
     </div>
