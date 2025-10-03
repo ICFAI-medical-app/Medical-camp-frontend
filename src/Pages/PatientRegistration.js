@@ -387,13 +387,13 @@ if (!response.data?.eid) {
             {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
           </div> */}
           <div className="patient-registration-form-group">
-            <label>EID</label>
+            <label>Token Number</label>
             <input
               type="number"
               name="eid"
               value={formData.eid}
               onChange={handleChange}
-              placeholder="Enter patient EID (optional)"
+              placeholder="Enter patient Token Number (optional)"
               className={fieldErrors.eid ? "error-input" : ""}
             />
             {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
