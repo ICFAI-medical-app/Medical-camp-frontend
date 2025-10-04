@@ -34,7 +34,6 @@ import PatientProfile from './Pages/PatientProfile';
 import Log from './Pages/Log';
 import VerifyMedicine from './Pages/VerifyMedicine';
 import TokenGeneration from './Pages/TokenGeneration'
-import Counselling from './Pages/Counselling';
 
 function App() {
   return (
@@ -78,7 +77,6 @@ function App() {
             <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
             <Route path="/patient/:id" element={<ProtectedRoute requiredType="admin"><PatientProfile /></ProtectedRoute>} />
-            <Route path="/counselling" element={<ProtectedRoute requiredType="volunteer"><Counselling /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />
