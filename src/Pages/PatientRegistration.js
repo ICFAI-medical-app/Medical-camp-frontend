@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/PatientRegistration.css";
@@ -33,7 +33,7 @@ function PatientRegistration() {
   // 🔹 Area state
   const [areas, setAreas] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  let debounceTimer;
+  const debounceTimer = useRef(null);
 
   // ------------------ VALIDATION ------------------
   const validateField = (name, value) => {
@@ -106,13 +106,12 @@ function PatientRegistration() {
     }
 
     setFormData({ ...formData, [name]: newValue });
-    
     setFieldErrors({ ...fieldErrors, [name]: '' });
 
     // 🔹 Debounced area fetch
     if (name === "area") {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => fetchAreas(value), 300);
+      clearTimeout(debounceTimer.current);
+      debounceTimer.current = setTimeout(() => fetchAreas(value), 300);
     }
   };
 
@@ -143,9 +142,9 @@ function PatientRegistration() {
       }
     });
     
-    const optionalFields = ['eid']; // eid remains optional
+    const optionalFields = ['eid'];
     optionalFields.forEach(field => {
-      if (formData[field]) { // Only validate if a value is provided
+      if (formData[field]) {
         const error = validateField(field, formData[field]);
         if (error) {
           newErrors[field] = error;
@@ -183,7 +182,6 @@ function PatientRegistration() {
           eid: response.data.eid || ''
         });
 
-        // 🔹 Generate token if eid missing
         if (!response.data?.eid) {
           try {
             const tokenRes = await privateAxios.post('/api/token', {
@@ -406,7 +404,7 @@ function PatientRegistration() {
                 placeholder="Area"
                 value={formData.area}
                 onChange={handleChange}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 300)}
                 autoComplete="off"
               />
               {showSuggestions && (
