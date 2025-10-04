@@ -315,6 +315,14 @@ function PatientProfile() {
         )}
       </div>
       <div className="nav-actions">
+        <button 
+          onClick={() => {
+            navigate('/patient-status'); // Navigate to the base patient status page
+          }} 
+          className="view-status-button"
+        >
+          View Patient Status
+        </button>
         <button onClick={() => navigate('/view-patients')} className="back-button">
           Back to Patients List
         </button>

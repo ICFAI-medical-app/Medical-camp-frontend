@@ -15,14 +15,14 @@ function Dashboard() {
 
   const cardData = [
     { title: "1. Token Generation", icon: "🎟️", path: "/token" },
-    { title: "2. Patient registration", icon: "👤", path: "/patient-registration" },
+    { title: "2. Patient Registration", icon: "👤", path: "/patient-registration" },
     { title: "3. Patients Waiting", icon: "⏳", class:"in-progress" },
     { title: "4. Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
     // { title: "5.2 Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
     { title: "5. Vitals", icon: "💓", path: "/vitals" },
     { title: "6. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
-    { title: "7. Medicine verification", icon: "💊", path: "/medicine-pickup" },
-    { title: "8. patient status", icon: "🔍", path:"/patient-status" },
+    { title: "7. Medicine Verification", icon: "💊", path: "/medicine-pickup" },
+    { title: "8. Patient Status", icon: "🔍", path:"/patient-status" },
     { title: "9. Counselling", icon: "🗣️", path:"/counselling" },
     { title: "10. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
     { title: "11. View Queues", icon: "📋", class: "in-progress" },
