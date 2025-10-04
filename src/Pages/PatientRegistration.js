@@ -1,36 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { privateAxios } from "../api/axios";
-import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import "../Styles/PatientRegistration.css";
+
+// ✅ Zod schema with coercion to handle number inputs
+const patientSchema = z.object({
+  bookNumber: z.coerce.string().min(1, "Book number is required"),
+  name: z.string().min(1, "Name is required"),
+  phoneNumber: z
+    .coerce.string()
+    .min(10, "Phone number must be 10 digits")
+    .max(10, "Phone number must be 10 digits")
+    .regex(/^[6-9]\d{9}$/, "Phone number must start with 6-9 and be 10 digits"),
+  age: z
+    .coerce.string()
+    .min(1, "Age is required")
+    .refine((val) => Number(val) > 0 && Number(val) <= 120, "Enter a valid age"),
+  gender: z.enum(["male", "female"], "Please select gender"),
+  area: z.string().min(1, "Area is required"),
+  oldNew: z.enum(["old", "new"], "Please select old/new"),
+  eid: z.string().optional(),
+});
 
 function PatientRegistration() {
   const [formData, setFormData] = useState({
-    bookNumber: '',
-    name: '',
-    phoneNumber: '',
-    age: '',
-    gender: '',
-    area: '',
-    oldNew: '',
-    eid: ''
+    bookNumber: "",
+    name: "",
+    phoneNumber: "",
+    age: "",
+    gender: "",
+    area: "",
+    oldNew: "",
+    eid: "",
   });
-  
-  const [fieldErrors, setFieldErrors] = useState({
-    bookNumber: '',
-    name: '',
-    phoneNumber: '',
-    age: '',
-    gender: '',
-    area: '',
-    oldNew: '',
-    eid: ''
-  });
-  
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   // 🔹 Area state
   const [areas, setAreas] = useState([]);
@@ -155,7 +157,7 @@ function PatientRegistration() {
     setError('');
     setMessage('');
     setIsLoading(true);
-    
+
     try {
       const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
       if (response.data) {
@@ -265,6 +267,7 @@ function PatientRegistration() {
   return (
     <div className="patient-registration-container">
       <h1 className="patient-registration-title">Patient Registration</h1>
+
       {message && <div className="patient-registration-success-msg">{message}</div>}
       {error && <div className="patient-registration-error-msg">{error}</div>}
 
@@ -273,24 +276,87 @@ function PatientRegistration() {
         <form onSubmit={handleBookNumberSubmit} className="patient-registration-form">
           <div className="patient-registration-form-group">
             <label>
-              Book Number <span className="required">*</span>
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={formData.gender === "male"}
+                onChange={handleChange}
+              />
+              Male
             </label>
-            <input
-              type="number"
-              name="bookNumber"
-              value={formData.bookNumber}
-              onChange={handleChange}
-              className={fieldErrors.bookNumber ? "error-input" : ""}
-              placeholder="Enter patient book number"
-            />
-            {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={formData.gender === "female"}
+                onChange={handleChange}
+              />
+              Female
+            </label>
           </div>
-          <button 
-            type="submit" 
-            className="patient-registration-submit-btn"
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : "Submit"}
+          {fieldErrors.gender && <div className="field-error">{fieldErrors.gender}</div>}
+        </div>
+
+        {/* Area */}
+        <div className="patient-registration-form-group">
+          <label>Area</label>
+          <input
+            type="text"
+            name="area"
+            value={formData.area}
+            onChange={handleChange}
+            placeholder="Enter area"
+            className={fieldErrors.area ? "error-input" : ""}
+          />
+          {fieldErrors.area && <div className="field-error">{fieldErrors.area}</div>}
+        </div>
+
+        {/* Old/New */}
+        <div className="patient-registration-form-group">
+          <label>Old/New</label>
+          <div className="radio-group">
+            <label>
+              <input
+                type="radio"
+                name="oldNew"
+                value="old"
+                checked={formData.oldNew === "old"}
+                onChange={handleChange}
+              />
+              Old
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="oldNew"
+                value="new"
+                checked={formData.oldNew === "new"}
+                onChange={handleChange}
+              />
+              New
+            </label>
+          </div>
+          {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
+        </div>
+
+        {/* EID (editable) */}
+        <div className="patient-registration-form-group">
+          <label>EID</label>
+          <input
+            type="text"
+            name="eid"
+            value={formData.eid}
+            onChange={handleChange}
+            placeholder="Enter EID"
+          />
+          {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
+        </div>
+
+        <div className="patient-registration-form-actions">
+          <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save Patient"}
           </button>
         </form>
       ) : (
