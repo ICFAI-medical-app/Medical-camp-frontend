@@ -34,173 +34,236 @@ function PatientRegistration() {
     eid: "",
   });
 
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // 🔹 Area state
+  const [areas, setAreas] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  let debounceTimer;
 
-  // Debounce mechanism for fetching patient data
-  const debounce = (func, delay) => {
-    let timeout;
-    return function(...args) {
-      const context = this;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(context, args), delay);
-    };
+  // ------------------ VALIDATION ------------------
+  const validateField = (name, value) => {
+    let errorMessage = '';
+    
+    switch (name) {
+      case 'bookNumber':
+        if (!value) {
+          errorMessage = 'Book number is required';
+        } else if (isNaN(value) || parseInt(value) <= 0) {
+          errorMessage = 'Book number must be a positive number';
+        }
+        break;
+      case 'name':
+        if (!value && isBookNumberSubmitted) {
+          errorMessage = 'Name is required';
+        }
+        break;
+      case 'phoneNumber':
+        if (value && !/^\d{10}$/.test(value)) {
+          errorMessage = 'Phone number must be exactly 10 digits';
+        }
+        break;
+      case 'age':
+        if (value && (isNaN(value) || parseInt(value) <= 0 || parseInt(value) > 150)) {
+          errorMessage = 'Age must be a valid number between 1 and 150';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    return errorMessage;
   };
 
-  const fetchPatientData = useCallback(
-    debounce(async (bookNum) => {
-      if (!bookNum) {
-        setFormData((prev) => ({
-          ...prev,
-          name: "",
-          phoneNumber: "",
-          age: "",
-          gender: "",
-          area: "",
-          oldNew: "",
-          eid: "",
-        }));
-        setMessage("");
-        setError("");
-        setIsLoading(false);
-        return;
-      }
+  // ------------------ AREA FETCH ------------------
+  const fetchAreas = async (query) => {
+    if (query.length < 3) {
+      setAreas([]);
+      setShowSuggestions(false);
+      return;
+    }
+    try {
+      const res = await privateAxios.get(`/api/patients/patient-areas?q=${query}`);
+      setAreas(res.data);
+      setShowSuggestions(res.data.length > 0);
+    } catch (err) {
+      console.error("Error fetching areas", err);
+      setShowSuggestions(false);
+    }
+  };
 
-      setError("");
-      setMessage("");
-      setIsLoading(true);
-
-      try {
-        const response = await privateAxios.get(`/api/patients/${bookNum}`);
-
-        if (response.data) {
-          setFormData((prev) => ({
-            ...prev,
-            bookNumber: response.data.book_no || bookNum,
-            name: response.data.patient_name || "",
-            phoneNumber: response.data.patient_phone_no || "",
-            age: response.data.patient_age || "",
-            gender: response.data.patient_sex || "",
-            area: response.data.patient_area || "",
-            oldNew: "old", // Mark as "old" if patient found
-            eid: response.data.eid || "",
-          }));
-          setMessage("Patient data loaded successfully!");
-        } else {
-          setMessage("No patient found. Please fill in details for new registration.");
-          setFormData((prev) => ({
-            ...prev,
-            name: "",
-            phoneNumber: "",
-            age: "",
-            gender: "",
-            area: "",
-            oldNew: "new", // Mark as "new" if patient not found
-            eid: "",
-          }));
-        }
-      } catch (err) {
-        console.error("Fetch Error:", err.response?.data || err.message);
-        if (err.response?.status === 404) {
-          setMessage("No patient found for this book number. Please fill in details for new registration.");
-          setFormData((prev) => ({
-            ...prev,
-            name: "",
-            phoneNumber: "",
-            age: "",
-            gender: "",
-            area: "",
-            oldNew: "new", // Mark as "new" if patient not found
-            eid: "",
-          }));
-          setError(""); // Clear any previous errors
-        } else {
-          setError(err.response?.data?.message || "An error occurred while fetching patient data.");
-          setFormData((prev) => ({
-            ...prev,
-            name: "",
-            phoneNumber: "",
-            age: "",
-            gender: "",
-            area: "",
-            oldNew: "new", // Default to "new" on error
-            eid: "",
-          }));
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500), // Debounce for 500ms
-    []
-  );
-
-  // Handle input change
+  // ------------------ HANDLE CHANGE ------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    setFieldErrors({ ...fieldErrors, [name]: '' });
 
-    // Restrict phone number to digits only and max length 10
-    if (name === "phoneNumber") {
-      if (!/^\d{0,10}$/.test(value)) return;
-    }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-
-    if (name === "bookNumber") {
-      fetchPatientData(value);
+    // 🔹 Debounced area fetch
+    if (name === "area") {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchAreas(value), 300);
     }
   };
 
-  // Zod validation
-  const validateFields = () => {
-    const result = patientSchema.safeParse(formData);
-    if (!result.success) {
-      const errors = {};
-      result.error.issues.forEach((err) => {
-        errors[err.path[0]] = err.message;
-      });
-      setFieldErrors(errors);
-      return false;
-    }
-    setFieldErrors({});
-    return true;
+  // ------------------ AREA SELECT ------------------
+  const handleSuggestionClick = (area) => {
+    setFormData({ ...formData, area });
+    setShowSuggestions(false);
   };
 
-  // Main form submit handler for saving/updating patient data
-  const handleFullFormSubmit = async (e) => {
+  // ------------------ VALIDATE BOOK NO. FORM ------------------
+  const validateBookNumberForm = () => {
+    const error = validateField('bookNumber', formData.bookNumber);
+    setFieldErrors({ ...fieldErrors, bookNumber: error });
+    return !error;
+  };
+
+  // ------------------ VALIDATE PATIENT FORM ------------------
+  const validatePatientForm = () => {
+    const newErrors = {};
+    let isValid = true;
+    
+    const requiredFields = ['name'];
+    requiredFields.forEach(field => {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        newErrors[field] = error;
+        isValid = false;
+      }
+    });
+    
+    const optionalFields = ['phoneNumber', 'age', 'eid'];
+    optionalFields.forEach(field => {
+      if (formData[field]) {
+        const error = validateField(field, formData[field]);
+        if (error) {
+          newErrors[field] = error;
+          isValid = false;
+        }
+      }
+    });
+    
+    setFieldErrors({ ...fieldErrors, ...newErrors });
+    return isValid;
+  };
+
+  // ------------------ BOOK NUMBER SUBMIT ------------------
+  const handleBookNumberSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateFields()) return;
-
-    setError("");
-    setMessage("");
+    
+    if (!validateBookNumberForm()) {
+      return;
+    }
+    
+    setError('');
+    setMessage('');
     setIsLoading(true);
 
     try {
-      const payload = {
+      const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
+      if (response.data) {
+        setFormData({
+          bookNumber: response.data.book_no,
+          name: response.data.patient_name || '',
+          phoneNumber: response.data.patient_phone_no || '',
+          age: response.data.patient_age || '',
+          gender: response.data.patient_sex || '',
+          area: response.data.patient_area || '',
+          oldNew: response.data.oldNew || '',
+          eid: response.data.eid || ''
+        });
+
+        // 🔹 Generate token if eid missing
+        if (!response.data?.eid) {
+          try {
+            const tokenRes = await privateAxios.post('/api/token', {
+              bookNumber: formData.bookNumber,
+              gender: response.data?.patient_sex || 'unknown'
+            });
+
+            if (tokenRes.data?.tokenNumber) {
+              setFormData(prev => ({
+                ...prev,
+                eid: tokenRes.data.tokenNumber
+              }));
+            }
+          } catch (tokenError) {
+            console.error('Error generating token:', tokenError);
+          }
+        }
+        setMessage('Patient data loaded successfully!');
+      } else {
+        setMessage('No patient found. Please fill out the form.');
+        setFormData({
+          bookNumber: formData.bookNumber,
+          name: '',
+          phoneNumber: '',
+          age: '',
+          gender: '',
+          area: '',
+          oldNew: '',
+          eid: ''
+        });
+      }
+      setError('');
+      setIsBookNumberSubmitted(true);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setMessage('No patient found. Please fill out the form.');
+        setFormData({
+          bookNumber: formData.bookNumber,
+          name: '',
+          phoneNumber: '',
+          age: '',
+          gender: '',
+          area: '',
+          oldNew: '',
+          eid: ''
+        });
+        setIsBookNumberSubmitted(true);
+      } else {
+        setError(error.response?.data?.message || 'An error occurred while fetching patient data.');
+        setMessage('');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ------------------ SAVE PATIENT ------------------
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validatePatientForm()) {
+      setError('Please correct the errors before submitting');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+    
+    try {
+      const response = await privateAxios.post('/api/patients', {
         book_no: formData.bookNumber,
         patient_name: formData.name,
         patient_age: formData.age,
         patient_sex: formData.gender,
         patient_phone_no: formData.phoneNumber,
         patient_area: formData.area,
-        old_or_new: formData.oldNew, // Changed key to old_or_new
-        eid: formData.eid,
-      };
-
-      const response = await privateAxios.post("/api/patients", payload);
-
-      setMessage(response.data?.message || "✅ Patient data saved successfully!");
-    } catch (err) {
-      console.error("Save Error:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "❌ Failed to save patient data.");
+        oldNew: formData.oldNew,
+        eid: formData.eid
+      });
+      setMessage(response.data.message || 'Patient data saved successfully!');
+      setError('');
+    } catch (error) {
+      setError(error.response?.data?.message || 'An error occurred while saving patient data.');
+      setMessage('');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ------------------ RENDER ------------------
   return (
     <div className="patient-registration-container">
       <h1 className="patient-registration-title">Patient Registration</h1>
@@ -208,71 +271,10 @@ function PatientRegistration() {
       {message && <div className="patient-registration-success-msg">{message}</div>}
       {error && <div className="patient-registration-error-msg">{error}</div>}
 
-      <form onSubmit={handleFullFormSubmit} className="patient-registration-form">
-        {/* Book Number - always editable, triggers fetch */}
-        <div className="patient-registration-form-group">
-          <label>
-            Book Number <span className="required">*</span>
-          </label>
-          <input
-            type="number"
-            name="bookNumber"
-            value={formData.bookNumber}
-            onChange={handleChange}
-            className={fieldErrors.bookNumber ? "error-input" : ""}
-            placeholder="Enter patient book number"
-            required
-            autoFocus
-          />
-          {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
-        </div>
-
-        {/* Name */}
-        <div className="patient-registration-form-group">
-          <label>Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Enter patient name"
-            className={fieldErrors.name ? "error-input" : ""}
-          />
-          {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
-        </div>
-
-        {/* Phone Number */}
-        <div className="patient-registration-form-group">
-          <label>Phone Number</label>
-          <input
-            type="number"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            placeholder="Enter phone number"
-            className={fieldErrors.phoneNumber ? "error-input" : ""}
-          />
-          {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
-        </div>
-
-        {/* Age */}
-        <div className="patient-registration-form-group">
-          <label>Age</label>
-          <input
-            type="number"
-            name="age"
-            value={formData.age}
-            onChange={handleChange}
-            placeholder="Enter age"
-            className={fieldErrors.age ? "error-input" : ""}
-          />
-          {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
-        </div>
-
-        {/* Gender */}
-        <div className="patient-registration-form-group">
-          <label>Gender</label>
-          <div className="radio-group">
+      {/* Book Number Step */}
+      {!isBookNumberSubmitted ? (
+        <form onSubmit={handleBookNumberSubmit} className="patient-registration-form">
+          <div className="patient-registration-form-group">
             <label>
               <input
                 type="radio"
@@ -356,8 +358,145 @@ function PatientRegistration() {
           <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
             {isLoading ? "Saving..." : "Save Patient"}
           </button>
-        </div>
-      </form>
+        </form>
+      ) : (
+        <form onSubmit={handleSubmit} className="patient-registration-form">
+
+          {/* Book Number */}
+          <div className="patient-registration-form-group">
+            <label>Book Number</label>
+            <input
+              type="number"
+              name="bookNumber"
+              value={formData.bookNumber}
+              disabled
+            />
+          </div>
+
+          {/* Name */}
+          <div className="patient-registration-form-group">
+            <label>
+              Name <span className="required">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className={fieldErrors.name ? "error-input" : ""}
+              placeholder="Enter patient name"
+            />
+            {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
+          </div>
+
+          {/* Phone Number */}
+          <div className="patient-registration-form-group">
+            <label>Phone Number</label>
+            <input
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              maxLength="10"
+              placeholder="Enter 10-digit phone number (optional)"
+              className={fieldErrors.phoneNumber ? "error-input" : ""}
+            />
+            {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
+          </div>
+
+          {/* Age */}
+          <div className="patient-registration-form-group">
+            <label>Age</label>
+            <input
+              type="number"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              placeholder="Enter patient age (optional)"
+              className={fieldErrors.age ? "error-input" : ""}
+            />
+            {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
+          </div>
+
+          {/* Gender */}
+          <div className="patient-registration-form-group">
+            <label>Gender</label>
+            <div className="patient-registration-radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="male"
+                  checked={formData.gender === 'male'}
+                  onChange={handleChange}
+                />
+                Male
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="female"
+                  checked={formData.gender === 'female'}
+                  onChange={handleChange}
+                />
+                Female
+              </label>
+            </div>
+          </div>
+
+          {/* Area with autocomplete */}
+          <div className="patient-registration-form-group">
+            <label>Area</label>
+            <div className="area-input">
+              <input
+                type="text"
+                name="area"
+                placeholder="Area"
+                value={formData.area}
+                onChange={handleChange}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                autoComplete="off"
+              />
+              {showSuggestions && (
+                <ul className="suggestions-dropdown">
+                  {areas.length > 0 ? (
+                    areas.map((area, i) => (
+                      <li key={i} onClick={() => handleSuggestionClick(area)}>
+                        {area}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="no-results">No results found</li>
+                  )}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {/* EID */}
+          <div className="patient-registration-form-group">
+            <label>Token Number</label>
+            <input
+              type="number"
+              name="eid"
+              value={formData.eid}
+              onChange={handleChange}
+              placeholder="Enter patient Token Number (optional)"
+              className={fieldErrors.eid ? "error-input" : ""}
+            />
+            {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
+          </div>
+
+          <button 
+            type="submit" 
+            className="patient-registration-submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </button>
+        </form>
+      )}
     </div>
   );
 }
