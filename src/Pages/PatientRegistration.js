@@ -43,8 +43,6 @@ function PatientRegistration() {
       case 'bookNumber':
         if (!value) {
           errorMessage = 'Book number is required';
-        } else if (isNaN(value) || parseInt(value) <= 0) {
-          errorMessage = 'Book number must be a positive number';
         }
         break;
       case 'name':
@@ -53,13 +51,25 @@ function PatientRegistration() {
         }
         break;
       case 'phoneNumber':
-        if (value && !/^\d{10}$/.test(value)) {
-          errorMessage = 'Phone number must be exactly 10 digits';
+        if (!value) {
+          errorMessage = 'Phone number is required';
+        } else if (!/^\d{10}$/.test(value) || isNaN(value)) {
+          errorMessage = 'Phone number must be exactly 10 digits and contain only numbers';
         }
         break;
       case 'age':
-        if (value && (isNaN(value) || parseInt(value) <= 0 || parseInt(value) > 150)) {
-          errorMessage = 'Age must be a valid number between 1 and 150';
+        if (!value) {
+          errorMessage = 'Age is required';
+        } else {
+          const ageValue = parseFloat(value);
+          if (isNaN(ageValue) || ageValue <= 0 || ageValue > 150) {
+            errorMessage = 'Age must be a valid decimal number between 0.1 and 150';
+          }
+        }
+        break;
+      case 'area':
+        if (!value) {
+          errorMessage = 'Area is required';
         }
         break;
       default:
@@ -89,7 +99,13 @@ function PatientRegistration() {
   // ------------------ HANDLE CHANGE ------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    let newValue = value;
+
+    if (name === 'phoneNumber') {
+      newValue = value.slice(0, 10); // Limit to 10 digits
+    }
+
+    setFormData({ ...formData, [name]: newValue });
     
     setFieldErrors({ ...fieldErrors, [name]: '' });
 
@@ -118,7 +134,7 @@ function PatientRegistration() {
     const newErrors = {};
     let isValid = true;
     
-    const requiredFields = ['name'];
+    const requiredFields = ['name', 'phoneNumber', 'age', 'area'];
     requiredFields.forEach(field => {
       const error = validateField(field, formData[field]);
       if (error) {
@@ -127,9 +143,9 @@ function PatientRegistration() {
       }
     });
     
-    const optionalFields = ['phoneNumber', 'age', 'eid'];
+    const optionalFields = ['eid']; // eid remains optional
     optionalFields.forEach(field => {
-      if (formData[field]) {
+      if (formData[field]) { // Only validate if a value is provided
         const error = validateField(field, formData[field]);
         if (error) {
           newErrors[field] = error;
@@ -271,7 +287,7 @@ function PatientRegistration() {
               Book Number <span className="required">*</span>
             </label>
             <input
-              type="number"
+              type="text"
               name="bookNumber"
               value={formData.bookNumber}
               onChange={handleChange}
@@ -295,7 +311,7 @@ function PatientRegistration() {
           <div className="patient-registration-form-group">
             <label>Book Number</label>
             <input
-              type="number"
+              type="text"
               name="bookNumber"
               value={formData.bookNumber}
               disabled
@@ -320,14 +336,16 @@ function PatientRegistration() {
 
           {/* Phone Number */}
           <div className="patient-registration-form-group">
-            <label>Phone Number</label>
+            <label>
+              Phone Number <span className="required">*</span>
+            </label>
             <input
-              type="text"
+              type="number"
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
               maxLength="10"
-              placeholder="Enter 10-digit phone number (optional)"
+              placeholder="Enter 10-digit phone number"
               className={fieldErrors.phoneNumber ? "error-input" : ""}
             />
             {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
@@ -335,13 +353,15 @@ function PatientRegistration() {
 
           {/* Age */}
           <div className="patient-registration-form-group">
-            <label>Age</label>
+            <label>
+              Age <span className="required">*</span>
+            </label>
             <input
-              type="number"
+              type="text"
               name="age"
               value={formData.age}
               onChange={handleChange}
-              placeholder="Enter patient age (optional)"
+              placeholder="Enter patient age"
               className={fieldErrors.age ? "error-input" : ""}
             />
             {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
@@ -376,7 +396,9 @@ function PatientRegistration() {
 
           {/* Area with autocomplete */}
           <div className="patient-registration-form-group">
-            <label>Area</label>
+            <label>
+              Area <span className="required">*</span>
+            </label>
             <div className="area-input">
               <input
                 type="text"
