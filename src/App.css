@@ -58,3 +58,9 @@ h1 {
   gap: 20px;
   margin-top: 40px;
 }
+
+.back-btn{
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
