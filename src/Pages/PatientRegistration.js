@@ -11,7 +11,6 @@ function PatientRegistration() {
     age: '',
     gender: '',
     area: '',
-    oldNew: '',
     eid: ''
   });
   
@@ -22,7 +21,6 @@ function PatientRegistration() {
     age: '',
     gender: '',
     area: '',
-    oldNew: '',
     eid: ''
   });
   
@@ -166,7 +164,6 @@ function PatientRegistration() {
           age: response.data.patient_age || '',
           gender: response.data.patient_sex || '',
           area: response.data.patient_area || '',
-          oldNew: response.data.oldNew || '',
           eid: response.data.eid || ''
         });
 
@@ -198,7 +195,6 @@ function PatientRegistration() {
           age: '',
           gender: '',
           area: '',
-          oldNew: '',
           eid: ''
         });
       }
@@ -248,7 +244,6 @@ function PatientRegistration() {
         patient_sex: formData.gender,
         patient_phone_no: formData.phoneNumber,
         patient_area: formData.area,
-        oldNew: formData.oldNew,
         eid: formData.eid
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
