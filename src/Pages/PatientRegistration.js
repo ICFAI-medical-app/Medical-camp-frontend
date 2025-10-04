@@ -1,17 +1,17 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/PatientRegistration.css";
 
-function PatientRegistration() {
+function PatientRegistration({ initialBookNumber = '', hideEidField = false, initialGender = '' }) {
   const [formData, setFormData] = useState({
-    bookNumber: '',
+    bookNumber: initialBookNumber,
     name: '',
     phoneNumber: '',
     age: '',
-    gender: '',
+    gender: initialGender,
     area: '',
-    eid: ''
+    ...(hideEidField ? {} : { eid: '' })
   });
   
   const [fieldErrors, setFieldErrors] = useState({
@@ -21,9 +21,15 @@ function PatientRegistration() {
     age: '',
     gender: '',
     area: '',
-    eid: ''
+    ...(hideEidField ? {} : { eid: '' })
   });
   
+  useEffect(() => {
+    if (initialGender) {
+      setFormData(prev => ({ ...prev, gender: initialGender }));
+    }
+  }, [initialGender]);
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
@@ -70,6 +76,11 @@ function PatientRegistration() {
       case 'area':
         if (!value) {
           errorMessage = 'Area is required';
+        }
+        break;
+      case 'eid':
+        if (!hideEidField && !value) { // Only validate if not hidden and value is missing
+          errorMessage = 'Token Number is required';
         }
         break;
       default:
@@ -142,7 +153,7 @@ function PatientRegistration() {
       }
     });
     
-    const optionalFields = ['eid'];
+    const optionalFields = hideEidField ? [] : ['eid']; // Conditionally include eid in optional fields
     optionalFields.forEach(field => {
       if (formData[field]) {
         const error = validateField(field, formData[field]);
@@ -179,10 +190,10 @@ function PatientRegistration() {
           age: response.data.patient_age || '',
           gender: response.data.patient_sex || '',
           area: response.data.patient_area || '',
-          eid: response.data.eid || ''
+          ...(hideEidField ? {} : { eid: response.data.eid || '' })
         });
 
-        if (!response.data?.eid) {
+        if (!response.data?.eid && !hideEidField) { // Only generate token if eid is not hidden
           try {
             const tokenRes = await privateAxios.post('/api/token', {
               bookNumber: formData.bookNumber,
@@ -202,31 +213,33 @@ function PatientRegistration() {
         setMessage('Patient data loaded successfully!');
       } else {
         setMessage('No patient found. Please fill out the form.');
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           bookNumber: formData.bookNumber,
           name: '',
           phoneNumber: '',
           age: '',
-          gender: '',
+          gender: initialGender, // Use initialGender here
           area: '',
-          eid: ''
-        });
+          ...(hideEidField ? {} : { eid: '' })
+        }));
       }
       setError('');
       setIsBookNumberSubmitted(true);
     } catch (error) {
       if (error.response && error.response.status === 404) {
         setMessage('No patient found. Please fill out the form.');
-        setFormData({
+        setFormData(prev => ({
+          ...prev,
           bookNumber: formData.bookNumber,
           name: '',
           phoneNumber: '',
           age: '',
-          gender: '',
+          gender: initialGender, // Use initialGender here
           area: '',
           oldNew: '',
-          eid: ''
-        });
+          ...(hideEidField ? {} : { eid: '' })
+        }));
         setIsBookNumberSubmitted(true);
       } else {
         setError(error.response?.data?.message || 'An error occurred while fetching patient data.');
@@ -258,7 +271,7 @@ function PatientRegistration() {
         patient_sex: formData.gender,
         patient_phone_no: formData.phoneNumber,
         patient_area: formData.area,
-        eid: formData.eid
+        ...(hideEidField ? {} : { eid: formData.eid }) // Conditionally include eid in payload
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
       setError('');
@@ -439,18 +452,20 @@ function PatientRegistration() {
           </div>
 
           {/* EID */}
-          <div className="patient-registration-form-group">
-            <label>Token Number</label>
-            <input
-              type="number"
-              name="eid"
-              value={formData.eid}
-              onChange={handleChange}
-              placeholder="Enter patient Token Number (optional)"
-              className={fieldErrors.eid ? "error-input" : ""}
-            />
-            {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
-          </div>
+          {!hideEidField && (
+            <div className="patient-registration-form-group">
+              <label>Token Number</label>
+              <input
+                type="number"
+                name="eid"
+                value={formData.eid}
+                onChange={handleChange}
+                placeholder="Enter patient Token Number (optional)"
+                className={fieldErrors.eid ? "error-input" : ""}
+              />
+              {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
+            </div>
+          )}
 
           <button 
             type="submit" 
