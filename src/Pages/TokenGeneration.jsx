@@ -161,7 +161,7 @@ const TokenGenerator = () => {
             ❌ Patient not found for Booking ID <strong>{bookNumber}</strong>.  
             Please create a new record below.
           </p>
-          <PatientRegistration initialBookNumber={bookNumber} />
+          <PatientRegistration initialBookNumber={bookNumber} hideEidField={true} initialGender={gender} />
         </div>
       )}
     </div>
