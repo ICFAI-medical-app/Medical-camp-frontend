@@ -1,38 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { privateAxios } from "../api/axios";
-import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import "../Styles/PatientRegistration.css";
+
+// ✅ Zod schema with coercion to handle number inputs
+const patientSchema = z.object({
+  bookNumber: z.coerce.string().min(1, "Book number is required"),
+  name: z.string().min(1, "Name is required"),
+  phoneNumber: z
+    .coerce.string()
+    .min(10, "Phone number must be 10 digits")
+    .max(10, "Phone number must be 10 digits")
+    .regex(/^[6-9]\d{9}$/, "Phone number must start with 6-9 and be 10 digits"),
+  age: z
+    .coerce.string()
+    .min(1, "Age is required")
+    .refine((val) => Number(val) > 0 && Number(val) <= 120, "Enter a valid age"),
+  gender: z.enum(["male", "female"], "Please select gender"),
+  area: z.string().min(1, "Area is required"),
+  oldNew: z.enum(["old", "new"], "Please select old/new"),
+  eid: z.string().optional(),
+});
 
 function PatientRegistration() {
   const [formData, setFormData] = useState({
-    bookNumber: '',
-    name: '',
-    phoneNumber: '',
-    age: '',
-    gender: '',
-    area: '',
-    oldNew: '',
-    eid: ''
+    bookNumber: "",
+    name: "",
+    phoneNumber: "",
+    age: "",
+    gender: "",
+    area: "",
+    oldNew: "",
+    eid: "",
   });
-  
-  const [fieldErrors, setFieldErrors] = useState({
-    bookNumber: '',
-    name: '',
-    phoneNumber: '',
-    age: '',
-    gender: '',
-    area: '',
-    oldNew: '',
-    eid: ''
-  });
-  
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
-  // Field validation function
+  // 🔹 Area state
+  const [areas, setAreas] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  let debounceTimer;
+
+  // ------------------ VALIDATION ------------------
   const validateField = (name, value) => {
     let errorMessage = '';
     
@@ -59,11 +66,6 @@ function PatientRegistration() {
           errorMessage = 'Age must be a valid number between 1 and 150';
         }
         break;
-      // case 'oldNew':
-      //   if (!value && isBookNumberSubmitted) {
-      //     errorMessage = 'Please select Old or New';
-      //   }
-        break;
       default:
         break;
     }
@@ -71,25 +73,55 @@ function PatientRegistration() {
     return errorMessage;
   };
 
+  // ------------------ AREA FETCH ------------------
+  const fetchAreas = async (query) => {
+    if (query.length < 3) {
+      setAreas([]);
+      setShowSuggestions(false);
+      return;
+    }
+    try {
+      const res = await privateAxios.get(`/api/patients/patient-areas?q=${query}`);
+      setAreas(res.data);
+      setShowSuggestions(res.data.length > 0);
+    } catch (err) {
+      console.error("Error fetching areas", err);
+      setShowSuggestions(false);
+    }
+  };
+
+  // ------------------ HANDLE CHANGE ------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     
-    // Clear field error when user starts typing
     setFieldErrors({ ...fieldErrors, [name]: '' });
+
+    // 🔹 Debounced area fetch
+    if (name === "area") {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchAreas(value), 300);
+    }
   };
 
+  // ------------------ AREA SELECT ------------------
+  const handleSuggestionClick = (area) => {
+    setFormData({ ...formData, area });
+    setShowSuggestions(false);
+  };
+
+  // ------------------ VALIDATE BOOK NO. FORM ------------------
   const validateBookNumberForm = () => {
     const error = validateField('bookNumber', formData.bookNumber);
     setFieldErrors({ ...fieldErrors, bookNumber: error });
     return !error;
   };
 
+  // ------------------ VALIDATE PATIENT FORM ------------------
   const validatePatientForm = () => {
     const newErrors = {};
     let isValid = true;
     
-    // Only validate required fields
     const requiredFields = ['name'];
     requiredFields.forEach(field => {
       const error = validateField(field, formData[field]);
@@ -99,7 +131,6 @@ function PatientRegistration() {
       }
     });
     
-    // Validate optional fields only if they have a value
     const optionalFields = ['phoneNumber', 'age', 'eid'];
     optionalFields.forEach(field => {
       if (formData[field]) {
@@ -115,10 +146,10 @@ function PatientRegistration() {
     return isValid;
   };
 
+  // ------------------ BOOK NUMBER SUBMIT ------------------
   const handleBookNumberSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate book number before submission
     if (!validateBookNumberForm()) {
       return;
     }
@@ -126,11 +157,10 @@ function PatientRegistration() {
     setError('');
     setMessage('');
     setIsLoading(true);
-    
+
     try {
       const response = await privateAxios.get(`/api/patients/${formData.bookNumber}`);
       if (response.data) {
-        // Load patient data into the form
         setFormData({
           bookNumber: response.data.book_no,
           name: response.data.patient_name || '',
@@ -142,32 +172,29 @@ function PatientRegistration() {
           eid: response.data.eid || ''
         });
 
-        // If eid is not present, generate a token and set it
-if (!response.data?.eid) {
-  try {
-    const tokenRes = await privateAxios.post('/api/token', {
-      bookNumber: formData.bookNumber,
-      gender: response.data?.patient_sex || 'unknown' // fallback in case gender not found
-    });
+        // 🔹 Generate token if eid missing
+        if (!response.data?.eid) {
+          try {
+            const tokenRes = await privateAxios.post('/api/token', {
+              bookNumber: formData.bookNumber,
+              gender: response.data?.patient_sex || 'unknown'
+            });
 
-    if (tokenRes.data?.tokenNumber) {
-      setFormData(prev => ({
-        ...prev,
-        eid: tokenRes.data.tokenNumber
-      }));
-    }
-  } catch (tokenError) {
-    console.error('Error generating token:', tokenError);
-  }
-}
-
-
+            if (tokenRes.data?.tokenNumber) {
+              setFormData(prev => ({
+                ...prev,
+                eid: tokenRes.data.tokenNumber
+              }));
+            }
+          } catch (tokenError) {
+            console.error('Error generating token:', tokenError);
+          }
+        }
         setMessage('Patient data loaded successfully!');
       } else {
-        // If no data is found, load a blank form
         setMessage('No patient found. Please fill out the form.');
         setFormData({
-          bookNumber: formData.bookNumber, // Keep the entered book number
+          bookNumber: formData.bookNumber,
           name: '',
           phoneNumber: '',
           age: '',
@@ -183,7 +210,7 @@ if (!response.data?.eid) {
       if (error.response && error.response.status === 404) {
         setMessage('No patient found. Please fill out the form.');
         setFormData({
-          bookNumber: formData.bookNumber, // Keep the entered book number
+          bookNumber: formData.bookNumber,
           name: '',
           phoneNumber: '',
           age: '',
@@ -202,10 +229,10 @@ if (!response.data?.eid) {
     }
   };
 
+  // ------------------ SAVE PATIENT ------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate form before submission
     if (!validatePatientForm()) {
       setError('Please correct the errors before submitting');
       return;
@@ -228,13 +255,6 @@ if (!response.data?.eid) {
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
       setError('');
-      // if (response.data.redirect) {
-      //   // setTimeout(() => {
-      //   //   window.location.reload(); // Reload the page to reset the form
-      //   // }, 2000); // Wait 2 seconds to display the success message
-        
-      //   // navigate('/');
-      // }
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred while saving patient data.');
       setMessage('');
@@ -243,47 +263,117 @@ if (!response.data?.eid) {
     }
   };
 
+  // ------------------ RENDER ------------------
   return (
     <div className="patient-registration-container">
       <h1 className="patient-registration-title">Patient Registration</h1>
+
       {message && <div className="patient-registration-success-msg">{message}</div>}
       {error && <div className="patient-registration-error-msg">{error}</div>}
+
+      {/* Book Number Step */}
       {!isBookNumberSubmitted ? (
         <form onSubmit={handleBookNumberSubmit} className="patient-registration-form">
           <div className="patient-registration-form-group">
             <label>
-              Book Number <span className="required">*</span>
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={formData.gender === "male"}
+                onChange={handleChange}
+              />
+              Male
             </label>
-            <input
-              type="number"
-              name="bookNumber"
-              value={formData.bookNumber}
-              onChange={handleChange}
-              className={fieldErrors.bookNumber ? "error-input" : ""}
-              placeholder="Enter patient book number"
-            />
-            {fieldErrors.bookNumber && <div className="field-error">{fieldErrors.bookNumber}</div>}
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={formData.gender === "female"}
+                onChange={handleChange}
+              />
+              Female
+            </label>
           </div>
-          <button 
-            type="submit" 
-            className="patient-registration-submit-btn"
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : "Submit"}
+          {fieldErrors.gender && <div className="field-error">{fieldErrors.gender}</div>}
+        </div>
+
+        {/* Area */}
+        <div className="patient-registration-form-group">
+          <label>Area</label>
+          <input
+            type="text"
+            name="area"
+            value={formData.area}
+            onChange={handleChange}
+            placeholder="Enter area"
+            className={fieldErrors.area ? "error-input" : ""}
+          />
+          {fieldErrors.area && <div className="field-error">{fieldErrors.area}</div>}
+        </div>
+
+        {/* Old/New */}
+        <div className="patient-registration-form-group">
+          <label>Old/New</label>
+          <div className="radio-group">
+            <label>
+              <input
+                type="radio"
+                name="oldNew"
+                value="old"
+                checked={formData.oldNew === "old"}
+                onChange={handleChange}
+              />
+              Old
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="oldNew"
+                value="new"
+                checked={formData.oldNew === "new"}
+                onChange={handleChange}
+              />
+              New
+            </label>
+          </div>
+          {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
+        </div>
+
+        {/* EID (editable) */}
+        <div className="patient-registration-form-group">
+          <label>EID</label>
+          <input
+            type="text"
+            name="eid"
+            value={formData.eid}
+            onChange={handleChange}
+            placeholder="Enter EID"
+          />
+          {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
+        </div>
+
+        <div className="patient-registration-form-actions">
+          <button type="submit" className="patient-registration-submit-btn" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save Patient"}
           </button>
         </form>
       ) : (
         <form onSubmit={handleSubmit} className="patient-registration-form">
+
+          {/* Book Number */}
           <div className="patient-registration-form-group">
             <label>Book Number</label>
             <input
               type="number"
               name="bookNumber"
               value={formData.bookNumber}
-              onChange={handleChange}
               disabled
             />
           </div>
+
+          {/* Name */}
           <div className="patient-registration-form-group">
             <label>
               Name <span className="required">*</span>
@@ -298,6 +388,8 @@ if (!response.data?.eid) {
             />
             {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
           </div>
+
+          {/* Phone Number */}
           <div className="patient-registration-form-group">
             <label>Phone Number</label>
             <input
@@ -311,6 +403,8 @@ if (!response.data?.eid) {
             />
             {fieldErrors.phoneNumber && <div className="field-error">{fieldErrors.phoneNumber}</div>}
           </div>
+
+          {/* Age */}
           <div className="patient-registration-form-group">
             <label>Age</label>
             <input
@@ -323,6 +417,8 @@ if (!response.data?.eid) {
             />
             {fieldErrors.age && <div className="field-error">{fieldErrors.age}</div>}
           </div>
+
+          {/* Gender */}
           <div className="patient-registration-form-group">
             <label>Gender</label>
             <div className="patient-registration-radio-group">
@@ -348,56 +444,50 @@ if (!response.data?.eid) {
               </label>
             </div>
           </div>
+
+          {/* Area with autocomplete */}
           <div className="patient-registration-form-group">
             <label>Area</label>
-            <input
-              type="text"
-              name="area"
-              value={formData.area}
-              onChange={handleChange}
-              placeholder="Enter patient area (optional)"
-            />
-          </div>
-          {/* <div className="patient-registration-form-group">
-            <label>
-              Old / New <span className="required">*</span>
-            </label>
-            <div className="patient-registration-radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="oldNew"
-                  value="old"
-                  checked={formData.oldNew === 'old'}
-                  onChange={handleChange}
-                />
-                Old
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="oldNew"
-                  value="new"
-                  checked={formData.oldNew === 'new'}
-                  onChange={handleChange}
-                />
-                New
-              </label>
+            <div className="area-input">
+              <input
+                type="text"
+                name="area"
+                placeholder="Area"
+                value={formData.area}
+                onChange={handleChange}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                autoComplete="off"
+              />
+              {showSuggestions && (
+                <ul className="suggestions-dropdown">
+                  {areas.length > 0 ? (
+                    areas.map((area, i) => (
+                      <li key={i} onClick={() => handleSuggestionClick(area)}>
+                        {area}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="no-results">No results found</li>
+                  )}
+                </ul>
+              )}
             </div>
-            {fieldErrors.oldNew && <div className="field-error">{fieldErrors.oldNew}</div>}
-          </div> */}
+          </div>
+
+          {/* EID */}
           <div className="patient-registration-form-group">
-            <label>EID</label>
+            <label>Token Number</label>
             <input
               type="number"
               name="eid"
               value={formData.eid}
               onChange={handleChange}
-              placeholder="Enter patient EID (optional)"
+              placeholder="Enter patient Token Number (optional)"
               className={fieldErrors.eid ? "error-input" : ""}
             />
             {fieldErrors.eid && <div className="field-error">{fieldErrors.eid}</div>}
           </div>
+
           <button 
             type="submit" 
             className="patient-registration-submit-btn"
