@@ -75,33 +75,6 @@
   white-space: nowrap;
 }
 
-.area-input {
-  position: relative;
-}
-
-.suggestions-dropdown {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  max-height: 150px;
-  overflow-y: auto;
-  background: white;
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.suggestions-dropdown li {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.suggestions-dropdown li:hover {
-  background: #f0f0f0;
-}
-
 .patient-registration-radio-group input[type="radio"] {
   margin-right: 5px;
 }
