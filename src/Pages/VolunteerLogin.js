@@ -7,6 +7,7 @@ import '../Styles/Login.css';
 const VolunteerLogin = () => {
     const [user_name, setUserName] = useState('');
     const [user_password, setUserPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -85,13 +86,21 @@ const VolunteerLogin = () => {
                     onChange={(e) => setUserName(e.target.value)}
                     required
                 />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={user_password}
-                    onChange={(e) => setUserPassword(e.target.value)}
-                    required
-                />
+                <div className="password-container">
+                    <input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Password"
+                        value={user_password}
+                        onChange={(e) => setUserPassword(e.target.value)}
+                        required
+                    />
+                    <span
+                        className="password-toggle-icon"
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? '🙈' : '👁️'}
+                    </span>
+                </div>
                 <button
                     type="submit"
                     className="login-button"

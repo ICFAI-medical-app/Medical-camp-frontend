@@ -83,6 +83,20 @@
   transition: background-color 0.3s ease;
 }
 
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+
 @media screen and (max-width: 600px) {
   .login-container {
     margin: 20vh auto;
