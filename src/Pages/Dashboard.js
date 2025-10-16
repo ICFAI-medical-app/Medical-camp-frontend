@@ -27,7 +27,7 @@ function Dashboard() {
     { title: "10. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
     { title: "11. View Queues", icon: "📋", class: "in-progress" },
     { title: "12. Medicine Delivery", icon: "🚚", class:"in-progress" },
-    { title: "13. Lab", icon: "🔬", class:"in-progress" },
+    { title: "13. Lab", icon: "🔬", path: "/lab-tests" },
     { title: "14. Patient Support", icon: "🤝", class:"in-progress" },
     { title: "15. Food", icon: "🍽️", class:"in-progress" },
   ];
