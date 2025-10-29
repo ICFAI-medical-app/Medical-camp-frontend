@@ -294,13 +294,13 @@ function MedicinePickup() {
                       <div key={batchIndex} className="batch-card">
                         <p><strong>Formulation:</strong> {med.medicine_formulation}</p>
                         <p><strong>Expiry:</strong> {new Date(batch.expiry_date).toLocaleDateString()}</p>
-                        <p><strong>Available:</strong> {batch.available_quantity}</p>
+                        <p><strong>Available:</strong> {med.total_quantity}</p>
                         <label>
                           <strong>Quantity to Give:</strong>
                           <input
                             type="number"
                             min="0"
-                            max={batch.available_quantity}
+                            max={med.total_quantity}
                             value={batch.quantity_taken} // Always show the value
                             onChange={(e) =>
                               handleQuantityChange(medIndex, batchIndex, e.target.value)
