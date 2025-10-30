@@ -18,10 +18,10 @@ const LabTestsPage = () => {
   const [bookNo, setBookNo] = useState(''); // Keep bookNo state for input field
   const [submissionMessage, setSubmissionMessage] = useState(null);
   const [messageType, setMessageType] = useState(null); // 'success' or 'error'
-  const [prescriptionExists, setPrescriptionExists] = useState(false);
-  const [isLoadingPrescription, setIsLoadingPrescription] = useState(false);
-  const [prescriptionStatusMessage, setPrescriptionStatusMessage] = useState('');
-  const [prescriptionMessageTimeoutId, setPrescriptionMessageTimeoutId] = useState(null); // New state for timeout ID
+  const [doctorAssigned, setDoctorAssigned] = useState(false);
+  const [isLoadingDoctorAssignment, setIsLoadingDoctorAssignment] = useState(false);
+  const [doctorAssignmentStatusMessage, setDoctorAssignmentStatusMessage] = useState('');
+  const [doctorAssignmentMessageTimeoutId, setDoctorAssignmentMessageTimeoutId] = useState(null); // New state for timeout ID
 
   const handleCheckboxChange = (test) => {
     setSelectedTests((prevSelectedTests) =>
@@ -33,55 +33,55 @@ const LabTestsPage = () => {
 
   const handleBookNoChange = (e) => {
     setBookNo(e.target.value);
-    setPrescriptionExists(false); // Reset prescription status on bookNo change
-    setPrescriptionStatusMessage('');
-    if (prescriptionMessageTimeoutId) {
-      clearTimeout(prescriptionMessageTimeoutId);
-      setPrescriptionMessageTimeoutId(null);
+    setDoctorAssigned(false); // Reset doctor assignment status on bookNo change
+    setDoctorAssignmentStatusMessage('');
+    if (doctorAssignmentMessageTimeoutId) {
+      clearTimeout(doctorAssignmentMessageTimeoutId);
+      setDoctorAssignmentMessageTimeoutId(null);
     }
   };
 
   useEffect(() => {
-    if (prescriptionMessageTimeoutId) {
-      clearTimeout(prescriptionMessageTimeoutId);
-      setPrescriptionMessageTimeoutId(null);
+    if (doctorAssignmentMessageTimeoutId) {
+      clearTimeout(doctorAssignmentMessageTimeoutId);
+      setDoctorAssignmentMessageTimeoutId(null);
     }
 
-    const checkPrescription = async () => {
+    const checkDoctorAssignment = async () => {
       if (bookNo) {
-        setIsLoadingPrescription(true);
-        setPrescriptionStatusMessage('Checking for prescription...');
+        setIsLoadingDoctorAssignment(true);
+        setDoctorAssignmentStatusMessage('Checking for doctor assignment...');
         try {
-          const response = await privateAxios.get(`/api/patient-history/check-prescription/${bookNo}`);
-          setPrescriptionExists(response.data.hasPrescription);
-          setPrescriptionStatusMessage(response.data.message);
+          const response = await privateAxios.get(`/api/patient-history/check-doctor-assignment/${bookNo}`);
+          setDoctorAssigned(response.data.hasDoctorAssigned);
+          setDoctorAssignmentStatusMessage(response.data.message);
           const timeoutId = setTimeout(() => {
-            setPrescriptionStatusMessage('');
+            setDoctorAssignmentStatusMessage('');
           }, 10000);
-          setPrescriptionMessageTimeoutId(timeoutId);
+          setDoctorAssignmentMessageTimeoutId(timeoutId);
         } catch (error) {
-          console.error('Error checking prescription:', error.response?.data || error.message);
-          setPrescriptionExists(false);
-          setPrescriptionStatusMessage(`Error checking prescription: ${error.response?.data?.message || error.message}`);
+          console.error('Error checking doctor assignment:', error.response?.data || error.message);
+          setDoctorAssigned(false);
+          setDoctorAssignmentStatusMessage(`Error checking doctor assignment: ${error.response?.data?.message || error.message}`);
           const timeoutId = setTimeout(() => {
-            setPrescriptionStatusMessage('');
+            setDoctorAssignmentMessageTimeoutId(timeoutId);
           }, 10000);
-          setPrescriptionMessageTimeoutId(timeoutId);
+          setDoctorAssignmentMessageTimeoutId(timeoutId);
         } finally {
-          setIsLoadingPrescription(false);
+          setIsLoadingDoctorAssignment(false);
         }
       } else {
-        setPrescriptionExists(false);
-        setPrescriptionStatusMessage('');
+        setDoctorAssigned(false);
+        setDoctorAssignmentStatusMessage('');
       }
     };
 
-    const handler = setTimeout(checkPrescription, 500); // Debounce API call
+    const handler = setTimeout(checkDoctorAssignment, 500); // Debounce API call
     return () => {
       clearTimeout(handler);
-      if (prescriptionMessageTimeoutId) {
-        clearTimeout(prescriptionMessageTimeoutId);
-        setPrescriptionMessageTimeoutId(null);
+      if (doctorAssignmentMessageTimeoutId) {
+        clearTimeout(doctorAssignmentMessageTimeoutId);
+        setDoctorAssignmentMessageTimeoutId(null);
       }
     };
   }, [bookNo]);
@@ -96,19 +96,8 @@ const LabTestsPage = () => {
       setMessageType('error');
       return;
     }
-    if (!prescriptionExists) {
-      setSubmissionMessage('A doctor\'s prescription is mandatory before submitting lab tests.');
-      setMessageType('error');
-      return;
-    }
-    if (selectedTests.length === 0) {
-      setSubmissionMessage('Please select at least one lab test.');
-      setMessageType('error');
-      return;
-    }
-
-    if (!bookNo) {
-      setSubmissionMessage('Please enter a Book No.');
+    if (!doctorAssigned) {
+      setSubmissionMessage('A doctor must be assigned to the patient before submitting lab tests.');
       setMessageType('error');
       return;
     }
@@ -167,10 +156,10 @@ const LabTestsPage = () => {
             placeholder="Enter Book No"
           />
         </div>
-        {isLoadingPrescription && <div className="prescription-status-message loading">Checking prescription...</div>}
-        {!isLoadingPrescription && prescriptionStatusMessage && (
-          <div className={`prescription-status-message ${prescriptionExists ? 'success' : 'error'}`}>
-            {prescriptionStatusMessage}
+        {isLoadingDoctorAssignment && <div className="prescription-status-message loading">Checking doctor assignment...</div>}
+        {!isLoadingDoctorAssignment && doctorAssignmentStatusMessage && (
+          <div className={`prescription-status-message ${doctorAssigned ? 'success' : 'error'}`}>
+            {doctorAssignmentStatusMessage}
           </div>
         )}
         {labTests.map((test, index) => (
@@ -185,7 +174,7 @@ const LabTestsPage = () => {
             <label htmlFor={`test-${index}`}>{test}</label>
           </div>
         ))}
-        <button type="submit" className="submit-button" disabled={isLoadingPrescription || !prescriptionExists}>
+        <button type="submit" className="submit-button" disabled={isLoadingDoctorAssignment || !doctorAssigned}>
           Submit Lab Tests
         </button>
       </form>
