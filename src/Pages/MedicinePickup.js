@@ -218,7 +218,7 @@ function MedicinePickup() {
         <h1 className="medicine-pickup-title">Medicine Pickup</h1>
 
         <div className="medicine-pickup-form-group">
-          <label>Book No</label>
+          <label>Book Number</label>
           <input
             type="text"
             value={bookNo}

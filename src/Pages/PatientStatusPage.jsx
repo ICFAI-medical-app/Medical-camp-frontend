@@ -64,7 +64,7 @@ const PatientStatusPage = () => {
 
       {patientStatus && (
         <>
-          <h3 className="status-for-book-no">Status for Book No: {currentBookNumber}</h3>
+          <h3 className="status-for-book-no">Status for Book Number: {currentBookNumber}</h3>
           <div className="status-checklist">
             {[
               { label: 'Doctor Assigned', key: 'doctorAssigned' },

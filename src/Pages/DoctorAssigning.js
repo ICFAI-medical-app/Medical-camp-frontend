@@ -62,7 +62,7 @@ function DoctorAssigning() {
         <div className="doctor-assigning-form-group">
           <label>Book Number</label>
           <input
-            type="number"
+            type="text"
             name="bookNumber"
             value={formData.bookNumber}
             onChange={handleChange}
