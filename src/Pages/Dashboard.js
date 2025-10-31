@@ -14,7 +14,7 @@ function Dashboard() {
   );
 
   const cardData = [
-    { title: "1. Token Generation", icon: "🎟️", path: "/token" },
+    { title: "1. Token Generation", icon: "🎟️", class:"in-progress" },
     { title: "2. Patient Registration", icon: "👤", path: "/patient-registration" },
     { title: "3. Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
     // { title: "5.2 Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
@@ -24,11 +24,11 @@ function Dashboard() {
     { title: "7. Patient Status", icon: "🔍", path:"/patient-status" },
     { title: "8. Counselling", icon: "🗣️", path:"/counselling" },
     { title: "9. Lab", icon: "🔬", path: "/lab-tests" },
-    { title: "10. Patients Waiting", icon: "⏳", class:"in-progress" },
-    { title: "11. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
-    { title: "12. View Queues", icon: "📋", class: "in-progress" },
-    { title: "13. Medicine Delivery", icon: "🚚", class:"in-progress" },
-    { title: "14. Patient Support", icon: "🤝", class:"in-progress" },
+    { title: "10. Patient Support", icon: "🤝", class:"in-progress" },
+    { title: "11. Patients Waiting", icon: "⏳", class:"in-progress" },
+    { title: "12. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
+    { title: "13. View Queues", icon: "📋", class: "in-progress" },
+    { title: "14. Medicine Delivery", icon: "🚚", class:"in-progress" },
     { title: "15. Food", icon: "🍽️", class:"in-progress" },
   ];
 
