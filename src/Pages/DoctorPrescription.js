@@ -178,7 +178,7 @@ function DoctorPrescription() {
         <h1 className="doctor-prescription-title">Doctor Prescription</h1>
         <form onSubmit={handleSubmit} className="doctor-prescription-form">
           <div className="doctor-prescription-form-group">
-            <label>Book No</label>
+            <label>Book Number</label>
             <input
               type="text"
               value={bookNo}

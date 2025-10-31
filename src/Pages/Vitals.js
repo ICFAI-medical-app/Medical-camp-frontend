@@ -42,14 +42,7 @@ function Vitals() {
       } else {
         setBpError(''); 
       }
-    } else if (name === 'bookNumber') {
-      const regex = /^[0-9]*$/; // Allow empty string for backspace
-      if (!regex.test(value)) {
-        setBookNumberError('Book Number must contain only digits');
-      } else {
-        setBookNumberError('');
-      }
-    }
+    } 
     setFormData({ ...formData, [name]: value });
   };
 
