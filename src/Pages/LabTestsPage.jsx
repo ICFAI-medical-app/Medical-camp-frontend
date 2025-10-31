@@ -1,33 +1,36 @@
-import React, { useState, useEffect } from 'react'; // Import useEffect
+import React, { useState, useEffect } from 'react';
 import '../Styles/LabTests.css';
-import { privateAxios } from '../api/axios'; // Import privateAxios
+import { privateAxios } from '../api/axios';
 
 const LabTestsPage = () => {
-  const labTests = [
-    "CBP",
-    "Creatinine",
-    "ESR",
-    "RBS",
-    "FBS",
-    "CRP",
-    "TSH",
-    "Thyroid Profile",
-  ];
-
+  const [labTests, setLabTests] = useState([]); // State to store fetched lab tests
   const [selectedTests, setSelectedTests] = useState([]);
-  const [bookNo, setBookNo] = useState(''); // Keep bookNo state for input field
+  const [bookNo, setBookNo] = useState('');
   const [submissionMessage, setSubmissionMessage] = useState(null);
-  const [messageType, setMessageType] = useState(null); // 'success' or 'error'
+  const [messageType, setMessageType] = useState(null);
   const [doctorAssigned, setDoctorAssigned] = useState(false);
   const [isLoadingDoctorAssignment, setIsLoadingDoctorAssignment] = useState(false);
   const [doctorAssignmentStatusMessage, setDoctorAssignmentStatusMessage] = useState('');
-  const [doctorAssignmentMessageTimeoutId, setDoctorAssignmentMessageTimeoutId] = useState(null); // New state for timeout ID
+  const [doctorAssignmentMessageTimeoutId, setDoctorAssignmentMessageTimeoutId] = useState(null);
 
-  const handleCheckboxChange = (test) => {
+  useEffect(() => {
+    const fetchAvailableLabTests = async () => {
+      try {
+        const response = await privateAxios.get('/api/admin/labtests'); // Fetch from admin endpoint
+        setLabTests(response.data.labTests);
+      } catch (error) {
+        console.error('Error fetching available lab tests:', error.response?.data || error.message);
+        // Optionally show an error message to the user
+      }
+    };
+    fetchAvailableLabTests();
+  }, []); // Empty dependency array means this runs once on mount
+
+  const handleCheckboxChange = (testName) => {
     setSelectedTests((prevSelectedTests) =>
-      prevSelectedTests.includes(test)
-        ? prevSelectedTests.filter((t) => t !== test)
-        : [...prevSelectedTests, test]
+      prevSelectedTests.includes(testName)
+        ? prevSelectedTests.filter((t) => t !== testName)
+        : [...prevSelectedTests, testName]
     );
   };
 
@@ -162,16 +165,16 @@ const LabTestsPage = () => {
             {doctorAssignmentStatusMessage}
           </div>
         )}
-        {labTests.map((test, index) => (
-          <div key={index} className="lab-test-item">
+        {labTests.map((test) => (
+          <div key={test._id} className="lab-test-item">
             <input
               type="checkbox"
-              id={`test-${index}`}
-              name={test}
-              checked={selectedTests.includes(test)}
-              onChange={() => handleCheckboxChange(test)}
+              id={`test-${test._id}`}
+              name={test.name}
+              checked={selectedTests.includes(test.name)}
+              onChange={() => handleCheckboxChange(test.name)}
             />
-            <label htmlFor={`test-${index}`}>{test}</label>
+            <label htmlFor={`test-${test._id}`}>{test.name}</label>
           </div>
         ))}
         <button type="submit" className="submit-button" disabled={isLoadingDoctorAssignment || !doctorAssigned}>
