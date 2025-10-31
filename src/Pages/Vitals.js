@@ -1,198 +1,132 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+// import axios from 'axios';
 import { privateAxios } from '../api/axios';
-import { z } from 'zod';
 import '../Styles/Vitals.css';
-
-const vitalsSchema = z.object({
-  bookNumber: z.string()
-    .regex(/^[0-9]+$/, { message: 'Book Number must contain only digits' })
-    .optional()
-    .or(z.literal('')),
-  bloodPressure: z.union([
-    z.string().length(0),
-    z.string().regex(
-      /^(\d{2,3})\/(\d{2,3})$/,
-      { message: 'Blood Pressure must be in format "120/80"' }
-    )
-  ]),
-  pulse: z.union([
-    z.string().length(0),
-    z.preprocess(val => (val === '' ? undefined : Number(val)),
-      z.number()
-        .min(30, { message: 'Enter a value between 30 and 220 bpm for pulse' })
-        .max(220, { message: 'Enter a value between 30 and 220 bpm for pulse' })
-    )
-  ]),
-  rbs: z.union([
-    z.string().length(0),
-    z.preprocess(val => (val === '' ? undefined : Number(val)),
-      z.number()
-        .min(40, { message: 'Enter a value between 40 and 600 mg/dL for RBS' })
-        .max(600, { message: 'Enter a value between 40 and 600 mg/dL for RBS' })
-    )
-  ]),
-  weight: z.union([
-    z.string().length(0),
-    z.preprocess(val => (val === '' ? undefined : Number(val)),
-      z.number()
-        .min(2, { message: 'Enter a value between 2 and 300 kg for weight' })
-        .max(300, { message: 'Enter a value between 2 and 300 kg for weight' })
-    )
-  ]),
-  height: z.union([
-    z.string().length(0),
-    z.preprocess(val => (val === '' ? undefined : Number(val)),
-      z.number()
-        .min(30, { message: 'Enter a value between 30 and 250 cm for height' })
-        .max(250, { message: 'Enter a value between 30 and 250 cm for height' })
-    )
-  ]),
-  extra_note: z.string().optional(),
-});
 
 function Vitals() {
   const VitalEmptyData = {
     bookNumber: '',
-    bloodPressure: '',
+    bp: '',
     pulse: '',
     rbs: '',
     weight: '',
     height: '',
-    extra_note: '',
-  };
-
-  const [formData, setFormData] = useState({ ...VitalEmptyData });
-  const [message, setMessage] = useState(''); // Reintroduce message state for success messages
-  const [error, setError] = useState(''); // Reintroduce error state for general errors
-  const [validationErrors, setValidationErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+    extra_note: ''
+  }
+  const [formData, setFormData] = useState({
+    ...VitalEmptyData
+  });
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [bpError, setBpError] = useState(''); // Add state for BP validation error
+  const [bookNumberError, setBookNumberError] = useState(''); // Add state for book number validation error
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
-
-  // Effect to clear general messages after a few seconds
-  React.useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage('');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-    if (error) {
-      const timer = setTimeout(() => {
-        setError('');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [message, error]);
-
-  const validateForm = (data) => {
-    const parsed = vitalsSchema.safeParse(data);
-    if (!parsed.success) {
-      const errors = {};
-      for (const issue of parsed.error.issues) {
-        errors[issue.path[0]] = issue.message;
-      }
-      setValidationErrors(errors);
-      return false;
-    }
-    setValidationErrors({});
-    return true;
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const updatedData = { ...formData, [name]: value };
-    setFormData(updatedData);
-    validateForm(updatedData);
+
+    if (name === 'bp') {
+      if (value) {
+        const parts = value.split('/');
+        if (
+          parts.length !== 2 || // Ensure there are exactly two parts
+          isNaN(Number(parts[0])) || // Ensure the first part is a number
+          isNaN(Number(parts[1])) // Ensure the second part is a number
+        ) {
+          setBpError('BP must be in the format systolic/diastolic (e.g., 120/80)');
+        } else {
+          setBpError(''); 
+        }
+      } else {
+        setBpError(''); 
+      }
+    } 
+    setFormData({ ...formData, [name]: value });
   };
+
+  const PORT = process.env.PORT || 5002;
 
   const debounce = (func, delay) => {
     let timeout;
-    return (...args) => {
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
       clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), delay);
+      timeout = setTimeout(later, delay);
     };
   };
 
-  const fetchVitals = async (value) => {
-    setMessage(''); // Clear previous messages
-    setError(''); // Clear previous errors
-    setValidationErrors({}); // Clear previous validation errors
-    setIsLoading(true);
-    if (value !== '') {
+  const fetchVitals = async (value) =>{
+    console.log(value);
+    setIsLoading(true); 
+    if(value !== ''){
       try {
-        const response = await privateAxios.get(`/api/vitals/${value}`);
-        // Expecting either systolic/diastolic (old) or combined format.
-        let bp = '';
-        if (response.data.systolic && response.data.diastolic) {
-          bp = `${response.data.systolic}/${response.data.diastolic}`;
-        } else if (response.data.bloodPressure) {
-          bp = response.data.bloodPressure;
-        }
-        setFormData({ ...VitalEmptyData, ...response.data, bloodPressure: bp, bookNumber: value });
-        setMessage('Vitals fetched successfully!');
-      } catch (err) {
-        if (err.response?.status === 404) {
-          setFormData({ ...VitalEmptyData, bookNumber: value });
-          setMessage('No vitals found for this patient for the current month. Please enter new vitals.');
-        } else {
-          setFormData({ ...VitalEmptyData, bookNumber: value });
-          setError(err.response?.data?.message || 'An error occurred while fetching vitals');
-        }
-      } finally {
-        setIsLoading(false);
+      // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/vitals`);
+      const response = await privateAxios.get(`/api/vitals/${value}`);
+      setFormData({
+        ...response.data,
+      bookNumber:value}); // Set book number in form data
+
+      setMessage('Vitals fetched successfully!');
+      setError('');
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setFormData({ ...VitalEmptyData, bookNumber: value });
+        setMessage('No vitals found for this patient for the current month. Please enter new vitals.');
+        setError('');
+      } else {
+        setFormData({ ...VitalEmptyData, bookNumber: value }); // Ensure bookNumber is retained on other errors
+        setError(error.response?.data?.message || 'An error occurred while fetching vitals');
+        setMessage('');
       }
+    } finally {
+      setIsLoading(false); 
+    }
     } else {
       setFormData(VitalEmptyData);
       setMessage('');
       setError('');
-      setValidationErrors({});
     }
-  };
+  }
 
   const debouncedFetchVitals = useCallback(
     debounce((value) => fetchVitals(value), 500),
     []
   );
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(''); // Clear previous messages
-    setError(''); // Clear previous errors
-    setValidationErrors({}); // Clear previous validation errors
-    if (!validateForm(formData)) {
-      setError('Please correct the highlighted errors before submitting.');
-      window.scrollTo(0, 0);
-      return;
-    }
-    setIsLoading(true);
+    setIsLoading(true); 
     try {
-      // Split blood pressure before sending
-      let systolic = null;
-      let diastolic = null;
-      if (formData.bloodPressure && formData.bloodPressure.includes('/')) {
-        const [sys, dia] = formData.bloodPressure.split('/');
-        systolic = sys;
-        diastolic = dia;
-      }
       const response = await privateAxios.post('/api/vitals', {
         book_no: formData.bookNumber,
-        systolic: systolic,
-        diastolic: diastolic,
-        pulse: formData.pulse || null,
         rbs: formData.rbs || null,
-        weight: formData.weight || null,
+        bp: formData.bp || null,
         height: formData.height || null,
-        extra_note: formData.extra_note || null,
+        weight: formData.weight || null,
+        pulse: formData.pulse || null,
+        extra_note: formData.extra_note || null 
       });
       setMessage(response.data.message || 'Vitals recorded successfully!');
-      setFormData({ ...VitalEmptyData });
-      setValidationErrors({}); // Clear validation errors on successful submission
+      setError('');
+      setFormData({
+        bookNumber: '',
+        bp: '',
+        pulse: '',
+        rbs: '',
+        weight: '',
+        height: '',
+        extra_note: ''
+      });
       window.scrollTo(0, 0);
-    } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
+    } catch (error) {
+      setError(error.response?.data?.message || 'An error occurred');
+      setMessage('');
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Set loading back to false after submission
     }
   };
 
@@ -201,108 +135,68 @@ function Vitals() {
       <h1 className="vitals-title">Vitals</h1>
       {message && <div className="vitals-success-msg">{message}</div>}
       {error && <div className="vitals-error-msg">{error}</div>}
-
       <form onSubmit={handleSubmit} className="vitals-form">
         <div className="vitals-form-group">
           <label>Book Number</label>
-          <input
-            type="text"
-            name="bookNumber"
-            placeholder="Digits only"
-            value={formData.bookNumber}
-            autoComplete="off"
-            className={validationErrors.bookNumber ? 'error-input' : ''}
-            onChange={(e) => {
-              handleChange(e);
-              debouncedFetchVitals(e.target.value);
-            }}
-            required
-          />
-          {validationErrors.bookNumber && <div className="vitals-error-msg">{validationErrors.bookNumber}</div>}
+          <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) =>{
+            handleChange(e); // This updates formData and bookNumberError
+            debouncedFetchVitals(e.target.value); // Always call debounced fetch
+          }} required />
+          {bookNumberError && <div className="vitals-error-msg">{bookNumberError}</div>}
         </div>
         <div className="vitals-form-group">
-          <label>Blood Pressure (mmHg)</label>
-          <input
-            type="text"
-            name="bloodPressure"
-            placeholder="e.g. 120/80"
-            value={formData.bloodPressure}
-            className={validationErrors.bloodPressure ? 'error-input' : ''}
-            onChange={handleChange}
-          />
-          {validationErrors.bloodPressure && (
-            <div className="vitals-error-msg">{validationErrors.bloodPressure}</div>
-          )}
+          <label>BP (systolic/diastolic)</label>
+          <input type="text" name="bp" value={formData.bp} onChange={(e) =>{
+            handleChange(e);
+          }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
-          <label>Pulse (bpm)</label>
-          <input
-            type="number"
-            name="pulse"
-            placeholder="30–220 bpm"
-            value={formData.pulse}
-            autoComplete="off"
-            className={validationErrors.pulse ? 'error-input' : ''}
-            onChange={handleChange}
-          />
-          {validationErrors.pulse && <div className="vitals-error-msg">{validationErrors.pulse}</div>}
+          <label>Pulse</label>
+          <input type="text" name="pulse" value={formData.pulse} onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
-          <label>RBS (mg/dL)</label>
-          <input
-            type="number"
-            name="rbs"
-            placeholder="40–600 mg/dL"
-            value={formData.rbs}
-            autoComplete="off"
-            className={validationErrors.rbs ? 'error-input' : ''}
-            onChange={handleChange}
-          />
-          {validationErrors.rbs && <div className="vitals-error-msg">{validationErrors.rbs}</div>}
+          <label>RBS</label>
+          <input type="text" name="rbs" value={formData.rbs} onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Weight (kg)</label>
-          <input
-            type="number"
-            name="weight"
-            placeholder="2–300 kg"
-            value={formData.weight}
-            autoComplete="off"
-            className={validationErrors.weight ? 'error-input' : ''}
-            onChange={handleChange}
-          />
-          {validationErrors.weight && <div className="vitals-error-msg">{validationErrors.weight}</div>}
+          <input type="text" name="weight" value={formData.weight}  onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Height (cm)</label>
-          <input
-            type="number"
-            name="height"
-            placeholder="30–250 cm"
-            value={formData.height}
-            autoComplete="off"
-            className={validationErrors.height ? 'error-input' : ''}
-            onChange={handleChange}
-          />
-          {validationErrors.height && <div className="vitals-error-msg">{validationErrors.height}</div>}
+          <input type="text" name="height" value={formData.height}  onChange={(e) =>{
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {  
+            handleChange(e);
+            }
+            }} autoComplete='off'/>
         </div>
         <div className="vitals-form-group">
           <label>Last Meal and Time</label>
-          <input
-            type="text"
-            name="extra_note"
-            value={formData.extra_note}
-            autoComplete="off"
-            onChange={handleChange}
-          />
+          <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} autoComplete='off' />
         </div>
-        <button
-          type="submit"
-          className="vitals-submit-btn"
-          disabled={isLoading}
+        <button 
+          type="submit" 
+          className="vitals-submit-btn" 
+          disabled={isLoading} // Disable button when loading
         >
-          {isLoading ? 'Submitting...' : 'Submit'}
-        </button>
+          {isLoading ? 'Submitting...' : 'Submit'} {/* Show loading text */}
+        </button>      
       </form>
     </div>
   );
