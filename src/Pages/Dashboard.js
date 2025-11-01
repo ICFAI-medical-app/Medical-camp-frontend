@@ -24,7 +24,7 @@ function Dashboard() {
     { title: "7. Patient Status", icon: "🔍", path:"/patient-status" },
     { title: "8. Counselling", icon: "🗣️", path:"/counselling" },
     { title: "9. Lab", icon: "🔬", path: "/lab-tests" },
-    { title: "10. Patient Support", icon: "🤝", class:"in-progress" },
+    { title: "10. Patient Support", icon: "🤝", path:"/patient-support" },
     { title: "11. Patients Waiting", icon: "⏳", class:"in-progress" },
     { title: "12. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
     { title: "13. View Queues", icon: "📋", class: "in-progress" },
