@@ -23,7 +23,7 @@ function Dashboard() {
     { title: "6. Patient Status", icon: "🔍", path:"/patient-status" },
     { title: "7. Counselling", icon: "🗣️", path:"/counselling" },
     { title: "8. Lab", icon: "🔬", path: "/lab-tests" },
-    { title: "9. Patient Support", icon: "🤝", class:"in-progress" },
+    { title: "9. Patient Support", icon: "🤝", path:"/patient-support" },
     { title: "10. Token Generation", icon: "🎟️", class:"in-progress" },
     { title: "11. Patients Waiting", icon: "⏳", class:"in-progress" },
     { title: "12. Doctor Assitance", icon: "👩‍⚕️", class:"in-progress" },
