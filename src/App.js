@@ -37,6 +37,8 @@ import CounsellingPage from './Pages/CounsellingPage';
 import TokenGeneration from './Pages/TokenGeneration';
 import PatientStatusPage from './Pages/PatientStatusPage'; // Import new component
 import LabTestsPage from './Pages/LabTestsPage'; // Import new component
+import AdminLabTests from './Pages/AdminLabTests'; // Import new component
+import PatientSupport from './Pages/PatientSupport'; // Import new component
 
 function App() {
   return (
@@ -50,11 +52,11 @@ function App() {
             <Route path="/dashboard" element={<ProtectedRoute requiredType="volunteer"><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard-admin" element={<ProtectedRoute requiredType="admin"><DashboardAdmin /></ProtectedRoute>} />
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/volunteer-login" element={<VolunteerLogin />} /> {/* Add the new route */}
+            <Route path="/volunteer-login" element={<VolunteerLogin />} />
             <Route path="/patient-registration" element={<ProtectedRoute requiredType="volunteer"><PatientRegistration /></ProtectedRoute>} />
             <Route path="/vitals" element={<ProtectedRoute requiredType="volunteer"><Vitals /></ProtectedRoute>} />
             <Route path="/token" element={<ProtectedRoute requiredType="volunteer"><TokenGeneration /></ProtectedRoute>} />
-            <Route path="/counselling" element={<ProtectedRoute requiredType="volunteer"><CounsellingPage /></ProtectedRoute>} /> {/* New Counselling Route */}
+            <Route path="/counselling" element={<ProtectedRoute requiredType="volunteer"><CounsellingPage /></ProtectedRoute>} />
             <Route path="/doctor-assigning" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigning /></ProtectedRoute>} />
             <Route path="/doctor-assigning-automatic" element={<ProtectedRoute requiredType="volunteer"><DoctorAssigningAutomatic /></ProtectedRoute>} />
             <Route path="/view-queue" element={<ProtectedRoute requiredType="volunteer"><ViewQueue /></ProtectedRoute>} />
@@ -66,7 +68,6 @@ function App() {
                 <Log />
               </ProtectedRoute>
             } />
-            {/* <Route path="/medicine-verification" element={<MedicineVerification />} /> */}
             <Route path="/add-volunteer" element={<ProtectedRoute requiredType="admin"><AddVolunteer /></ProtectedRoute>} />
             <Route path="/add-doctor" element={<ProtectedRoute requiredType="admin"><AddDoctor /></ProtectedRoute>} />
             <Route path="/doctor-availability" element={<ProtectedRoute requiredType="admin"><DoctorAvailability /></ProtectedRoute>} />
@@ -75,14 +76,15 @@ function App() {
             <Route path="/update-medicine-stock" element={<ProtectedRoute requiredType="admin"><UpdateMedicineStock /></ProtectedRoute>} />
             <Route path="/add-new-medicine" element={<ProtectedRoute requiredType="admin"><AddMedicine /></ProtectedRoute>} />
             <Route path='/get-doctors' element={<ProtectedRoute requiredType="admin"><ViewDoctors /></ProtectedRoute>} />
-            {/* <Route path="/expired-medicines" element={<ProtectedRoute requiredType="admin"><ExpiredMedicines /></ProtectedRoute>} /> */}
             <Route path='/doctor/:id' element={<ProtectedRoute requiredType="admin"><DoctorProfile /></ProtectedRoute>} />
             <Route path="/get-volunteers" element={<ProtectedRoute requiredType="admin"><ViewVolunteers /></ProtectedRoute>} />
             <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
             <Route path="/patient/:id" element={<ProtectedRoute requiredType="admin"><PatientProfile /></ProtectedRoute>} />
-            <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} /> {/* New Patient Status Route */}
-            <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} /> {/* New Lab Tests Route */}
+            <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} />
+            <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} />
+            <Route path="/manage-labtests" element={<ProtectedRoute requiredType="admin"><AdminLabTests /></ProtectedRoute>} /> {/* New Admin Lab Tests Route */}
+            <Route path="/patient-support" element={<ProtectedRoute requiredType="volunteer"><PatientSupport /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />

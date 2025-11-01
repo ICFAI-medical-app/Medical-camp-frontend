@@ -7,11 +7,11 @@ import '../Styles/Login.css';
 const AdminLogin = () => {
   const [user_name, setUserName] = useState('');
   const [user_password, setUserPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
-  // const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
 
   useEffect(() => {
     // Check for auth token and user type when component mounts
@@ -84,13 +84,21 @@ const AdminLogin = () => {
           onChange={(e) => setUserName(e.target.value)}
           required
         />
-        <input
-          type="password"
-          placeholder="Password"
-          value={user_password}
-          onChange={(e) => setUserPassword(e.target.value)}
-          required
-        />
+        <div className="password-container">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            value={user_password}
+            onChange={(e) => setUserPassword(e.target.value)}
+            required
+          />
+          <span
+            className="password-toggle-icon"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? '✖' : '👁'}
+          </span>
+        </div>
         <button 
           type="submit" 
           className="login-button"

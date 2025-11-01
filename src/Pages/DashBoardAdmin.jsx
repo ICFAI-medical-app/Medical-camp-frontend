@@ -24,6 +24,7 @@ function DashboardAdmin() {
     { title: "Add New Medicine", icon: "💊", path: "/add-new-medicine" },
     { title: "Add Doctor", icon: "👨‍⚕️", path: "/add-doctor" },
     { title: "Add Volunteer", icon: "👥", path: "/add-volunteer" },
+    { title: "Manage Lab Tests", icon: "🔬", path: "/manage-labtests" }, // New card for Lab Tests
     { title: "View Logs", icon: "📜", path: "/log" },
   ];
 
