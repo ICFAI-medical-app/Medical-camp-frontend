@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom"; // Import useParams and useLocation
 import { privateAxios } from "../api/axios";
 import "../Styles/DoctorAssigning.css";
 
@@ -8,8 +9,14 @@ function DoctorAssigning() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const location = useLocation(); // Initialize useLocation hook
 
   useEffect(() => {
+    // Check if bookNumber is passed via state from Vitals page
+    if (location.state && location.state.bookNumber) {
+      setFormData((prev) => ({ ...prev, bookNumber: location.state.bookNumber }));
+    }
+
     const fetchDoctors = async () => {
       setIsLoading(true); // Set loading to true while fetching doctors
       try {

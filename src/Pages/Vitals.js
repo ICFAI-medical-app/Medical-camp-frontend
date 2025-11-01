@@ -1,8 +1,20 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-// import axios from 'axios';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom'; // Removed Link
 import { privateAxios } from '../api/axios';
 import '../Styles/Vitals.css';
+
+// Debounce utility function moved outside the component to prevent re-creation on every render
+const debounce = (func, delay) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, delay);
+  };
+};
 
 function Vitals() {
   const VitalEmptyData = {
@@ -19,10 +31,80 @@ function Vitals() {
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [bpError, setBpError] = useState(''); // Add state for BP validation error
-  const [bookNumberError, setBookNumberError] = useState(''); // Add state for book number validation error
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [bpError, setBpError] = useState('');
+  const [bookNumberError, setBookNumberError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { book_no: urlBookNumber } = useParams(); // Get book_no from URL parameters
+
+  const fetchVitals = async (value) => {
+    console.log(value);
+    setIsLoading(true);
+    if (value !== '') {
+      try {
+        // Always fetch patient status first to check doctor assignment
+        const patientStatusResponse = await privateAxios.get(`/api/patient-status/${value}`);
+        if (!patientStatusResponse.data.status.doctorAssigned) {
+          setFormData({ ...VitalEmptyData, bookNumber: value }); // Keep book number
+          setError('Doctor assignment required before vitals entry.');
+          setMessage('');
+          setIsLoading(false);
+          return; // Stop further execution if no doctor is assigned
+        } else {
+          setError(''); // Clear error if doctor is assigned
+        }
+
+        // If doctor is assigned, proceed to fetch vitals data
+        const vitalsResponse = await privateAxios.get(`/api/vitals/${value}`);
+        setFormData({
+          ...vitalsResponse.data,
+          bookNumber: value
+        });
+        setMessage('Vitals fetched successfully!');
+        setError(''); // Clear any previous errors
+
+      } catch (error) {
+        setFormData({ ...VitalEmptyData, bookNumber: value }); // Retain book number on error
+        setMessage(''); // Clear success message
+
+        let currentError = error.response?.data?.message || 'An error occurred while fetching vitals';
+        setError(currentError);
+
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setFormData(VitalEmptyData);
+      setMessage('');
+      setError('');
+    }
+  };
+
+  const debouncedFetchVitals = useCallback(
+    debounce((value) => fetchVitals(value), 500),
+    []
+  );
+
+  // Effect to pre-fill book number if available from URL
+  useEffect(() => {
+    if (urlBookNumber) {
+      setFormData((prev) => ({ ...prev, bookNumber: urlBookNumber }));
+      debouncedFetchVitals(urlBookNumber);
+    }
+  }, [urlBookNumber, debouncedFetchVitals]);
+
+  // Effect to clear messages after a few seconds, but keep doctor assignment error
+  useEffect(() => {
+    if (message || (error && error !== 'Doctor assignment required before vitals entry.')) {
+      const timer = setTimeout(() => {
+        setMessage('');
+        if (error !== 'Doctor assignment required before vitals entry.') {
+          setError('');
+        }
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, error]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,75 +113,31 @@ function Vitals() {
       if (value) {
         const parts = value.split('/');
         if (
-          parts.length !== 2 || // Ensure there are exactly two parts
-          isNaN(Number(parts[0])) || // Ensure the first part is a number
-          isNaN(Number(parts[1])) // Ensure the second part is a number
+          parts.length !== 2 ||
+          isNaN(Number(parts[0])) ||
+          isNaN(Number(parts[1]))
         ) {
           setBpError('BP must be in the format systolic/diastolic (e.g., 120/80)');
         } else {
-          setBpError(''); 
+          setBpError('');
         }
       } else {
-        setBpError(''); 
+        setBpError('');
       }
-    } 
+    } else if (name === 'bookNumber') {
+      const regex = /^[0-9]*$/;
+      if (!regex.test(value)) {
+        setBookNumberError('Book Number must contain only digits');
+      } else {
+        setBookNumberError('');
+      }
+    }
     setFormData({ ...formData, [name]: value });
   };
 
-  const PORT = process.env.PORT || 5002;
-
-  const debounce = (func, delay) => {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, delay);
-    };
-  };
-
-  const fetchVitals = async (value) =>{
-    console.log(value);
-    setIsLoading(true); 
-    if(value !== ''){
-      try {
-      // const response = await axios.get(`${process.env.REACT_APP_BACKEND}/api/vitals`);
-      const response = await privateAxios.get(`/api/vitals/${value}`);
-      setFormData({
-        ...response.data,
-      bookNumber:value}); // Set book number in form data
-
-      setMessage('Vitals fetched successfully!');
-      setError('');
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setFormData({ ...VitalEmptyData, bookNumber: value });
-        setMessage('No vitals found for this patient for the current month. Please enter new vitals.');
-        setError('');
-      } else {
-        setFormData({ ...VitalEmptyData, bookNumber: value }); // Ensure bookNumber is retained on other errors
-        setError(error.response?.data?.message || 'An error occurred while fetching vitals');
-        setMessage('');
-      }
-    } finally {
-      setIsLoading(false); 
-    }
-    } else {
-      setFormData(VitalEmptyData);
-      setMessage('');
-      setError('');
-    }
-  }
-
-  const debouncedFetchVitals = useCallback(
-    debounce((value) => fetchVitals(value), 500),
-    []
-  );
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); 
+    setIsLoading(true);
     try {
       const response = await privateAxios.post('/api/vitals', {
         book_no: formData.bookNumber,
@@ -108,7 +146,7 @@ function Vitals() {
         height: formData.height || null,
         weight: formData.weight || null,
         pulse: formData.pulse || null,
-        extra_note: formData.extra_note || null 
+        extra_note: formData.extra_note || null
       });
       setMessage(response.data.message || 'Vitals recorded successfully!');
       setError('');
@@ -123,10 +161,11 @@ function Vitals() {
       });
       window.scrollTo(0, 0);
     } catch (error) {
-      setError(error.response?.data?.message || 'An error occurred');
+      const errorMessage = error.response?.data?.message || 'An error occurred';
+      setError(errorMessage);
       setMessage('');
     } finally {
-      setIsLoading(false); // Set loading back to false after submission
+      setIsLoading(false);
     }
   };
 
@@ -134,69 +173,82 @@ function Vitals() {
     <div className="vitals-container">
       <h1 className="vitals-title">Vitals</h1>
       {message && <div className="vitals-success-msg">{message}</div>}
-      {error && <div className="vitals-error-msg">{error}</div>}
+      {error && error !== 'Doctor assignment required before vitals entry.' && (
+        <div className="vitals-error-msg">{error}</div>
+      )}
+      {error === 'Doctor assignment required before vitals entry.' && formData.bookNumber && (
+        <div className="doctor-assignment-prompt">
+          <p>A doctor must be assigned before vitals can be entered.</p>
+          <button
+            className="doctor-assign-link"
+            onClick={() => navigate('/doctor-assigning', { state: { bookNumber: formData.bookNumber } })}
+          >
+            Go to Doctor Assignment
+          </button>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="vitals-form">
         <div className="vitals-form-group">
           <label>Book Number</label>
-          <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) =>{
-            handleChange(e); // This updates formData and bookNumberError
-            debouncedFetchVitals(e.target.value); // Always call debounced fetch
+          <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) => {
+            handleChange(e);
+            debouncedFetchVitals(e.target.value);
           }} required />
           {bookNumberError && <div className="vitals-error-msg">{bookNumberError}</div>}
         </div>
         <div className="vitals-form-group">
           <label>BP (systolic/diastolic)</label>
-          <input type="text" name="bp" value={formData.bp} onChange={(e) =>{
+          <input type="text" name="bp" value={formData.bp} onChange={(e) => {
             handleChange(e);
           }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Pulse</label>
-          <input type="text" name="pulse" value={formData.pulse} onChange={(e) =>{
+          <input type="text" name="pulse" value={formData.pulse} onChange={(e) => {
             const regex = /^[0-9]+$/;
-            if (regex.test(e.target.value) || e.target.value === '') {  
-            handleChange(e);
+            if (regex.test(e.target.value) || e.target.value === '') {
+              handleChange(e);
             }
-            }} autoComplete='off'/>
+          }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>RBS</label>
-          <input type="text" name="rbs" value={formData.rbs} onChange={(e) =>{
+          <input type="text" name="rbs" value={formData.rbs} onChange={(e) => {
             const regex = /^[0-9]+$/;
-            if (regex.test(e.target.value) || e.target.value === '') {  
-            handleChange(e);
+            if (regex.test(e.target.value) || e.target.value === '') {
+              handleChange(e);
             }
-            }} autoComplete='off'/>
+          }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Weight (kg)</label>
-          <input type="text" name="weight" value={formData.weight}  onChange={(e) =>{
+          <input type="text" name="weight" value={formData.weight} onChange={(e) => {
             const regex = /^[0-9]+$/;
-            if (regex.test(e.target.value) || e.target.value === '') {  
-            handleChange(e);
+            if (regex.test(e.target.value) || e.target.value === '') {
+              handleChange(e);
             }
-            }} autoComplete='off'/>
+          }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Height (cm)</label>
-          <input type="text" name="height" value={formData.height}  onChange={(e) =>{
+          <input type="text" name="height" value={formData.height} onChange={(e) => {
             const regex = /^[0-9]+$/;
-            if (regex.test(e.target.value) || e.target.value === '') {  
-            handleChange(e);
+            if (regex.test(e.target.value) || e.target.value === '') {
+              handleChange(e);
             }
-            }} autoComplete='off'/>
+          }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Last Meal and Time</label>
           <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} autoComplete='off' />
         </div>
-        <button 
-          type="submit" 
-          className="vitals-submit-btn" 
-          disabled={isLoading} // Disable button when loading
+        <button
+          type="submit"
+          className="vitals-submit-btn"
+          disabled={isLoading}
         >
-          {isLoading ? 'Submitting...' : 'Submit'} {/* Show loading text */}
-        </button>      
+          {isLoading ? 'Submitting...' : 'Submit'}
+        </button>
       </form>
     </div>
   );
