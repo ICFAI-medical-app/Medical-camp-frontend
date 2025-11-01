@@ -286,6 +286,7 @@ function DoctorPrescription() {
                       onChange={(e) =>
                         handlePrescriptionChange(index, 'days', Number(e.target.value))
                       }
+                      onWheel={(e) => e.target.blur()} // Disable scroll sensitivity
                       required
                       placeholder="e.g. 3"
                       disabled={isLoading} // Disable input while loading
