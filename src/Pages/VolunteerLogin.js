@@ -12,7 +12,7 @@ const VolunteerLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    //   const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
+
 
     useEffect(() => {
         // Check for auth token and user type when component mounts
@@ -98,7 +98,7 @@ const VolunteerLogin = () => {
                         className="password-toggle-icon"
                         onClick={() => setShowPassword(!showPassword)}
                     >
-                        {showPassword ? '🙈' : '👁️'}
+                        {showPassword ? '✖' : '👁'}
                     </span>
                 </div>
                 <button
