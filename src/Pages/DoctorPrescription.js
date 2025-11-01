@@ -13,6 +13,36 @@ function DoctorPrescription() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const debounceTimeout = useRef(null);
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true); // State to disable submit button
+  const [quantityExceedsError, setQuantityExceedsError] = useState(''); // State to show quantity exceeds error
+
+  // Function to validate quantities and update submit button state
+  const validateQuantities = () => {
+    let disable = false;
+    let errorMsg = '';
+
+    for (const [index, prescription] of prescriptions.entries()) {
+      // Only validate if medicine details are available and no error in fetching them
+      if (medicineDetails[index] && !medicineDetails[index].error) {
+        const availableStock = medicineDetails[index].total_quantity;
+        const calculatedQuantity = prescription.quantity;
+
+        if (calculatedQuantity > availableStock) {
+          disable = true;
+          errorMsg = `Calculated quantity for Medicine ID- ${prescription.medicine_id} exceeds available stock (${availableStock}).`;
+          break;
+        }
+      }
+    }
+    setIsSubmitDisabled(disable);
+    setQuantityExceedsError(errorMsg);
+  };
+
+  // Call validateQuantities whenever prescriptions or medicineDetails change
+  React.useEffect(() => {
+    validateQuantities();
+  }, [prescriptions, medicineDetails]);
+
 
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
@@ -240,13 +270,6 @@ function DoctorPrescription() {
                       <>
                         <p><strong>{prescription.isMedicine ? "Formulation" : "Item"}:</strong> {medicineDetails[index].medicine_formulation}</p>
                         <p><strong>Available Stock:</strong> {medicineDetails[index].total_quantity}</p> {/* Display total_quantity */}
-                        <ul>
-                          {medicineDetails[index].details && medicineDetails[index].details.map((med, i) => (
-                            <li key={i}>
-                              Qty: {med.quantity} — Exp: {new Date(med.expiry_date).toLocaleDateString()}
-                            </li>
-                          ))}
-                        </ul>
                       </>
                     )}
                   </div>
@@ -349,10 +372,15 @@ function DoctorPrescription() {
           </div>
 
           <div className="doctor-prescription-btn-container">
+            {quantityExceedsError && (
+              <p className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
+                {quantityExceedsError}
+              </p>
+            )}
             <button
               type="submit"
               className="doctor-prescription-submit-btn"
-              disabled={isLoading} // Disable button while loading
+              disabled={isLoading || isSubmitDisabled} // Disable button while loading or if validation fails
             >
               {isLoading ? 'Submitting...' : 'Submit Prescription'} {/* Show loading text */}
             </button>
