@@ -121,6 +121,7 @@ function DoctorPrescription() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage(''); // Clear any previous messages immediately
     setIsLoading(true); // Set loading to true when submitting starts
 
     // Format the prescriptions for the backend
@@ -157,6 +158,7 @@ function DoctorPrescription() {
       );
       if (response.status >= 200 && response.status < 300) {
         setMessage('Prescription submitted successfully!');
+        setTimeout(() => setMessage(''), 10000); // Clear success message after 10 seconds
         setBookNo('');
         setPrescriptions([
           { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
@@ -164,9 +166,26 @@ function DoctorPrescription() {
         setMedicineDetails([]);
       } else {
         setMessage('Failed to submit prescription.');
+        setTimeout(() => setMessage(''), 10000); // Clear generic failure message after 10 seconds
       }
     } catch (error) {
-      setMessage('Error: ' + (error.response?.data?.message || error.message));
+      let errorMessage = 'Failed to submit prescription.';
+      if (error.response) {
+        if (error.response.status === 404) {
+          errorMessage = 'Error: Prescription not found for the given Book No.';
+        } else if (error.response.data && error.response.data.message) {
+          errorMessage = 'Error: ' + error.response.data.message;
+        }
+      } else {
+        errorMessage = 'Error: ' + error.message;
+      }
+
+      if (error.response && error.response.status === 404) {
+        setMessage(errorMessage); // Set 404 message directly, no timeout
+      } else {
+        setMessage(errorMessage);
+        setTimeout(() => setMessage(''), 10000); // Clear generic failure message after 10 seconds
+      }
     } finally {
       setIsLoading(false); // Set loading back to false after submission
     }
@@ -178,7 +197,7 @@ function DoctorPrescription() {
         <h1 className="doctor-prescription-title">Doctor Prescription</h1>
         <form onSubmit={handleSubmit} className="doctor-prescription-form">
           <div className="doctor-prescription-form-group">
-            <label>Book No</label>
+            <label>Book Number</label>
             <input
               type="text"
               value={bookNo}
