@@ -35,9 +35,9 @@ const CampAnalytics = () => {
   const [doctors, setDoctors] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [vitals, setVitals] = useState([]);
-  const [volunteers, setVolunteers] = useState([]);
   const [patientHistories, setPatientHistories] = useState([]);
-  const [totalQueueCount, setTotalQueueCount] = useState(0);
+  const [allPatientHistoriesForMonths, setAllPatientHistoriesForMonths] = useState([]);
+  const [allDoctorsForMonths, setAllDoctorsForMonths] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('graph');
 
@@ -45,14 +45,12 @@ const CampAnalytics = () => {
   const location = useLocation();
 
   const [selectedMonth, setSelectedMonth] = useState('All');
-  const [selectedDoctor, setSelectedDoctor] = useState('All');
   const [selectedCamp, setSelectedCamp] = useState('All');
 
   const [appliedFilters, setAppliedFilters] = useState({
     month: 'All',
     camp: 'All',
-    doctor: 'All',
-    hasSubmitted: false,
+    hasSubmitted: true, // Changed to true to display data on initial load
   });
 
   // On initial load, sync from URL params
@@ -60,13 +58,11 @@ const CampAnalytics = () => {
     const queryParams = new URLSearchParams(location.search);
     const month = queryParams.get('month') || 'All';
     const camp = queryParams.get('camp') || 'All';
-    const doctor = queryParams.get('doctor') || 'All';
 
-    if (month !== 'All' || camp !== 'All' || doctor !== 'All') {
+    if (month !== 'All' || camp !== 'All') {
       setSelectedMonth(month);
       setSelectedCamp(camp);
-      setSelectedDoctor(doctor);
-      setAppliedFilters({ month, camp, doctor, hasSubmitted: true });
+      setAppliedFilters({ month, camp, hasSubmitted: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
@@ -77,105 +73,144 @@ const CampAnalytics = () => {
     const params = new URLSearchParams();
     if (appliedFilters.month !== 'All') params.set('month', appliedFilters.month);
     if (appliedFilters.camp !== 'All') params.set('camp', appliedFilters.camp);
-    if (appliedFilters.doctor !== 'All') params.set('doctor', appliedFilters.doctor);
     navigate({ search: params.toString() }, { replace: true });
   }, [appliedFilters, navigate]);
 
-  // Build unique, sorted options
+  // Build unique, sorted options for filters (from all data)
   const { monthOptions, doctorOptions, campOptions } = useMemo(() => {
     const monthSet = new Set();
     const campSet = new Set();
     const doctorSet = new Set();
 
-    patients.forEach(p => {
-      if (p?.createdAt) monthSet.add(format(new Date(p.createdAt), 'yyyy-MM'));
-      if (p?.camp) campSet.add(p.camp);
+    // Use allPatientHistoriesForMonths to get all available months
+    allPatientHistoriesForMonths.forEach(history => {
+      history.visits.forEach(visit => {
+        if (visit?.timestamp) monthSet.add(visit.timestamp);
+      });
     });
-    doctors.forEach(d => {
+
+    // Use allDoctorsForMonths to get all available doctors
+    allDoctorsForMonths.forEach(d => {
       if (d?.doctor_name) doctorSet.add(d.doctor_name);
+    });
+
+    // Camp options are still derived from the currently filtered patients,
+    // as camp is a patient-specific attribute and not directly tied to visits/doctors in the same way.
+    // If camp filtering is also to be "all-encompassing" for options, it would need a separate fetch as well.
+    patients.forEach(p => {
+      if (p?.camp) campSet.add(p.camp);
     });
 
     const months = ['All', ...Array.from(monthSet).sort((a, b) => a.localeCompare(b))];
     const camps = ['All', ...Array.from(campSet).sort((a, b) => a.localeCompare(b))];
     const drs = ['All', ...Array.from(doctorSet).sort((a, b) => a.localeCompare(b))];
 
+    console.log('Generated month options:', months);
+    console.log('Generated camp options:', camps);
+    console.log('Generated doctor options:', drs);
+
     return { monthOptions: months, doctorOptions: drs, campOptions: camps };
-  }, [patients, doctors]);
+  }, [allPatientHistoriesForMonths, allDoctorsForMonths, patients]); // Depend on all data for options
 
   // Validate current selections against available options
   useEffect(() => {
     if (!monthOptions.includes(selectedMonth)) setSelectedMonth('All');
     if (!campOptions.includes(selectedCamp)) setSelectedCamp('All');
-    if (!doctorOptions.includes(selectedDoctor)) setSelectedDoctor('All');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monthOptions, campOptions, doctorOptions]);
+  }, [monthOptions, campOptions]);
 
-  // Apply all three filters
+  // Apply filters
   const filteredPatients = useMemo(() => {
-    const { month, camp, doctor } = appliedFilters;
+    const { month, camp } = appliedFilters;
     if (!appliedFilters.hasSubmitted) return [];
 
-    const doctorMap = doctors.reduce((acc, doc) => {
-      if (doc?.doctor_name && doc?._id) acc[doc.doctor_name] = doc._id;
-      return acc;
-    }, {});
+    console.log('Filtering patients with:', { month, camp }); // Debug log
+    console.log('Patients before filtering:', patients); // Debug log
+    console.log('Patient Histories for filtering:', patientHistories); // Debug log
 
-    return patients.filter(p => {
+    const filtered = patients.filter(p => {
+      // Month match: Check patient's createdAt OR patient's history visits
       const monthMatch =
         month === 'All' ||
-        (p.createdAt && format(new Date(p.createdAt), 'yyyy-MM') === month);
-
-      const doctorMatch =
-        doctor === 'All' ||
-        (p.assigned_doctor && p.assigned_doctor === doctorMap[doctor]);
+        (p.createdAt && format(new Date(p.createdAt), 'yyyy-MM') === month) ||
+        (patientHistories.some(history =>
+          history.book_no === p.book_no &&
+          history.visits.some(visit => visit.timestamp === month)
+        ));
 
       const campMatch =
         camp === 'All' ||
         (p.camp && p.camp === camp);
 
-      return monthMatch && doctorMatch && campMatch;
+      return monthMatch && campMatch;
     });
-  }, [patients, doctors, appliedFilters]);
+    console.log('Patients after filtering:', filtered); // Debug log
+    return filtered;
+  }, [patients, appliedFilters, patientHistories]);
 
   // Charts/tables data (keep hooks above any return)
-  const genderData = useMemo(() => ([
-    { name: 'Male', value: filteredPatients.filter(p => p.patient_sex === 'Male').length },
-    { name: 'Female', value: filteredPatients.filter(p => p.patient_sex === 'Female').length },
-    { name: 'Other', value: filteredPatients.filter(p => p.patient_sex === 'Other').length },
-  ]), [filteredPatients]);
+  const genderData = useMemo(() => {
+    const maleCount = filteredPatients.filter(p => p.patient_sex && p.patient_sex.toLowerCase() === 'male').length;
+    const femaleCount = filteredPatients.filter(p => p.patient_sex && p.patient_sex.toLowerCase() === 'female').length;
+    const otherCount = filteredPatients.filter(p => p.patient_sex && p.patient_sex.toLowerCase() === 'other').length;
 
-  const registrationTrendData = useMemo(() => {
-    // keep chronological order using yyyy-MM as key
-    const map = new Map();
-    filteredPatients.forEach(p => {
-      if (!p?.createdAt) return;
-      const ym = format(new Date(p.createdAt), 'yyyy-MM');
-      map.set(ym, (map.get(ym) || 0) + 1);
-    });
-    return Array.from(map.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([ym, count]) => ({ month: format(new Date(`${ym}-01`), 'MMM yyyy'), registrations: count }));
+    return [
+      { name: 'Male', value: maleCount },
+      { name: 'Female', value: femaleCount },
+    ];
   }, [filteredPatients]);
 
-  const doctorPatientData = useMemo(() => (
-    doctors
-      .map(doctor => ({
-        name: doctor.doctor_name,
-        patients: filteredPatients.filter(p => p.assigned_doctor === doctor._id).length
-      }))
-      .filter(d => d.patients > 0)
-  ), [doctors, filteredPatients]);
+
+  const doctorPatientData = useMemo(() => {
+    const doctorVisitCounts = new Map();
+
+    patientHistories.forEach(history => {
+      history.visits.forEach(visit => {
+        if (visit.doctor_id) {
+          doctorVisitCounts.set(visit.doctor_id, (doctorVisitCounts.get(visit.doctor_id) || 0) + 1);
+        }
+      });
+    });
+
+    const data = Array.from(doctorVisitCounts.entries())
+      .map(([doctorId, count]) => {
+        // Match doctor_id from patient history visits with doctor.doctor_id (numeric ID)
+        const doctor = allDoctorsForMonths.find(d => d.doctor_id === doctorId);
+        return {
+          name: doctor ? doctor.doctor_name : `Unknown Doctor (ID: ${doctorId})`,
+          patients: count
+        };
+      })
+      .filter(d => d.patients > 0);
+
+    console.log('Doctor-Patient Ratio Data:', data); // Final debug log
+    return data;
+  }, [doctors, patientHistories]);
 
   const medicineDistributionData = useMemo(() => {
-    // If medicines should be per filtered patients, adjust here accordingly
-    const arr = medicines.reduce((acc, m) => {
-      const found = acc.find(i => i.name === m.medicine_name);
-      if (found) found.quantity++;
-      else acc.push({ name: m.medicine_name, quantity: 1 });
-      return acc;
-    }, []);
-    return arr.sort((a, b) => b.quantity - a.quantity).slice(0, 10);
-  }, [medicines]);
+    const aggregatedMedicines = new Map();
+
+    patientHistories.forEach(history => {
+      history.visits.forEach(visit => {
+        if (visit.medicines_given) {
+          visit.medicines_given.forEach(givenMed => {
+            const medId = givenMed.medicine_id;
+            aggregatedMedicines.set(
+              medId,
+              (aggregatedMedicines.get(medId) || 0) + givenMed.quantity
+            );
+          });
+        }
+      });
+    });
+
+    const data = Array.from(aggregatedMedicines.entries()).map(([medicine_id, distributed_quantity]) => ({
+      medicine_id,
+      distributed_quantity,
+    }));
+
+    return data.sort((a, b) => a.medicine_id.localeCompare(b.medicine_id)); // Sort by medicine_id
+  }, [patientHistories]);
 
   const averageVitals = useMemo(() => {
     const filteredPatientIds = new Set(filteredPatients.map(p => p._id));
@@ -205,7 +240,6 @@ const CampAnalytics = () => {
     setAppliedFilters({
       month: selectedMonth,
       camp: selectedCamp,
-      doctor: selectedDoctor,
       hasSubmitted: true
     });
   };
@@ -213,8 +247,7 @@ const CampAnalytics = () => {
   const handleReset = () => {
     setSelectedMonth('All');
     setSelectedCamp('All');
-    setSelectedDoctor('All');
-    setAppliedFilters({ month: 'All', camp: 'All', doctor: 'All', hasSubmitted: false });
+    setAppliedFilters({ month: 'All', camp: 'All', hasSubmitted: false });
     navigate({ search: '' }, { replace: true });
   };
 
@@ -243,25 +276,93 @@ const CampAnalytics = () => {
     document.body.removeChild(link);
   };
 
-  // Fetch data once
+  const handleExportMedicineDistribution = () => {
+    const csv = unparse({
+      fields: ['Medicine ID', 'Distributed Quantity'],
+      data: medicineDistributionData.map(item => ({
+        'Medicine ID': item.medicine_id,
+        'Distributed Quantity': item.distributed_quantity,
+      }))
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'medicine_distribution.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportDoctorPatientRatio = () => {
+    const csv = unparse({
+      fields: ['Doctor', 'Patients Visited'],
+      data: doctorPatientData.map(item => ({
+        'Doctor': item.name,
+        'Patients Visited': item.patients,
+      }))
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'doctor_patient_ratio.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Fetch all data for month/doctor options once on mount
+  useEffect(() => {
+    const fetchAllOptionsData = async () => {
+      try {
+        const [allDoctorsRes, allPatientHistoriesRes] = await Promise.all([
+          privateAxios.get('/api/admin/get_doctors'), // No month filter for options
+          privateAxios.get('/api/patient-history/summary'), // No month filter for options
+        ]);
+        setAllDoctorsForMonths(allDoctorsRes.data || []);
+        setAllPatientHistoriesForMonths(allPatientHistoriesRes.data || []);
+      } catch (error) {
+        console.error('Error fetching all data for options:', error);
+      }
+    };
+    fetchAllOptionsData();
+  }, []); // Run only once on mount
+
+  // Fetch filtered data based on applied filters
   useEffect(() => {
     const fetchData = async () => {
+      if (!appliedFilters.hasSubmitted) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
       try {
-        const [patientsRes, doctorsRes, medicinesRes, vitalsRes] = await Promise.all([
-          privateAxios.get('/api/admin/get_patients'),
-          privateAxios.get('/api/admin/get_doctors'),
-          privateAxios.get('/api/admin/get_medicines'),
-          privateAxios.get('/api/vitals'),
+        const monthParam = appliedFilters.month !== 'All' ? `?month=${appliedFilters.month}` : '';
+
+        const [patientsRes, doctorsRes, medicinesRes, vitalsRes, patientHistoriesRes] = await Promise.all([
+          privateAxios.get(`/api/admin/get_patients${monthParam}`),
+          privateAxios.get(`/api/admin/get_doctors${monthParam}`),
+          privateAxios.get('/api/admin/get_medicines'), // Medicines are not month-specific
+          privateAxios.get('/api/vitals'), // Vitals are not month-specific, filtered on frontend
+          privateAxios.get(`/api/patient-history/summary${monthParam}`),
         ]);
         setPatients(patientsRes.data || []);
         setDoctors(doctorsRes.data || []);
         setMedicines(medicinesRes.data || []);
         setVitals(vitalsRes.data || []);
-        // console logs left for debugging; remove if noisy
+        setPatientHistories(patientHistoriesRes.data || []);
+        
         console.log('Fetched Patients:', patientsRes.data);
         console.log('Fetched Doctors:', doctorsRes.data);
         console.log('Fetched Medicines:', medicinesRes.data);
         console.log('Fetched Vitals:', vitalsRes.data);
+        console.log('Fetched Patient Histories:', patientHistoriesRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -269,7 +370,7 @@ const CampAnalytics = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [appliedFilters]); // Re-run when appliedFilters change
 
   return (
     <div className="analytics-container">
@@ -289,9 +390,6 @@ const CampAnalytics = () => {
           {campOptions.map(camp => <option key={camp} value={camp}>{camp}</option>)}
         </select>
 
-        <select value={selectedDoctor} onChange={e => setSelectedDoctor(e.target.value)}>
-          {doctorOptions.map(doctor => <option key={doctor} value={doctor}>{doctor}</option>)}
-        </select>
 
         <button type="button" onClick={handleSubmit}>Apply Filters</button>
         <button type="button" onClick={handleReset}>Reset</button>
@@ -301,13 +399,6 @@ const CampAnalytics = () => {
           aria-disabled={!appliedFilters.hasSubmitted}
         >
           Toggle View
-        </button>
-        <button
-          onClick={handleExport}
-          disabled={!appliedFilters.hasSubmitted}
-          aria-disabled={!appliedFilters.hasSubmitted}
-        >
-          Export to CSV
         </button>
       </div>
 
@@ -376,6 +467,7 @@ const CampAnalytics = () => {
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
+                          label={({ name, value }) => `${name}: ${value}`} // Display name and value
                         >
                           {genderData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -386,56 +478,35 @@ const CampAnalytics = () => {
                       </PieChart>
                     </div>
 
-                    <div className="chart">
-                      <h3>Patient Registration Trend</h3>
-                      <LineChart
-                        width={500}
-                        height={300}
-                        data={registrationTrendData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="registrations" stroke="#8884d8" activeDot={{ r: 8 }} />
-                      </LineChart>
-                    </div>
 
                     <div className="chart">
                       <h3>Doctor-Patient Ratio</h3>
-                      <BarChart
-                        width={500}
-                        height={300}
+                      <TableView
                         data={doctorPatientData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients Visited', key: 'patients' }]}
+                      />
+                      <button
+                        onClick={handleExportDoctorPatientRatio}
+                        disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                        aria-disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="patients" fill="#8884d8" />
-                      </BarChart>
+                        Export Doctor-Patient Ratio to CSV
+                      </button>
                     </div>
 
                     <div className="chart">
                       <h3>Medicine Distribution</h3>
-                      <BarChart
-                        layout="vertical"
-                        width={500}
-                        height={300}
+                      <TableView
                         data={medicineDistributionData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        columns={[{ title: 'Medicine ID', key: 'medicine_id' }, { title: 'Distributed Quantity', key: 'distributed_quantity' }]}
+                      />
+                      <button
+                        onClick={handleExportMedicineDistribution}
+                        disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                        aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="name" type="category" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="quantity" fill="#8884d8" />
-                      </BarChart>
+                        Export Medicine Distribution to CSV
+                      </button>
                     </div>
                   </>
                 )}
@@ -448,23 +519,32 @@ const CampAnalytics = () => {
                       columns={[{ title: 'Gender', key: 'name' }, { title: 'Count', key: 'value' }]}
                     />
 
-                    <h3>Patient Registration Trend</h3>
-                    <TableView
-                      data={registrationTrendData}
-                      columns={[{ title: 'Month', key: 'month' }, { title: 'Registrations', key: 'registrations' }]}
-                    />
 
                     <h3>Doctor-Patient Ratio</h3>
                     <TableView
                       data={doctorPatientData}
                       columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients', key: 'patients' }]}
                     />
+                    <button
+                      onClick={handleExportDoctorPatientRatio}
+                      disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                      aria-disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                    >
+                      Export Doctor-Patient Ratio to CSV
+                    </button>
 
                     <h3>Medicine Distribution</h3>
                     <TableView
                       data={medicineDistributionData}
-                      columns={[{ title: 'Medicine', key: 'name' }, { title: 'Quantity', key: 'quantity' }]}
+                      columns={[{ title: 'Medicine ID', key: 'medicine_id' }, { title: 'Distributed Quantity', key: 'distributed_quantity' }]}
                     />
+                    <button
+                      onClick={handleExportMedicineDistribution}
+                      disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                      aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                    >
+                      Export Medicine Distribution to CSV
+                    </button>
                   </div>
                 )}
               </>
