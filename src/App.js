@@ -26,6 +26,7 @@ import Footer from './Components/Footer';
 import DoctorProfile from './Pages/DoctorProfile';
 import ProtectedRoute from './Pages/ProtectedRoute';
 import AdminAnalytics from './Pages/AdminAnalytics';
+import CampAnalytics from './Pages/CampAnalytics';
 import './App.css';
 import AddVolunteer from './Pages/AddVolunteer';
 import ViewVolunteers from './Pages/ViewVolunteers';
@@ -80,6 +81,7 @@ function App() {
             <Route path="/get-volunteers" element={<ProtectedRoute requiredType="admin"><ViewVolunteers /></ProtectedRoute>} />
             <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
+            <Route path="/camp-analytics" element={<ProtectedRoute requiredType="admin"><CampAnalytics /></ProtectedRoute>} />
             <Route path="/patient/:id" element={<ProtectedRoute requiredType="admin"><PatientProfile /></ProtectedRoute>} />
             <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} />
             <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} />
