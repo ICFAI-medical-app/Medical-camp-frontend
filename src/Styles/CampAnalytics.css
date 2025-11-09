@@ -78,3 +78,22 @@ th, td {
 th {
   background-color: #f4f4f4;
 }
+
+.filters button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.filters button:hover {
+  background-color: #0056b3;
+}
+
+.filters button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
