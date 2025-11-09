@@ -12,20 +12,22 @@ import { unparse } from 'papaparse';
 import '../Styles/CampAnalytics.css';
 
 const TableView = ({ data, columns }) => (
-  <table>
-    <thead>
-      <tr>
-        {columns.map(col => <th key={col.key}>{col.title}</th>)}
-      </tr>
-    </thead>
-    <tbody>
-      {data.map((row, i) => (
-        <tr key={i}>
-          {columns.map(col => <td key={col.key}>{row[col.key]}</td>)}
+  <div className="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          {columns.map(col => <th key={col.key}>{col.title}</th>)}
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {data.map((row, i) => (
+          <tr key={i}>
+            {columns.map(col => <td key={col.key}>{row[col.key]}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 );
 
 const CampAnalytics = () => {
@@ -33,6 +35,9 @@ const CampAnalytics = () => {
   const [doctors, setDoctors] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [vitals, setVitals] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
+  const [patientHistories, setPatientHistories] = useState([]);
+  const [totalQueueCount, setTotalQueueCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('graph');
 
