@@ -37,7 +37,7 @@ const Navbar = () => {
 
   const adminNavLinks = [
     { path: ADMIN_DASH,             label: 'Dashboard' },
-    { path: '/analytics',      label: 'Camp Analytics'},
+    { path: '/camp-analytics',      label: 'Camp Analytics'},
     { path: '/doctor-availability',label: 'Doctor Availability' },
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
     { path: '/get-doctors',         label: 'View Doctors',    menuOnly: true },

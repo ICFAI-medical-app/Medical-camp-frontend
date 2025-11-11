@@ -14,7 +14,7 @@ function DashboardAdmin() {
   );
 
   const cardData = [
-    { title: "Camp Analytics", icon: "📊", path: "/analytics" },
+    { title: "Camp Analytics", icon: "📊", path: "/camp-analytics" },
     { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
     { title: "Update Medicine Stock", icon: "💊", path: "/update-medicine-stock" },
     {title: "View Doctors" , icon: "👨‍⚕️" , path: "/get-doctors"},
