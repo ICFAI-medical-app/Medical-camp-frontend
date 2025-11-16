@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorPrescription.css';
 import { privateAxios } from '../api/axios';
@@ -10,6 +10,7 @@ function DoctorPrescription() {
     { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
   ]);
   const [medicineDetails, setMedicineDetails] = useState([]);
+  const [medicines, setMedicines] = useState([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const debounceTimeout = useRef(null);
@@ -43,6 +44,18 @@ function DoctorPrescription() {
     validateQuantities();
   }, [prescriptions, medicineDetails]);
 
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const response = await privateAxios.get('/api/inventory/get-all-medicine');
+        setMedicines(response.data);
+      } catch (error) {
+        console.error('Failed to fetch medicines:', error);
+      }
+    };
+
+    fetchMedicines();
+  }, []);
 
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
@@ -67,28 +80,19 @@ function DoctorPrescription() {
 
     // Fetch medicine info when ID changes (for both medicine and non-medicine items)
     if (field === 'medicine_id') {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-
-      if (value !== '') {
-        debounceTimeout.current = setTimeout(async () => {
-          try {
-            setIsLoading(true); // Set loading to true while fetching medicine details
-            const response = await privateAxios.get(`/api/inventory/${value}`);
-            const detailsCopy = [...medicineDetails];
-            detailsCopy[index] = response.data;
-            setMedicineDetails(detailsCopy);
-          } catch (err) {
-            const detailsCopy = [...medicineDetails];
-            detailsCopy[index] = { error: 'Item not found' };
-            setMedicineDetails(detailsCopy);
-          } finally {
-            setIsLoading(false); // Set loading back to false after fetching
-          }
-        }, 500); // Debounce for 500ms
+      if (value) {
+        const selectedMedicine = medicines.find(m => m.medicine_id.toString() === value);
+        if (selectedMedicine) {
+          const detailsCopy = [...medicineDetails];
+          detailsCopy[index] = {
+            ...selectedMedicine,
+            total_quantity: selectedMedicine.total_quantity,
+            medicine_name: selectedMedicine.medicine_details[0].medicine_name,
+            medicine_formulation: `${selectedMedicine.medicine_details[0].medicine_name} (${selectedMedicine.medicine_formulation})`
+          };
+          setMedicineDetails(detailsCopy);
+        }
       } else {
-        // Clear medicine details if medicine_id is empty
         const detailsCopy = [...medicineDetails];
         detailsCopy[index] = null;
         setMedicineDetails(detailsCopy);
@@ -252,16 +256,22 @@ function DoctorPrescription() {
               </div>
 
               <div className="doctor-prescription-form-group">
-                <label>Medicine ID</label>
-                <input
-                  type="text"
+                <label>Medicine</label>
+                <select
+                  className="medicine-dropdown"
                   value={prescription.medicine_id}
                   onChange={(e) =>
                     handlePrescriptionChange(index, 'medicine_id', e.target.value)
                   }
                   required
-                  placeholder="e.g. 101"
-                />
+                >
+                  <option value="">Select Medicine</option>
+                  {medicines.map((med) => (
+                    <option key={med.medicine_id} value={med.medicine_id}>
+                      {med.medicine_id} - {med.medicine_details[0].medicine_name} {med.medicine_formulation}
+                    </option>
+                  ))}
+                </select>
                 {medicineDetails[index] && (
                   <div className="doctor-prescription-medicine-info">
                     {medicineDetails[index].error ? (
