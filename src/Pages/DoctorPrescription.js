@@ -48,13 +48,44 @@ function DoctorPrescription() {
     const fetchMedicines = async () => {
       try {
         const response = await privateAxios.get('/api/inventory/get-all-medicine');
-        setMedicines(response.data);
+        const medicineList = response.data;
+
+        setMedicines(medicineList);
+
+        // Refresh stock inside medicineDetails (for selected medicines)
+        setMedicineDetails(prevDetails =>
+          prevDetails.map((details, index) => {
+            if (!details) return null;
+
+            // Find updated medicine
+            const updated = medicineList.find(
+              m => m.medicine_id.toString() === prescriptions[index].medicine_id
+            );
+
+            if (!updated) return details;
+
+            console.log("updated quantity: ", updated.total_quantity);
+
+            return {
+              ...details,
+              total_quantity: updated.total_quantity,
+              medicine_name: updated.medicine_details[0].medicine_name,
+              medicine_formulation:
+                `${updated.medicine_details[0].medicine_name} (${updated.medicine_formulation})`
+            };
+          })
+        );
       } catch (error) {
         console.error('Failed to fetch medicines:', error);
       }
     };
 
     fetchMedicines();
+
+    const interval = setInterval(fetchMedicines, 30000);
+
+    return ()=> clearInterval(interval);
+
   }, []);
 
   const handlePrescriptionChange = async (index, field, value) => {
