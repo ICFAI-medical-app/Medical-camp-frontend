@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { privateAxios } from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import "../Styles/PatientRegistration.css";
+import PatientIDCard from "../Components/PatientIDCard";
 
 function PatientRegistration({ initialBookNumber = '', hideEidField = false, initialGender = '' }) {
   const [formData, setFormData] = useState({
@@ -34,6 +35,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
   const [error, setError] = useState('');
   const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [registeredPatient, setRegisteredPatient] = useState(null);
   const navigate = useNavigate();
 
   // 🔹 Area state
@@ -275,6 +277,11 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
       setError('');
+
+      // Set the registered patient data for ID card display
+      if (response.data.patient) {
+        setRegisteredPatient(response.data.patient);
+      }
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred while saving patient data.');
       setMessage('');
@@ -304,6 +311,11 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
       <h1 className="patient-registration-title">Patient Registration</h1>
       {message && <div className="patient-registration-success-msg">{message}</div>}
       {error && <div className="patient-registration-error-msg">{error}</div>}
+
+      {/* Display Patient ID Card after successful registration */}
+      {registeredPatient && (
+        <PatientIDCard patientData={registeredPatient} />
+      )}
 
       {/* Book Number Step */}
       {!isBookNumberSubmitted ? (

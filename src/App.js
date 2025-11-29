@@ -39,7 +39,7 @@ import TokenGeneration from './Pages/TokenGeneration';
 import PatientStatusPage from './Pages/PatientStatusPage'; // Import new component
 import LabTestsPage from './Pages/LabTestsPage'; // Import new component
 import AdminLabTests from './Pages/AdminLabTests'; // Import new component
-import PatientSupport from './Pages/PatientSupport'; // Import new component
+import Food from './Pages/Food'; // Import new component
 
 function App() {
   return (
@@ -86,7 +86,7 @@ function App() {
             <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} />
             <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} />
             <Route path="/manage-labtests" element={<ProtectedRoute requiredType="admin"><AdminLabTests /></ProtectedRoute>} /> {/* New Admin Lab Tests Route */}
-            <Route path="/patient-support" element={<ProtectedRoute requiredType="volunteer"><PatientSupport /></ProtectedRoute>} />
+            <Route path="/food" element={<ProtectedRoute requiredType="volunteer"><Food /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />
