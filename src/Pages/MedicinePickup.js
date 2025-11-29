@@ -10,6 +10,7 @@ function MedicinePickup() {
   const [prescribedMeds, setPrescribedMeds] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [updatedMeds, setUpdatedMeds] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [editingMedIndex, setEditingMedIndex] = useState(null); // State to track which medicine is being edited
   const [editedQuantity, setEditedQuantity] = useState(0); // State to hold the edited quantity
@@ -130,12 +131,17 @@ function MedicinePickup() {
           medicinesGiven
         }
       );
-
-      let successMessage = response.data.message || 'Medicines given updated successfully!';
+      
+      let successMessage = ` ${bookNo}</p>`
       if (response.data.updated_quantities && response.data.updated_quantities.length > 0) {
-        successMessage += '\n\nInventory Updates:';
+        
         response.data.updated_quantities.forEach(item => {
-          successMessage += `\n- Medicine ID: ${item.medicine_id}, Picked Up: ${item.picked_up_quantity}, Before: ${item.before_quantity}, After: ${item.after_quantity}`;
+          let med={};
+          med["medicine_id"] = item.medicine_id;
+          med["picked_up_quantity"] = item.picked_up_quantity;
+          med["before_quantity"] = item.before_quantity;
+          med["after_quantity"] = item.after_quantity;
+          updatedMeds.push(med);
         });
       }
       setMessage(successMessage);
@@ -331,7 +337,32 @@ function MedicinePickup() {
       {message && (
         <div className="medicine-pickup-popup-overlay">
           <div className="medicine-pickup-popup">
-            <p>{message}</p>
+            <p><strong>Book Number:</strong> {bookNo}</p>
+            {
+              updatedMeds.length>0 && (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Medicine ID</th>
+                      <th>Picked Up Quantity</th>
+                      <th>Before</th>
+                      <th>After</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {
+                      updatedMeds.map(item => (
+                        <tr>
+                          <td>{item.medicine_id}</td>
+                          <td>{item.picked_up_quantity}</td>
+                          <td>{item.before_quantity}</td>
+                          <td>{item.after_quantity}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )
+            }
             <button className="medicine-pickup-close-popup" onClick={() => setMessage('')}>
               Close
             </button>
