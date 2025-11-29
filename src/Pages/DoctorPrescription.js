@@ -16,6 +16,25 @@ function DoctorPrescription() {
   const debounceTimeout = useRef(null);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true); // State to disable submit button
   const [quantityExceedsError, setQuantityExceedsError] = useState(''); // State to show quantity exceeds error
+  const [searchText, setSearchText] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [inventoryData, setInventoryData] = useState(null);
+
+  const filteredMedicines = medicines.filter((med) => {
+    const id = med.medicine_id.toLowerCase();
+    const search = searchText.toLowerCase();
+    return id.startsWith(search);
+  });
+  
+  const fetchMedicineInventory = async (medicineId) => {
+    try {
+      const res = await privateAxios.get(`/api/inventory/${medicineId}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      return null;
+    }
+  };
 
   // Function to validate quantities and update submit button state
   const validateQuantities = () => {
@@ -84,7 +103,7 @@ function DoctorPrescription() {
 
     const interval = setInterval(fetchMedicines, 30000);
 
-    return ()=> clearInterval(interval);
+    return () => clearInterval(interval);
 
   }, []);
 
@@ -288,21 +307,51 @@ function DoctorPrescription() {
 
               <div className="doctor-prescription-form-group">
                 <label>Medicine</label>
-                <select
-                  className="medicine-dropdown"
-                  value={prescription.medicine_id}
-                  onChange={(e) =>
-                    handlePrescriptionChange(index, 'medicine_id', e.target.value)
-                  }
-                  required
-                >
-                  <option value="">Select Medicine</option>
-                  {medicines.map((med) => (
-                    <option key={med.medicine_id} value={med.medicine_id}>
-                      {med.medicine_id} - {med.medicine_details[0].medicine_name} {med.medicine_formulation}
-                    </option>
-                  ))}
-                </select>
+                <div className="dropdown-container">
+                  <input
+                    type="text"
+                    placeholder="Search medicine by ID..."
+                    value={searchText}
+                    onChange={(e) => {
+                      setSearchText(e.target.value);
+                      setIsOpen(true);
+                    }}
+                    onFocus={() => setIsOpen(true)}
+                    className="search-input"
+                  />
+
+                  {isOpen && searchText.trim() !== "" && (
+                    <div className="dropdown-list">
+                      {filteredMedicines.length === 0 ? (
+                        <div className="dropdown-item no-item">No medicines found</div>
+                      ) : (
+                        filteredMedicines.map((med) => (
+                          <div
+                            key={med.medicine_id}
+                            className="dropdown-item"
+                            onClick={async () => {
+                              handlePrescriptionChange(index, "medicine_id", med.medicine_id);
+                              setSearchText(med.medicine_id);
+                              setIsOpen(false);
+
+                              // 🚀 Fetch inventory now
+                              const data = await fetchMedicineInventory(med.medicine_id);
+                              setInventoryData(data);
+
+                              console.log("Inventory loaded:", data);
+                            }}
+                          >
+                            <strong>{med.medicine_id}</strong>
+                            <span className="item-details">
+                              {med.medicine_details[0].medicine_name} {med.medicine_formulation}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {medicineDetails[index] && (
                   <div className="doctor-prescription-medicine-info">
                     {medicineDetails[index].error ? (
