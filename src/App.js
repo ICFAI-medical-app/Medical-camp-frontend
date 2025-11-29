@@ -40,6 +40,7 @@ import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerLogin from './Pages/VolunteerLogin';
 import VolunteerManual from './Pages/VolunteerManual';
 import VolunteerProfile from './Pages/VolunteerProfile';
+import PatientSupport from './Pages/PatientSupport'; // Import new component
 import PublicRoute from './Pages/PublicRoute';
 import LoginOTP from './Pages/LoginOTP';
 import VerifyOTP from './Pages/VerifyOTP';
@@ -92,8 +93,7 @@ function App() {
             <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} />
             <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} />
             <Route path="/manage-labtests" element={<ProtectedRoute requiredType="admin"><AdminLabTests /></ProtectedRoute>} /> {/* New Admin Lab Tests Route */}
-            <Route path="/food" element={<ProtectedRoute requiredType="volunteer"><Food /></ProtectedRoute>} />
-            <Route path="/volunteer-manual" element={<ProtectedRoute requiredType="volunteer"><VolunteerManual /></ProtectedRoute>} />
+            <Route path="/patient-support" element={<ProtectedRoute requiredType="volunteer"><PatientSupport /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />
