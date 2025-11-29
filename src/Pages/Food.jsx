@@ -65,14 +65,14 @@ function PatientSupport() { // Removed volunteerId prop
     setMessageType('');
 
     try {
-      const response = await privateAxios.post(`/api/patients/volunteer/patient-support`, {
+      const response = await privateAxios.post(`/api/patients/volunteer/patient-food`, {
         book_no: bookNo,
       });
       setMessage(response.data.message);
       setMessageType('success');
       setBookNo(''); // Clear input on success
     } catch (error) {
-      console.error('Error submitting patient support:', error);
+      console.error('Error submitting patient food form:', error);
       const errorMessage = error.response?.data?.message || 'Failed to submit book number. Please try again.';
       setMessage(errorMessage);
       setMessageType('error');
