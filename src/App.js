@@ -40,6 +40,9 @@ import PatientStatusPage from './Pages/PatientStatusPage'; // Import new compone
 import LabTestsPage from './Pages/LabTestsPage'; // Import new component
 import AdminLabTests from './Pages/AdminLabTests'; // Import new component
 import PatientSupport from './Pages/PatientSupport'; // Import new component
+import PublicRoute from './Pages/PublicRoute';
+import LoginOTP from './Pages/LoginOTP';
+import VerifyOTP from './Pages/VerifyOTP';
 
 function App() {
   return (
@@ -49,6 +52,8 @@ function App() {
         <div className="main-content">
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/login-otp" element={ <PublicRoute><LoginOTP /> </PublicRoute>} />
+            <Route path="/verify-otp" element={ <PublicRoute><VerifyOTP /> </PublicRoute>} />
             <Route path="/volunteer-signup" element={<AddVolunteer fromLogin={true} />} />
             <Route path="/dashboard" element={<ProtectedRoute requiredType="volunteer"><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard-admin" element={<ProtectedRoute requiredType="admin"><DashboardAdmin /></ProtectedRoute>} />

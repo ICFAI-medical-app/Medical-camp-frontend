@@ -12,7 +12,15 @@ const VolunteerLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+      if (!error) return;
 
+      const timer = setTimeout(() => {
+        setError(""); // auto clear message
+      }, 3000); // disappear after 3 sec
+
+      return () => clearTimeout(timer); // cleanup
+    }, [error]); // runs every time message changes
 
     useEffect(() => {
         // Check for auth token and user type when component mounts
@@ -108,6 +116,18 @@ const VolunteerLogin = () => {
                 >
                     {isLoading ? 'Logging in...' : 'Login'}
                 </button>
+
+                <div className="otp-login-container">
+                    <span>Or</span>
+                    <button
+                        type="button"
+                        className="otp-login-button"
+                        onClick={() => navigate('/login-otp')}
+                    >
+                        Login with OTP
+                    </button>
+                </div>
+
             </form>
         </div>
     );
