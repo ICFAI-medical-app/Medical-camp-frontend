@@ -22,4 +22,3 @@ privateAxios.interceptors.request.use(
 );
 
 export { privateAxios, publicAxios };
-
