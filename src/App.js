@@ -40,7 +40,6 @@ import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerLogin from './Pages/VolunteerLogin';
 import VolunteerManual from './Pages/VolunteerManual';
 import VolunteerProfile from './Pages/VolunteerProfile';
-import PatientSupport from './Pages/PatientSupport'; // Import new component
 import PublicRoute from './Pages/PublicRoute';
 import LoginOTP from './Pages/LoginOTP';
 import VerifyOTP from './Pages/VerifyOTP';
