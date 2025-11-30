@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
+import ProfileHeader from '../Components/ProfileHeader';
 import '../Styles/VolunteerProfile.css';
 
 // Helper function to display empty values consistently
@@ -143,26 +144,21 @@ function VolunteerProfile() {
 
   return (
     <div className="volunteer-profile-container">
-      <div className="volunteer-profile-header">
-        <h1>Volunteer Profile</h1>
-        {!isEditing ? (
-          <div className="header-actions">
-            <button className="edit-button" onClick={handleEditToggle}>Edit</button>
-            <button className="delete-button" onClick={handleDelete}>Delete</button>
-          </div>
-        ) : (
-          <div className="action-buttons">
-            <button className="save-button" onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-button" onClick={handleEditToggle}>Cancel</button>
-          </div>
-        )}
-      </div>
+      <ProfileHeader
+        name={volunteer.user_name}
+        gender="N/A" // Volunteer object doesn't seem to have gender
+        phone={volunteer.user_phone_no}
+        role="Volunteer"
+        attendanceCount={analytics?.visitCount}
+        isEditing={isEditing}
+        onEdit={handleEditToggle}
+        onDelete={handleDelete}
+        onSave={handleSave}
+        onCancel={handleEditToggle}
+        saving={saving}
+      />
+
       <div className="volunteer-profile-card">
-        <div className="volunteer-avatar-large">
-          {volunteer.user_name?.charAt(0).toUpperCase() || 'V'}
-        </div>
         {isEditing ? (
           <div className="volunteer-edit-form">
             <div className="form-group">
@@ -229,11 +225,9 @@ function VolunteerProfile() {
           </div>
         ) : (
           <>
-            <h2>{volunteer.user_name}</h2>
             <div className="volunteer-details-container">
               <div className="volunteer-detail"><strong>User ID:</strong><span>{displayValue(volunteer.user_id)}</span></div>
               <div className="volunteer-detail"><strong>Email:</strong><span>{displayValue(volunteer.user_email)}</span></div>
-              <div className="volunteer-detail"><strong>Phone:</strong><span>{displayValue(volunteer.user_phone_no)}</span></div>
               <div className="volunteer-detail"><strong>Age:</strong><span>{displayValue(volunteer.user_age)}</span></div>
               <div className="volunteer-detail">
                 <strong>Password:</strong>
@@ -243,9 +237,6 @@ function VolunteerProfile() {
             {analytics && (
               <div className="volunteer-analytics-section">
                 <h3 className="analytics-title">Camp Visit History</h3>
-                <div className="visit-count">
-                  Total Camp Visits: <span>{analytics.visitCount}</span>
-                </div>
                 {analytics.visits && analytics.visits.length > 0 ? (
                   <div className="visit-timeline">
                     {analytics.visits

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import ProfileHeader from '../Components/ProfileHeader';
 import '../Styles/PatientProfile.css';
 
 // Helper function to display empty values consistently
@@ -65,7 +66,7 @@ function PatientProfile() {
       ...editablePatient,
       [name]: value
     });
-    
+
     if (validationErrors[name]) {
       setValidationErrors({
         ...validationErrors,
@@ -76,15 +77,15 @@ function PatientProfile() {
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!editablePatient.patient_name || editablePatient.patient_name.trim() === '') {
       errors.patient_name = "Name is required";
     }
-    
+
     if (!editablePatient.patient_age) {
       errors.patient_age = "Age is required";
     }
-    
+
     if (!editablePatient.patient_sex) {
       errors.patient_sex = "Sex is required";
     }
@@ -95,14 +96,14 @@ function PatientProfile() {
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+
     setSaving(true);
     try {
       const response = await privateAxios.post(
         `/api/admin/edit_patient/${id}`,
         editablePatient
       );
-      
+
       setPatient(response.data.patient);
       setIsEditing(false);
       alert('Patient information updated successfully');
@@ -142,39 +143,23 @@ function PatientProfile() {
 
   return (
     <div className="patient-profile-container">
-      <div className="patient-profile-header">
-        <h1>Patient Profile</h1>
-        {!isEditing ? (
-          <div className="header-actions">
-            <button className="edit-button" onClick={handleEditToggle}>
-              Edit
-            </button>
-            <button className="delete-button" onClick={handleDelete}>
-              Delete
-            </button>
-          </div>
-        ) : (
-          <div className="action-buttons">
-            <button 
-              className="save-button" 
-              onClick={handleSave} 
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-button" onClick={handleEditToggle}>
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
+      <ProfileHeader
+        name={patient.patient_name}
+        gender={patient.patient_sex}
+        phone={patient.patient_phone_no}
+        role="Patient"
+        attendanceCount={analytics?.visitCount}
+        isEditing={isEditing}
+        onEdit={handleEditToggle}
+        onDelete={handleDelete}
+        onSave={handleSave}
+        onCancel={handleEditToggle}
+        saving={saving}
+      />
+
       <div className="patient-profile-card">
-        <div className="patient-avatar-large">
-          {patient.patient_name?.charAt(0).toUpperCase() || 'P'}
-        </div>
         {!isEditing ? (
           <>
-            <h2>{patient.patient_name}</h2>
             <div className="patient-details-container">
               <div className="patient-detail">
                 <strong>Book Number:</strong>
@@ -185,24 +170,13 @@ function PatientProfile() {
                 <span>{displayValue(patient.patient_age)}</span>
               </div>
               <div className="patient-detail">
-                <strong>Sex:</strong>
-                <span>{displayValue(patient.patient_sex)}</span>
-              </div>
-              <div className="patient-detail">
-                <strong>Phone:</strong>
-                <span>{displayValue(patient.patient_phone_no)}</span>
-              </div>
-              <div className="patient-detail">
                 <strong>Area:</strong>
                 <span>{displayValue(patient.patient_area)}</span>
               </div>
-              
+
               {analytics && (
                 <div className="patient-analytics-section">
                   <h3 className="analytics-title">Clinic Visit History</h3>
-                  <div className="visit-count">
-                    Total Clinic Visits: <span>{analytics.visitCount}</span>
-                  </div>
 
                   {analytics.bpData && analytics.bpData.length > 0 && (
                     <>
@@ -211,8 +185,8 @@ function PatientProfile() {
                         <ResponsiveContainer width="100%" height={300}>
                           <LineChart data={analytics.bpData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                              dataKey="timestamp" 
+                            <XAxis
+                              dataKey="timestamp"
                               tickFormatter={(timestamp) => {
                                 const [year, month] = timestamp.split('-');
                                 return `${month}/${year.slice(2)}`;
@@ -226,17 +200,17 @@ function PatientProfile() {
                               }}
                             />
                             <Legend />
-                            <Line 
-                              type="monotone" 
-                              dataKey="systolic" 
-                              stroke="#8884d8" 
+                            <Line
+                              type="monotone"
+                              dataKey="systolic"
+                              stroke="#8884d8"
                               name="Systolic"
                               dot={{ r: 4 }}
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="diastolic" 
-                              stroke="#82ca9d" 
+                            <Line
+                              type="monotone"
+                              dataKey="diastolic"
+                              stroke="#82ca9d"
                               name="Diastolic"
                               dot={{ r: 4 }}
                             />
@@ -315,10 +289,10 @@ function PatientProfile() {
         )}
       </div>
       <div className="nav-actions">
-        <button 
+        <button
           onClick={() => {
             navigate('/patient-status'); // Navigate to the base patient status page
-          }} 
+          }}
           className="view-status-button"
         >
           View Patient Status
