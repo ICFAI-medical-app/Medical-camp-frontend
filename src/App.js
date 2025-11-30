@@ -40,16 +40,6 @@ import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerLogin from './Pages/VolunteerLogin';
 import VolunteerManual from './Pages/VolunteerManual';
 import VolunteerProfile from './Pages/VolunteerProfile';
-import PatientProfile from './Pages/PatientProfile';
-import Log from './Pages/Log';
-import VerifyMedicine from './Pages/VerifyMedicine';
-import CounsellingPage from './Pages/CounsellingPage';
-import TokenGeneration from './Pages/TokenGeneration';
-import PatientStatusPage from './Pages/PatientStatusPage'; // Import new component
-import LabTestsPage from './Pages/LabTestsPage'; // Import new component
-import AdminLabTests from './Pages/AdminLabTests'; // Import new component
-import Food from './Pages/Food'; // Import new component
-import Profiles from './Pages/Profiles'; // Import Profiles component
 import PublicRoute from './Pages/PublicRoute';
 import LoginOTP from './Pages/LoginOTP';
 import VerifyOTP from './Pages/VerifyOTP';
