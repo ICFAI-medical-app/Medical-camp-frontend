@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-// import axios from 'axios';
 import { privateAxios } from '../api/axios';
+import ProfileHeader from '../Components/ProfileHeader';
 import '../Styles/DoctorProfile.css';
 
 // Add this function at the top level of your component or in a utilities file
@@ -22,7 +22,7 @@ const DoctorProfile = () => {
   const [analytics, setAnalytics] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const DoctorProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Fix: Map the form field names to the correct property names
     const fieldMapping = {
       name: 'doctor_name',
@@ -76,14 +76,14 @@ const DoctorProfile = () => {
       age: 'doctor_age',
       sex: 'doctor_sex'
     };
-    
+
     const fieldName = fieldMapping[name] || name;
-    
+
     setEditableDoctor({
       ...editableDoctor,
       [fieldName]: value
     });
-    
+
     // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors({
@@ -99,7 +99,7 @@ const DoctorProfile = () => {
       ...prev,
       [field]: message
     }));
-    
+
     // Clear the error message after 5 seconds
     setTimeout(() => {
       setValidationErrors(prev => ({
@@ -107,25 +107,25 @@ const DoctorProfile = () => {
         [field]: null
       }));
     }, 5000);
-    
+
     return false; // Return false to indicate validation failure
   };
 
   const validateForm = () => {
     let isValid = true;
-    
+
     // Name validation - required field with minimum length
     if (!editableDoctor.doctor_name || editableDoctor.doctor_name.trim() === '') {
       isValid = showTemporaryError('name', "Name is required");
     } else if (editableDoctor.doctor_name.trim().length < 2) {
       isValid = showTemporaryError('name', "Name must be at least 2 characters");
     }
-    
+
     // Specialization validation - required field
     if (!editableDoctor.specialization || editableDoctor.specialization.trim() === '') {
       isValid = showTemporaryError('specialization', "Specialization is required");
     }
-    
+
     // Phone number validation - must be 10 digits if provided
     if (editableDoctor.doctor_phone_no && editableDoctor.doctor_phone_no.trim() !== '') {
       const phoneRegex = /^\d{10}$/;
@@ -133,7 +133,7 @@ const DoctorProfile = () => {
         isValid = showTemporaryError('phone', "Phone number must be 10 digits");
       }
     }
-    
+
     // Email validation - valid email format if provided
     if (editableDoctor.doctor_email && editableDoctor.doctor_email.trim() !== '') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -141,7 +141,7 @@ const DoctorProfile = () => {
         isValid = showTemporaryError('email', "Please enter a valid email address");
       }
     }
-    
+
     // Age validation - must be a reasonable number if provided
     if (editableDoctor.doctor_age) {
       const age = parseInt(editableDoctor.doctor_age);
@@ -149,7 +149,7 @@ const DoctorProfile = () => {
         isValid = showTemporaryError('age', "Age must be between 0 and 130");
       }
     }
-    
+
     return isValid;
   };
 
@@ -158,7 +158,7 @@ const DoctorProfile = () => {
     if (!validateForm()) {
       return; // Stop submission if validation fails
     }
-    
+
     setSaving(true);
     try {
       // Fix 1: Change the field names to match expected backend field names
@@ -176,13 +176,13 @@ const DoctorProfile = () => {
         `/api/admin/edit_doctor/${id}`,
         doctorToUpdate
       );
-      
+
       setDoctor(response.data);
       setIsEditing(false);
       alert('Doctor information updated successfully');
     } catch (error) {
       console.error('Error updating doctor:', error);
-      
+
       if (error.response && error.response.data && error.response.data.message) {
         alert('Update failed: ' + error.response.data.message);
       } else {
@@ -229,36 +229,21 @@ const DoctorProfile = () => {
 
   return (
     <div className="doctor-profile-container">
-      <div className="doctor-profile-header">
-        <h1>Doctor Profile</h1>
-        {!isEditing ? (
-          <div className="header-actions">
-            <button className="edit-button" onClick={handleEditToggle}>
-              Edit
-            </button>
-            <button className="delete-button" onClick={handleDelete}>
-              Delete
-            </button>
-          </div>
-        ) : (
-          <div className="action-buttons">
-            <button 
-              className="save-button" 
-              onClick={handleSave} 
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-            <button className="cancel-button" onClick={handleEditToggle}>
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
+      <ProfileHeader
+        name={doctor.doctor_name}
+        gender={doctor.doctor_sex}
+        phone={doctor.doctor_phone_no}
+        role="Doctor"
+        attendanceCount={analytics?.visitCount}
+        isEditing={isEditing}
+        onEdit={handleEditToggle}
+        onDelete={handleDelete}
+        onSave={handleSave}
+        onCancel={handleEditToggle}
+        saving={saving}
+      />
+
       <div className="doctor-profile-card">
-        <div className="doctor-avatar-large">
-          {doctor.doctor_name?.charAt(0).toUpperCase() || 'D'}
-        </div>
         {isEditing ? (
           // Edit mode
           <div className="doctor-edit-form">
@@ -343,35 +328,24 @@ const DoctorProfile = () => {
         ) : (
           // View mode
           <>
-            <h2>{doctor.doctor_name}</h2>
             <div className="doctor-details-container">
               <div className="doctor-detail">
-                <strong>Specialization:</strong> 
+                <strong>Specialization:</strong>
                 <span>{displayValue(doctor.specialization)}</span>
               </div>
               <div className="doctor-detail">
-                <strong>Phone:</strong> 
-                <span>{displayValue(doctor.doctor_phone_no)}</span>
-              </div>
-              <div className="doctor-detail">
-                <strong>Email:</strong> 
+                <strong>Email:</strong>
                 <span>{displayValue(doctor.doctor_email)}</span>
               </div>
               <div className="doctor-detail">
-                <strong>Age:</strong> 
+                <strong>Age:</strong>
                 <span>{displayValue(doctor.doctor_age)}</span>
               </div>
-              <div className="doctor-detail">
-                <strong>Sex:</strong> 
-                <span>{displayValue(doctor.doctor_sex)}</span>
-              </div>
+
               {/* Add Analytics Section */}
               {analytics && (
                 <div className="doctor-analytics-section">
                   <h3 className="analytics-title">Camp Visit History</h3>
-                  <div className="visit-count">
-                    Total Camp Visits: <span>{analytics.visitCount}</span>
-                  </div>
                   <div className="visit-timeline">
                     {analytics.visits
                       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
