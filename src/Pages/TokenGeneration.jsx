@@ -144,12 +144,6 @@ const TokenGenerator = () => {
             <h4>Token Info</h4>
             <p><strong>Booking ID:</strong> {tokenInfo.bookNumber}</p>
             <p><strong>Gender:</strong> {tokenInfo.gender}</p>
-            <p><strong>Token Number:</strong> {tokenInfo.tokenNumber}</p>
-            {tokenInfo.alreadyExists && (
-              <p style={{ color: 'orange' }}>
-                You have already been assigned a token for today.
-              </p>
-            )}
           </div>
         </div>
       )}

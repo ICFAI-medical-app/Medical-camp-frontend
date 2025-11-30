@@ -14,6 +14,7 @@ import UpdateMedicineStock from './Pages/UpdateMedicineStock';
 import ViewDoctors from './Pages/ViewDoctors';
 import ViewMedicines from './Pages/ViewMedicines';
 import ViewPatients from './Pages/ViewPatients';
+import Profiles from './Pages/Profiles';
 import ViewQueue from './Pages/ViewQueue';
 import Vitals from './Pages/Vitals';
 // import ExpiredMedicines from './Pages/ExpiredMedicines';
