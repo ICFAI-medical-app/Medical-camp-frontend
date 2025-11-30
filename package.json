@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -12,12 +13,13 @@
     "papaparse": "^5.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.67.0",
     "react-router-dom": "^7.3.0",
     "react-scripts": "^5.0.1",
     "rechart": "^0.0.1",
     "recharts": "^2.15.4",
     "web-vitals": "^2.1.4",
-    "zod": "^4.1.9"
+    "zod": "^4.1.13"
   },
   "scripts": {
     "start": "react-scripts start",
