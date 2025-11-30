@@ -1,6 +1,6 @@
 import axios from 'axios';
-const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
-//const BACKEND_URL = 'http://localhost:5002';
+// const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
+const BACKEND_URL = 'http://localhost:5002';
 
 const publicAxios = axios.create({
     baseURL: BACKEND_URL,
@@ -21,4 +21,4 @@ privateAxios.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-export { publicAxios, privateAxios };
+export { privateAxios, publicAxios };
