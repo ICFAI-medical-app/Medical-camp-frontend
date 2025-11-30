@@ -1,0 +1,100 @@
+.profiles-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.profiles-header-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.profiles-header-section h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.profiles-header-section p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+.profiles-tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.profile-tab {
+    background-color: white;
+    border: 2px solid #ecf0f1;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #7f8c8d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.profile-tab:hover {
+    border-color: #3498db;
+    color: #3498db;
+    transform: translateY(-2px);
+}
+
+.profile-tab.active {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: white;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+.tab-icon {
+    font-size: 1.2rem;
+}
+
+.profiles-content-area {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Override some styles of children to fit better if necessary */
+.profiles-content-area .doctor-container,
+.profiles-content-area #view-patients-container,
+.profiles-content-area .volunteer-container {
+    margin-top: 0;
+    box-shadow: none;
+    /* Remove double shadow if desired */
+    border: 1px solid #ecf0f1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .profiles-tabs-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .profile-tab {
+        justify-content: center;
+    }
+}

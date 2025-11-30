@@ -82,6 +82,7 @@ function App() {
             <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
             <Route path="/camp-analytics" element={<ProtectedRoute requiredType="admin"><CampAnalytics /></ProtectedRoute>} />
             <Route path="/patient/:id" element={<ProtectedRoute requiredType="admin"><PatientProfile /></ProtectedRoute>} />
+            <Route path="/profiles" element={<ProtectedRoute requiredType="admin"><Profiles /></ProtectedRoute>} />
             <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} />
             <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} />
             <Route path="/manage-labtests" element={<ProtectedRoute requiredType="admin"><AdminLabTests /></ProtectedRoute>} /> {/* New Admin Lab Tests Route */}

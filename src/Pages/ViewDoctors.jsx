@@ -19,11 +19,11 @@ function ViewDoctors() {
   const fetchDoctors = () => {
     setIsLoading(true);
     setError('');
-    
+
     privateAxios.get('/api/admin/get_doctors')
       .then(response => {
         setDoctors(response.data);
-        
+
         // Extract unique specializations for filter dropdown
         const uniqueSpecializations = [...new Set(
           response.data
@@ -61,7 +61,7 @@ function ViewDoctors() {
 
   // Filter doctors based on search query and selected specialization
   const filteredDoctors = doctors.filter(doctor => {
-    const nameMatch = doctor.doctor_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const nameMatch = (doctor.doctor_name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const specializationMatch = selectedSpecialization === '' || doctor.specialization === selectedSpecialization;
     return nameMatch && specializationMatch;
   });
@@ -69,9 +69,9 @@ function ViewDoctors() {
   return (
     <div className="doctor-container">
       <h1>Doctors</h1>
-      
+
       {error && <div className="error-message">{error}</div>}
-      
+
       {isLoading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -81,17 +81,17 @@ function ViewDoctors() {
         <>
           <div className="doctor-filters">
             <div className="search-container">
-              <input 
-                type="text" 
-                placeholder="Search by doctor name" 
+              <input
+                type="text"
+                placeholder="Search by doctor name"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="doctor-search-input"
               />
             </div>
-            
+
             <div className="filter-container">
-              <select 
+              <select
                 value={selectedSpecialization}
                 onChange={handleSpecializationChange}
                 className="specialization-filter"
@@ -103,41 +103,37 @@ function ViewDoctors() {
                   </option>
                 ))}
               </select>
-              
+
               <button onClick={resetFilters} className="reset-filters-btn">
                 Reset Filters
               </button>
             </div>
           </div>
-          
-          <div className="doctor-table-container">
-            <table className="doctor-table">
-              <thead>
-                <tr>
-                  <th>Doctor Name</th>
-                  <th>Specialization</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDoctors.length > 0 ? (
-                  filteredDoctors.map((doctor, index) => (
-                    <tr key={doctor._id || index} onClick={() => handleRowClick(doctor._id || index)}>
-                      <td>{doctor.doctor_name}</td>
-                      <td>{doctor.specialization || 'General Practice'}</td>
-                      <td className="action-cell">
-                        <div className="tap-details">Tap for doctor details</div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="3" className="no-results">No doctors found matching your criteria</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+
+          {filteredDoctors.length > 0 ? (
+            <div className="doctors-grid">
+              {filteredDoctors.map((doctor, index) => (
+                <div
+                  key={doctor._id || index}
+                  className="doctor-card"
+                  onClick={() => handleRowClick(doctor._id || index)}
+                >
+                  <div className="doctor-card-header">
+                    <span className="doctor-icon">👨‍⚕️</span>
+                  </div>
+                  <div className="doctor-info">
+                    <p className="doctor-name">{doctor.doctor_name}</p>
+                    <p className="doctor-details">Gender: {doctor.doctor_sex || 'N/A'}</p>
+                    <p className="doctor-details">Phone: {doctor.doctor_phone_no}</p>
+                    <p className="doctor-details">Role: Doctor</p>
+                    <p className="doctor-details">Attendance: {doctor.list_of_visits ? doctor.list_of_visits.length : 0}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-results">No doctors found matching your criteria</div>
+          )}
         </>
       )}
     </div>

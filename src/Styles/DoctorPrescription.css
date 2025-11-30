@@ -205,6 +205,70 @@
 .toggle-medicine-button:hover {
   background-color: #3b5bdb;
 }
+.dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0px 0px 4px rgba(74, 144, 226, 0.4);
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 45px;
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #f2f2f2;
+  transition: background 0.2s;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: #f5faff;
+}
+
+.dropdown-item strong {
+  font-size: 14px;
+  color: #333;
+}
+
+.item-details {
+  font-size: 12px;
+  color: #666;
+}
+
+.no-item {
+  text-align: center;
+  color: #999;
+}
 
 @media screen and (max-width: 600px) {
   .doctor-prescription-container {
