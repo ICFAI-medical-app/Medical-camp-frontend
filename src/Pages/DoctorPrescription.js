@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/DoctorPrescription.css';
 import { privateAxios } from '../api/axios';
@@ -10,11 +10,31 @@ function DoctorPrescription() {
     { medicine_id: '', days: 0, morning: false, afternoon: false, night: false, quantity: 0, isMedicine: true }
   ]);
   const [medicineDetails, setMedicineDetails] = useState([]);
+  const [medicines, setMedicines] = useState([]);
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const debounceTimeout = useRef(null);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true); // State to disable submit button
   const [quantityExceedsError, setQuantityExceedsError] = useState(''); // State to show quantity exceeds error
+  const [searchText, setSearchText] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [inventoryData, setInventoryData] = useState(null);
+
+  const filteredMedicines = medicines.filter((med) => {
+    const id = med.medicine_id.toLowerCase();
+    const search = searchText.toLowerCase();
+    return id.startsWith(search);
+  });
+  
+  const fetchMedicineInventory = async (medicineId) => {
+    try {
+      const res = await privateAxios.get(`/api/inventory/${medicineId}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      return null;
+    }
+  };
 
   // Function to validate quantities and update submit button state
   const validateQuantities = () => {
@@ -43,6 +63,49 @@ function DoctorPrescription() {
     validateQuantities();
   }, [prescriptions, medicineDetails]);
 
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const response = await privateAxios.get('/api/inventory/get-all-medicine');
+        const medicineList = response.data;
+
+        setMedicines(medicineList);
+
+        // Refresh stock inside medicineDetails (for selected medicines)
+        setMedicineDetails(prevDetails =>
+          prevDetails.map((details, index) => {
+            if (!details) return null;
+
+            // Find updated medicine
+            const updated = medicineList.find(
+              m => m.medicine_id.toString() === prescriptions[index].medicine_id
+            );
+
+            if (!updated) return details;
+
+            console.log("updated quantity: ", updated.total_quantity);
+
+            return {
+              ...details,
+              total_quantity: updated.total_quantity,
+              medicine_name: updated.medicine_details[0].medicine_name,
+              medicine_formulation:
+                `${updated.medicine_details[0].medicine_name} (${updated.medicine_formulation})`
+            };
+          })
+        );
+      } catch (error) {
+        console.error('Failed to fetch medicines:', error);
+      }
+    };
+
+    fetchMedicines();
+
+    const interval = setInterval(fetchMedicines, 30000);
+
+    return () => clearInterval(interval);
+
+  }, []);
 
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
@@ -67,28 +130,19 @@ function DoctorPrescription() {
 
     // Fetch medicine info when ID changes (for both medicine and non-medicine items)
     if (field === 'medicine_id') {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-
-      if (value !== '') {
-        debounceTimeout.current = setTimeout(async () => {
-          try {
-            setIsLoading(true); // Set loading to true while fetching medicine details
-            const response = await privateAxios.get(`/api/inventory/${value}`);
-            const detailsCopy = [...medicineDetails];
-            detailsCopy[index] = response.data;
-            setMedicineDetails(detailsCopy);
-          } catch (err) {
-            const detailsCopy = [...medicineDetails];
-            detailsCopy[index] = { error: 'Item not found' };
-            setMedicineDetails(detailsCopy);
-          } finally {
-            setIsLoading(false); // Set loading back to false after fetching
-          }
-        }, 500); // Debounce for 500ms
+      if (value) {
+        const selectedMedicine = medicines.find(m => m.medicine_id.toString() === value);
+        if (selectedMedicine) {
+          const detailsCopy = [...medicineDetails];
+          detailsCopy[index] = {
+            ...selectedMedicine,
+            total_quantity: selectedMedicine.total_quantity,
+            medicine_name: selectedMedicine.medicine_details[0].medicine_name,
+            medicine_formulation: `${selectedMedicine.medicine_details[0].medicine_name} (${selectedMedicine.medicine_formulation})`
+          };
+          setMedicineDetails(detailsCopy);
+        }
       } else {
-        // Clear medicine details if medicine_id is empty
         const detailsCopy = [...medicineDetails];
         detailsCopy[index] = null;
         setMedicineDetails(detailsCopy);
@@ -252,16 +306,52 @@ function DoctorPrescription() {
               </div>
 
               <div className="doctor-prescription-form-group">
-                <label>Medicine ID</label>
-                <input
-                  type="text"
-                  value={prescription.medicine_id}
-                  onChange={(e) =>
-                    handlePrescriptionChange(index, 'medicine_id', e.target.value)
-                  }
-                  required
-                  placeholder="e.g. 101"
-                />
+                <label>Medicine</label>
+                <div className="dropdown-container">
+                  <input
+                    type="text"
+                    placeholder="Search medicine by ID..."
+                    value={searchText}
+                    onChange={(e) => {
+                      setSearchText(e.target.value);
+                      setIsOpen(true);
+                    }}
+                    onFocus={() => setIsOpen(true)}
+                    className="search-input"
+                  />
+
+                  {isOpen && searchText.trim() !== "" && (
+                    <div className="dropdown-list">
+                      {filteredMedicines.length === 0 ? (
+                        <div className="dropdown-item no-item">No medicines found</div>
+                      ) : (
+                        filteredMedicines.map((med) => (
+                          <div
+                            key={med.medicine_id}
+                            className="dropdown-item"
+                            onClick={async () => {
+                              handlePrescriptionChange(index, "medicine_id", med.medicine_id);
+                              setSearchText(med.medicine_id);
+                              setIsOpen(false);
+
+                              // 🚀 Fetch inventory now
+                              const data = await fetchMedicineInventory(med.medicine_id);
+                              setInventoryData(data);
+
+                              console.log("Inventory loaded:", data);
+                            }}
+                          >
+                            <strong>{med.medicine_id}</strong>
+                            <span className="item-details">
+                              {med.medicine_details[0].medicine_name} {med.medicine_formulation}
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {medicineDetails[index] && (
                   <div className="doctor-prescription-medicine-info">
                     {medicineDetails[index].error ? (
