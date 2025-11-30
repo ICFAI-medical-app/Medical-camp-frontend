@@ -50,7 +50,8 @@
 }
 
 .patient-registration-form-group input[type="text"],
-.patient-registration-form-group input[type="number"] {
+.patient-registration-form-group input[type="number"],
+.patient-registration-form-group input[type="tel"] {
   width: 100%;
   box-sizing: border-box;
   padding: 8px;
