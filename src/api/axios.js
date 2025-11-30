@@ -21,4 +21,5 @@ privateAxios.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-export { publicAxios, privateAxios };
+export { privateAxios, publicAxios };
+

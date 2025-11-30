@@ -1,46 +1,44 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Navbar from "./Components/Navbar";
+import AddDoctor from './Pages/AddDoctor';
+import AddMedicine from './Pages/AddMedicine';
 import Dashboard from './Pages/Dashboard';
-import PatientRegistration from './Pages/PatientRegistration';
-import Vitals from './Pages/Vitals';
-import DoctorPrescription from './Pages/DoctorPrescription';
+import DashboardAdmin from './Pages/DashBoardAdmin';
 import DoctorAssigning from './Pages/DoctorAssigning';
 import DoctorAssigningAutomatic from './Pages/DoctorAssigningAutomatic';
-import ViewQueue from './Pages/ViewQueue';
-import MedicinePickup from './Pages/MedicinePickup';
-import MedicineVerification from './Pages/MedicineVerification';
-import AddDoctor from './Pages/AddDoctor';
-import ViewDoctors from './Pages/ViewDoctors';
-import DashboardAdmin from './Pages/DashBoardAdmin';
 import DoctorAvailability from './Pages/DoctorAvailability';
-import ViewPatients from './Pages/ViewPatients';
-import ViewMedicines from './Pages/ViewMedicines';
+import DoctorPrescription from './Pages/DoctorPrescription';
+import MedicinePickup from './Pages/MedicinePickup';
+import PatientRegistration from './Pages/PatientRegistration';
 import UpdateMedicineStock from './Pages/UpdateMedicineStock';
-import AddMedicine from './Pages/AddMedicine';
+import ViewDoctors from './Pages/ViewDoctors';
+import ViewMedicines from './Pages/ViewMedicines';
+import ViewPatients from './Pages/ViewPatients';
+import ViewQueue from './Pages/ViewQueue';
+import Vitals from './Pages/Vitals';
 // import ExpiredMedicines from './Pages/ExpiredMedicines';
-import Login from './Pages/Login';
-import AdminLogin from './Pages/AdminLogin';
-import VolunteerLogin from './Pages/VolunteerLogin'; // Import the new component
-import Footer from './Components/Footer';
-import DoctorProfile from './Pages/DoctorProfile';
-import ProtectedRoute from './Pages/ProtectedRoute';
-import AdminAnalytics from './Pages/AdminAnalytics';
-import CampAnalytics from './Pages/CampAnalytics';
 import './App.css';
+import Footer from './Components/Footer';
 import AddVolunteer from './Pages/AddVolunteer';
-import ViewVolunteers from './Pages/ViewVolunteers';
-import VolunteerProfile from './Pages/VolunteerProfile';
-import PatientProfile from './Pages/PatientProfile';
-import Log from './Pages/Log';
-import VerifyMedicine from './Pages/VerifyMedicine';
+import AdminAnalytics from './Pages/AdminAnalytics';
+import AdminLabTests from './Pages/AdminLabTests';
+import AdminLogin from './Pages/AdminLogin';
+import CampAnalytics from './Pages/CampAnalytics';
 import CounsellingPage from './Pages/CounsellingPage';
+import DoctorProfile from './Pages/DoctorProfile';
+import Food from './Pages/Food';
+import LabTestsPage from './Pages/LabTestsPage';
+import Log from './Pages/Log';
+import Login from './Pages/Login';
+import PatientProfile from './Pages/PatientProfile';
+import PatientStatusPage from './Pages/PatientStatusPage';
+import ProtectedRoute from './Pages/ProtectedRoute';
 import TokenGeneration from './Pages/TokenGeneration';
-import PatientStatusPage from './Pages/PatientStatusPage'; // Import new component
-import LabTestsPage from './Pages/LabTestsPage'; // Import new component
-import AdminLabTests from './Pages/AdminLabTests'; // Import new component
-import Food from './Pages/Food'; // Import new component
-import Profiles from './Pages/Profiles'; // Import Profiles component
+import VerifyMedicine from './Pages/VerifyMedicine';
+import ViewVolunteers from './Pages/ViewVolunteers';
+import VolunteerLogin from './Pages/VolunteerLogin';
+import VolunteerManual from './Pages/VolunteerManual';
+import VolunteerProfile from './Pages/VolunteerProfile';
 
 function App() {
   return (
@@ -89,6 +87,7 @@ function App() {
             <Route path="/lab-tests" element={<ProtectedRoute requiredType="volunteer"><LabTestsPage /></ProtectedRoute>} />
             <Route path="/manage-labtests" element={<ProtectedRoute requiredType="admin"><AdminLabTests /></ProtectedRoute>} /> {/* New Admin Lab Tests Route */}
             <Route path="/food" element={<ProtectedRoute requiredType="volunteer"><Food /></ProtectedRoute>} />
+            <Route path="/volunteer-manual" element={<ProtectedRoute requiredType="volunteer"><VolunteerManual /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />
