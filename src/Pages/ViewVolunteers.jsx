@@ -8,7 +8,7 @@ function ViewVolunteers() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     fetchVolunteers();
   }, []);
@@ -30,20 +30,20 @@ function ViewVolunteers() {
     // Navigate to volunteer profile page
     navigate(`/volunteer/${volunteerId}`);
   };
-  
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
-  
+
   // Filter volunteers based on search query
-  const filteredVolunteers = volunteers.filter(volunteer => 
-    volunteer.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredVolunteers = volunteers.filter(volunteer =>
+    (volunteer.user_name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="volunteer-container">
       <h1>Volunteers</h1>
-      
+
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -53,8 +53,8 @@ function ViewVolunteers() {
         <div className="no-data-container">
           <i className="fas fa-user-times fa-3x"></i>
           <p>No volunteers found.</p>
-          <button 
-            className="add-volunteer-button" 
+          <button
+            className="add-volunteer-button"
             onClick={() => navigate('/add-volunteer')}
           >
             Add New Volunteer
@@ -72,44 +72,38 @@ function ViewVolunteers() {
                 className="volunteer-search-input"
               />
             </div>
-            <button 
-              className="add-volunteer-button" 
+            <button
+              className="add-volunteer-button"
               onClick={() => navigate('/add-volunteer')}
             >
               Add New Volunteer
             </button>
           </div>
-          
-          <div className="volunteer-table-container">
-            <table className="volunteer-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Password</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredVolunteers.length > 0 ? (
-                  filteredVolunteers.map((volunteer) => (
-                    <tr key={volunteer._id} onClick={() => handleRowClick(volunteer._id)}>
-                      <td>{volunteer.user_name}</td>
-                      <td>{volunteer.user_phone_no || '-'}</td>
-                      <td>{volunteer.user_password}</td> {/* Add password column */}
-                      <td className="action-cell">
-                        <div className="tap-details">Tap to view details</div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="no-results">No volunteers found matching your search</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+
+          {filteredVolunteers.length > 0 ? (
+            <div className="volunteers-grid">
+              {filteredVolunteers.map((volunteer) => (
+                <div
+                  key={volunteer._id}
+                  className="volunteer-card"
+                  onClick={() => handleRowClick(volunteer._id)}
+                >
+                  <div className="volunteer-card-header">
+                    <span className="volunteer-icon">👥</span>
+                  </div>
+                  <div className="volunteer-info">
+                    <p className="volunteer-name">{volunteer.user_name}</p>
+                    <p className="volunteer-details">Gender: N/A</p>
+                    <p className="volunteer-details">Phone: {volunteer.user_phone_no || '-'}</p>
+                    <p className="volunteer-details">Role: Volunteer</p>
+                    <p className="volunteer-details">Attendance: {volunteer.list_of_visits ? volunteer.list_of_visits.length : 0}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-results">No volunteers found matching your search</div>
+          )}
         </>
       )}
     </div>
