@@ -2,10 +2,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useLocation } from "react-router-dom"; // Import useLocation
 import { z } from "zod";
 import { privateAxios } from "../api/axios";
 import PatientIDCard from "../Components/PatientIDCard";
-import "../Styles/PatientRegistration.css";
+import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
+import '../Styles/PatientRegistration.css';
 
 // ---------------------- ZOD VALIDATION --------------------------
 const patientSchema = z.object({
@@ -100,8 +102,17 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
   const [areas, setAreas] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceTimer = useRef(null);
+  const location = useLocation(); // Initialize useLocation
 
   // ------------------ REACT HOOK FORM ------------------
+  const { openScanner } = useQrScanner();
+
+  const handleQrScan = (bookNumber) => {
+    console.log(`QR Code detected: ${bookNumber}`);
+    setValue('bookNumber', bookNumber, { shouldValidate: true });
+    // Optionally trigger form submission here if desired
+  };
+
   const {
     register,
     handleSubmit,
@@ -128,6 +139,16 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
       setValue('gender', initialGender);
     }
   }, [initialGender, setValue]);
+
+  // Effect to handle bookNumber from dashboard scan
+  useEffect(() => {
+    if (location.state?.bookNumber) {
+      setValue('bookNumber', location.state.bookNumber, { shouldValidate: true });
+      // Clear the state so it doesn't re-apply on subsequent renders/navigation if not intended
+      // navigate('.', { replace: true, state: {} }); // This would clear the state, but might interfere with other uses of state
+    }
+  }, [location.state, setValue]);
+
 
   // ------------------ AREA FETCH ------------------
   const fetchAreas = async (query) => {
@@ -294,12 +315,23 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
               <label>
                 Book Number <span className="required">*</span>
               </label>
-              <input
-                type="text"
-                {...register("bookNumber")}
-                className={errors.bookNumber ? "error-input" : ""}
-                placeholder="Enter patient book number"
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="text"
+                  {...register("bookNumber")}
+                  className={errors.bookNumber ? "error-input" : ""}
+                  placeholder="Enter patient book number"
+                  style={{ flexGrow: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => openScanner(handleQrScan)}
+                  className="scan-btn"
+                  title="Scan QR Code"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><rect fill="none" height="24" width="24" /></g><g><g><path d="M3,11h8V3H3V11z M5,5h4v4H5V5z" /><path d="M3,21h8v-8H3V21z M5,15h4v4H5V15z" /><path d="M13,3v8h8V3H13z M19,9h-4V5h4V9z" /><rect height="2" width="2" x="13" y="13" /><rect height="2" width="2" x="17" y="17" /><rect height="2" width="2" x="19" y="19" /><rect height="2" width="2" x="13" y="19" /><rect height="2" width="2" x="19" y="13" /><rect height="2" width="2" x="15" y="15" /><rect height="2" width="2" x="17" y="13" /><rect height="2" width="2" x="15" y="19" /></g></g></svg>
+                </button>
+              </div>
               {errors.bookNumber && <div className="field-error">{errors.bookNumber.message}</div>}
             </div>
             <button
@@ -423,7 +455,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
               {errors.area && <div className="field-error">{errors.area.message}</div>}
             </div>
 
-            {!hideEidField && (
+            {/* {!hideEidField && (
               <div className="patient-registration-form-group">
                 <label>Token Number</label>
                 <input
@@ -434,7 +466,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
                 />
                 {errors.eid && <div className="field-error">{errors.eid.message}</div>}
               </div>
-            )}
+            )} */}
 
             <button
               type="submit"
