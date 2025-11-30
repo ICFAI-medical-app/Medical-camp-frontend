@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import '../Styles/Dashboard.css';
 
@@ -21,8 +20,8 @@ function Dashboard() {
     { title: "4. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
     { title: "5. Medicine Packing", icon: "💊", path: "/medicine-pickup" },
     // { title: "6. Patient Status", icon: "🔍", path:"/patient-status" },
-    { title: "6. Counselling", icon: "🗣️", path:"/counselling" },
-    { title: "7. Food", icon: "🍽️", path:"/food" },
+    { title: "6. Counselling", icon: "🗣️", path: "/counselling" },
+    { title: "7. Food", icon: "🍽️", path: "/food" },
     // { title: "8. Lab", icon: "🔬", path: "/lab-tests" },
     // { title: "9. Patient Support", icon: "🤝", path:"/in-progress" },
     // { title: "10. Token Generation", icon: "🎟️", class:"in-progress" },
@@ -35,7 +34,12 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Dashboard</h1>
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">Dashboard</h1>
+        <Link to="/volunteer-manual" className="volunteer-manual-btn">
+          Volunteer Manual
+        </Link>
+      </div>
       <div className="dashboard-card-container">
         {cardData.map((card, index) => (
           <Link to={card.path} key={index} className={`dashboard-card-link ${card.class}`}>
