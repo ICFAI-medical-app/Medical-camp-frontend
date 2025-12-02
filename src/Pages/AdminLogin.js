@@ -106,6 +106,17 @@ const AdminLogin = () => {
         >
           {isLoading ? 'Logging in...' : 'Login'}
         </button>
+
+        <div className="otp-login-container">
+            <span>Or</span>
+            <button
+                type="button"
+                className="otp-login-button"
+                onClick={() => navigate('/login-otp')}
+            >
+                Login with OTP
+            </button>
+        </div>
       </form>
     </div>
   );

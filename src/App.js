@@ -40,6 +40,9 @@ import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerLogin from './Pages/VolunteerLogin';
 import VolunteerManual from './Pages/VolunteerManual';
 import VolunteerProfile from './Pages/VolunteerProfile';
+import PublicRoute from './Pages/PublicRoute';
+import LoginOTP from './Pages/LoginOTP';
+import VerifyOTP from './Pages/VerifyOTP';
 import { QrScannerProvider } from './Context/QrScannerContext';
 
 function App() {
@@ -51,6 +54,8 @@ function App() {
           <QrScannerProvider>
             <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/login-otp" element={ <PublicRoute><LoginOTP /> </PublicRoute>} />
+            <Route path="/verify-otp" element={ <PublicRoute><VerifyOTP /> </PublicRoute>} />
             <Route path="/volunteer-signup" element={<AddVolunteer fromLogin={true} />} />
             <Route path="/dashboard" element={<ProtectedRoute requiredType="volunteer"><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard-admin" element={<ProtectedRoute requiredType="admin"><DashboardAdmin /></ProtectedRoute>} />
