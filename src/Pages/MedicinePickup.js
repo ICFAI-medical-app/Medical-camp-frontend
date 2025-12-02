@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-// import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/MedicinePickup.css';
+import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
 
 function MedicinePickup() {
   const navigate = useNavigate();
+  const location = useLocation(); // Initialize useLocation
+  const { openScanner } = useQrScanner();
   const [bookNo, setBookNo] = useState('');
   const [prescribedMeds, setPrescribedMeds] = useState([]);
   const [error, setError] = useState('');
@@ -54,6 +56,17 @@ function MedicinePickup() {
     } finally {
       setIsLoading(false); // Set loading back to false after fetching
     }
+  };
+
+  useEffect(() => {
+    // Set bookNo from location.state if navigating from Dashboard
+    if (location.state?.bookNumber) {
+      setBookNo(location.state.bookNumber);
+    }
+  }, [location.state]);
+
+  const handleQrScan = (scannedBookNumber) => {
+    setBookNo(scannedBookNumber);
   };
 
   const handleQuantityChange = (medIndex, batchIndex, value) => {
@@ -225,14 +238,25 @@ function MedicinePickup() {
 
         <div className="medicine-pickup-form-group">
           <label>Book Number</label>
-          <input
-            type="text"
-            value={bookNo}
-            onChange={(e) => setBookNo(e.target.value)}
-            required
-            placeholder="Enter Book No"
-                            disabled={isLoading || editingMedIndex !== null} // Disable input while loading or when editing prescribed quantity
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="text"
+              value={bookNo}
+              onChange={(e) => setBookNo(e.target.value)}
+              required
+              placeholder="Enter Book No"
+              disabled={isLoading || editingMedIndex !== null} // Disable input while loading or when editing prescribed quantity
+              style={{ flexGrow: 1 }}
+            />
+            <button
+              type="button"
+              onClick={() => openScanner(handleQrScan)}
+              className="scan-btn"
+              title="Scan QR Code"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z"/></svg>
+            </button>
+          </div>
         </div>
 
         <div className="medicine-pickup-btn-container">

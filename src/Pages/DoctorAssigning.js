@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom"; // Import useParams and useLocation
 import { privateAxios } from "../api/axios";
 import "../Styles/DoctorAssigning.css";
+import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
 
 function DoctorAssigning() {
+  const { openScanner } = useQrScanner();
   const [formData, setFormData] = useState({ bookNumber: '', doc_name: '' });
   const [doctors, setDoctors] = useState([]);
   const [message, setMessage] = useState('');
@@ -33,6 +35,11 @@ function DoctorAssigning() {
 
     fetchDoctors();
   }, []);
+
+  const handleQrScan = (bookNumber) => {
+    console.log(`QR Code detected: ${bookNumber}`);
+    setFormData((prev) => ({ ...prev, bookNumber: bookNumber }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,14 +75,25 @@ function DoctorAssigning() {
       <form onSubmit={handleSubmit} className="doctor-assigning-form">
         <div className="doctor-assigning-form-group">
           <label>Book Number</label>
-          <input
-            type="text"
-            name="bookNumber"
-            value={formData.bookNumber}
-            onChange={handleChange}
-            required
-            disabled={isLoading} // Disable input while loading
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="text"
+              name="bookNumber"
+              value={formData.bookNumber}
+              onChange={handleChange}
+              required
+              style={{ flexGrow: 1 }}
+              // No longer disabled by isLoading for manual entry fallback
+            />
+            <button
+              type="button"
+              onClick={() => openScanner(handleQrScan)}
+              className="scan-btn"
+              title="Scan QR Code"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z"/></svg>
+            </button>
+          </div>
         </div>
         <div className="doctor-assigning-form-group">
           <label>Doctor Assigned</label>

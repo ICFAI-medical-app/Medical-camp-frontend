@@ -40,6 +40,7 @@ import ViewVolunteers from './Pages/ViewVolunteers';
 import VolunteerLogin from './Pages/VolunteerLogin';
 import VolunteerManual from './Pages/VolunteerManual';
 import VolunteerProfile from './Pages/VolunteerProfile';
+import { QrScannerProvider } from './Context/QrScannerContext';
 
 function App() {
   return (
@@ -47,7 +48,8 @@ function App() {
       <Router>
         <Navbar />
         <div className="main-content">
-          <Routes>
+          <QrScannerProvider>
+            <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/volunteer-signup" element={<AddVolunteer fromLogin={true} />} />
             <Route path="/dashboard" element={<ProtectedRoute requiredType="volunteer"><Dashboard /></ProtectedRoute>} />
@@ -90,6 +92,7 @@ function App() {
             <Route path="/food" element={<ProtectedRoute requiredType="volunteer"><Food /></ProtectedRoute>} />
             <Route path="/volunteer-manual" element={<ProtectedRoute requiredType="volunteer"><VolunteerManual /></ProtectedRoute>} />
           </Routes>
+          </QrScannerProvider>
         </div>
         <Footer />
       </Router>
