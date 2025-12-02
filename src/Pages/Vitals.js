@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; // Removed Link
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/Vitals.css';
+import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
 
 // Debounce utility function moved outside the component to prevent re-creation on every render
 const debounce = (func, delay) => {
@@ -35,7 +36,14 @@ function Vitals() {
   const [bookNumberError, setBookNumberError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Initialize useLocation
+  const { openScanner } = useQrScanner();
   const { book_no: urlBookNumber } = useParams(); // Get book_no from URL parameters
+
+  const handleQrScan = (scannedBookNumber) => {
+    setFormData((prev) => ({ ...prev, bookNumber: scannedBookNumber }));
+    debouncedFetchVitals(scannedBookNumber);
+  };
 
   const fetchVitals = async (value) => {
     console.log(value);
@@ -190,10 +198,28 @@ function Vitals() {
       <form onSubmit={handleSubmit} className="vitals-form">
         <div className="vitals-form-group">
           <label>Book Number</label>
-          <input type="text" name="bookNumber" value={formData.bookNumber} autoComplete='off' onChange={(e) => {
-            handleChange(e);
-            debouncedFetchVitals(e.target.value);
-          }} required />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              type="text"
+              name="bookNumber"
+              value={formData.bookNumber}
+              autoComplete='off'
+              onChange={(e) => {
+                handleChange(e);
+                debouncedFetchVitals(e.target.value);
+              }}
+              required
+              style={{ flexGrow: 1 }}
+            />
+            <button
+              type="button"
+              onClick={() => openScanner(handleQrScan)}
+              className="scan-btn"
+              title="Scan QR Code"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><rect fill="none" height="24" width="24" /></g><g><g><path d="M3,11h8V3H3V11z M5,5h4v4H5V5z" /><path d="M3,21h8v-8H3V21z M5,15h4v4H5V15z" /><path d="M13,3v8h8V3H13z M19,9h-4V5h4V9z" /><rect height="2" width="2" x="13" y="13" /><rect height="2" width="2" x="17" y="17" /><rect height="2" width="2" x="19" y="19" /><rect height="2" width="2" x="13" y="19" /><rect height="2" width="2" x="19" y="13" /><rect height="2" width="2" x="15" y="15" /><rect height="2" width="2" x="17" y="13" /><rect height="2" width="2" x="15" y="19" /></g></g></svg>
+            </button>
+          </div>
           {bookNumberError && <div className="vitals-error-msg">{bookNumberError}</div>}
         </div>
         <div className="vitals-form-group">
