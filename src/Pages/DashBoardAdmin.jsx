@@ -23,6 +23,7 @@ function DashboardAdmin() {
     { title: "Add Doctor", icon: "👨‍⚕️", path: "/add-doctor" },
     { title: "Add Volunteer", icon: "👥", path: "/add-volunteer" },
     { title: "Manage Lab Tests", icon: "🔬", path: "/manage-labtests" }, // New card for Lab Tests
+    { title: "Download QR Codes", icon: "🖨️", path: "/downloadQrcode" },
     { title: "View Logs", icon: "📜", path: "/log" },
   ];
 
