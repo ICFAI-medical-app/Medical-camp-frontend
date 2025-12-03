@@ -41,18 +41,6 @@ const patientSchema = z.object({
     }, {
       message: "Phone number must start with 6–9",
     })
-    // Note: Backend might expect 10 digits or full format. 
-    // Keeping it as 10 digits for consistency with previous implementation if needed, 
-    // but the robust schema suggests standardizing. 
-    // We will send what the user inputs but cleaned, or standard 10 digits if possible.
-    // The previous implementation sent 10 digits. 
-    // Let's stick to 10 digits for backend compatibility if it expects that.
-    // However, the user asked to "refer to this code" which adds +91. 
-    // I will use the transformation to 10 digits for storage if the backend doesn't handle +91 well,
-    // or just keep it as is. 
-    // Let's use the robust validation but maybe strip the +91 for the backend if it expects 10 digits.
-    // Actually, looking at the backend code, it just stores what it gets.
-    // I'll stick to the user's requested format (+91) but ensure it's valid.
     .transform((digits) => {
       if (digits.length === 10) return digits; // Keep 10 digits for consistency with existing data
       if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2); // Strip 91 to store 10 digits
@@ -144,8 +132,6 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
   useEffect(() => {
     if (location.state?.bookNumber) {
       setValue('bookNumber', location.state.bookNumber, { shouldValidate: true });
-      // Clear the state so it doesn't re-apply on subsequent renders/navigation if not intended
-      // navigate('.', { replace: true, state: {} }); // This would clear the state, but might interfere with other uses of state
     }
   }, [location.state, setValue]);
 
@@ -269,215 +255,225 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
     }
   };
 
+  const handleRegisterNext = () => {
+    setRegisteredPatient(null);
+    setIsBookNumberSubmitted(false);
+    setMessage('');
+    setError('');
+    reset({
+      bookNumber: '',
+      name: '',
+      phoneNumber: '',
+      age: '',
+      gender: initialGender || '',
+      area: '',
+      eid: ''
+    });
+  };
+
   // ------------------ RENDER ------------------
   return (
     <div className="patient-registration-container">
-      <button
-        className="back-btn"
-        hidden={!isBookNumberSubmitted}
-        onClick={() => {
-          setIsBookNumberSubmitted(false);
-          setMessage('');
-          setError('');
-          reset({
-            bookNumber: '',
-            name: '',
-            phoneNumber: '',
-            age: '',
-            gender: initialGender || '',
-            area: '',
-            eid: ''
-          });
-        }}
-      >
-        <svg fill="#000000" xmlns="http://www.w3.org/2000/svg"
-          width="24px" height="24px" viewBox="0 0 52 52" enableBackground="new 0 0 52 52">
-          <path d="M48.6,23H15.4c-0.9,0-1.3-1.1-0.7-1.7l9.6-9.6c0.6-0.6,0.6-1.5,0-2.1l-2.2-2.2c-0.6-0.6-1.5-0.6-2.1,0
-            L2.5,25c-0.6,0.6-0.6,1.5,0,2.1L20,44.6c0.6,0.6,1.5,0.6,2.1,0l2.1-2.1c0.6-0.6,0.6-1.5,0-2.1l-9.6-9.6C14,30.1,14.4,29,15.3,29
-            h33.2c0.8,0,1.5-0.6,1.5-1.4v-3C50,23.8,49.4,23,48.6,23z"/>
-        </svg>
-      </button>
+      {registeredPatient ? (
+        <div className="simple-qr-view" id="printable-qr">
+          <img src={registeredPatient.qr} alt="Patient QR Code" />
+          <h2>{registeredPatient.book_no}</h2>
+          <div className="action-buttons">
+            <button className="btn-register-next" onClick={handleRegisterNext}>Register Next Patient</button>
+            <button className="btn-print" onClick={() => window.print()}>Print</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <button
+            className="back-btn"
+            hidden={!isBookNumberSubmitted}
+            onClick={() => {
+              setIsBookNumberSubmitted(false);
+              setMessage('');
+              setError('');
+              reset({
+                bookNumber: '',
+                name: '',
+                phoneNumber: '',
+                age: '',
+                gender: initialGender || '',
+                area: '',
+                eid: ''
+              });
+            }}
+          >
+            <svg fill="#000000" xmlns="http://www.w3.org/2000/svg"
+              width="24px" height="24px" viewBox="0 0 52 52" enableBackground="new 0 0 52 52">
+              <path d="M48.6,23H15.4c-0.9,0-1.3-1.1-0.7-1.7l9.6-9.6c0.6-0.6,0.6-1.5,0-2.1l-2.2-2.2c-0.6-0.6-1.5-0.6-2.1,0
+                L2.5,25c-0.6,0.6-0.6,1.5,0,2.1L20,44.6c0.6,0.6,1.5,0.6,2.1,0l2.1-2.1c0.6-0.6,0.6-1.5,0-2.1l-9.6-9.6C14,30.1,14.4,29,15.3,29
+                h33.2c0.8,0,1.5-0.6,1.5-1.4v-3C50,23.8,49.4,23,48.6,23z"/>
+            </svg>
+          </button>
 
-      <h1 className="patient-registration-title">Patient Registration</h1>
-      {message && <div className="patient-registration-success-msg">{message}</div>}
-      {error && <div className="patient-registration-error-msg">{error}</div>}
+          <h1 className="patient-registration-title">Patient Registration</h1>
+          {message && <div className="patient-registration-success-msg">{message}</div>}
+          {error && <div className="patient-registration-error-msg">{error}</div>}
 
-      {
-        registeredPatient && (
-          <PatientIDCard patientData={registeredPatient} />
-        )
-      }
-
-      {
-        !isBookNumberSubmitted ? (
-          <form onSubmit={handleSubmit(handleBookNumberSubmit)} className="patient-registration-form">
-            <div className="patient-registration-form-group">
-              <label>
-                Book Number <span className="required">*</span>
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <input
-                  type="text"
-                  {...register("bookNumber")}
-                  className={errors.bookNumber ? "error-input" : ""}
-                  placeholder="Enter patient book number"
-                  style={{ flexGrow: 1 }}
-                />
+          {
+            !isBookNumberSubmitted ? (
+              <form onSubmit={handleSubmit(handleBookNumberSubmit)} className="patient-registration-form">
+                <div className="patient-registration-form-group">
+                  <label>
+                    Book Number <span className="required">*</span>
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      type="text"
+                      {...register("bookNumber")}
+                      className={errors.bookNumber ? "error-input" : ""}
+                      placeholder="Enter patient book number"
+                      style={{ flexGrow: 1 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openScanner(handleQrScan)}
+                      className="scan-btn"
+                      title="Scan QR Code"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><rect fill="none" height="24" width="24" /></g><g><g><path d="M3,11h8V3H3V11z M5,5h4v4H5V5z" /><path d="M3,21h8v-8H3V21z M5,15h4v4H5V15z" /><path d="M13,3v8h8V3H13z M19,9h-4V5h4V9z" /><rect height="2" width="2" x="13" y="13" /><rect height="2" width="2" x="17" y="17" /><rect height="2" width="2" x="19" y="19" /><rect height="2" width="2" x="13" y="19" /><rect height="2" width="2" x="19" y="13" /><rect height="2" width="2" x="15" y="15" /><rect height="2" width="2" x="17" y="13" /><rect height="2" width="2" x="15" y="19" /></g></g></svg>
+                    </button>
+                  </div>
+                  {errors.bookNumber && <div className="field-error">{errors.bookNumber.message}</div>}
+                </div>
                 <button
-                  type="button"
-                  onClick={() => openScanner(handleQrScan)}
-                  className="scan-btn"
-                  title="Scan QR Code"
+                  type="submit"
+                  className="patient-registration-submit-btn"
+                  disabled={isLoading}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><rect fill="none" height="24" width="24" /></g><g><g><path d="M3,11h8V3H3V11z M5,5h4v4H5V5z" /><path d="M3,21h8v-8H3V21z M5,15h4v4H5V15z" /><path d="M13,3v8h8V3H13z M19,9h-4V5h4V9z" /><rect height="2" width="2" x="13" y="13" /><rect height="2" width="2" x="17" y="17" /><rect height="2" width="2" x="19" y="19" /><rect height="2" width="2" x="13" y="19" /><rect height="2" width="2" x="19" y="13" /><rect height="2" width="2" x="15" y="15" /><rect height="2" width="2" x="17" y="13" /><rect height="2" width="2" x="15" y="19" /></g></g></svg>
+                  {isLoading ? "Loading..." : "Submit"}
                 </button>
-              </div>
-              {errors.bookNumber && <div className="field-error">{errors.bookNumber.message}</div>}
-            </div>
-            <button
-              type="submit"
-              className="patient-registration-submit-btn"
-              disabled={isLoading}
-            >
-              {isLoading ? "Loading..." : "Submit"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleSubmit(onSubmitPatient)} className="patient-registration-form">
-            <div className="patient-registration-form-group">
-              <label>Book Number</label>
-              <input
-                type="text"
-                {...register("bookNumber")}
-                disabled
-              />
-            </div>
-
-            <div className="patient-registration-form-group">
-              <label>
-                Name <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                {...register("name")}
-                className={errors.name ? "error-input" : ""}
-                placeholder="Enter patient name"
-              />
-              {errors.name && <div className="field-error">{errors.name.message}</div>}
-            </div>
-
-            <div className="patient-registration-form-group">
-              <label>
-                Phone Number <span className="required">*</span>
-              </label>
-              <input
-                type="tel"
-                {...register("phoneNumber")}
-                maxLength="12"
-                placeholder="Enter phone number"
-                className={errors.phoneNumber ? "error-input" : ""}
-              />
-              {errors.phoneNumber && <div className="field-error">{errors.phoneNumber.message}</div>}
-            </div>
-
-            <div className="patient-registration-form-group">
-              <label>
-                Age <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                {...register("age")}
-                placeholder="Enter patient age (0.1 - 120)"
-                className={errors.age ? "error-input" : ""}
-              />
-              {errors.age && <div className="field-error">{errors.age.message}</div>}
-            </div>
-
-            <div className="patient-registration-form-group">
-              <label>
-                Gender <span className="required">*</span>
-              </label>
-              <div className="patient-registration-radio-group">
-                <label>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmitPatient)} className="patient-registration-form">
+                <div className="patient-registration-form-group">
+                  <label>Book Number</label>
                   <input
-                    type="radio"
-                    value="male"
-                    {...register("gender")}
+                    type="text"
+                    {...register("bookNumber")}
+                    disabled
                   />
-                  Male
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="female"
-                    {...register("gender")}
-                  />
-                  Female
-                </label>
-              </div>
-              {errors.gender && <div className="field-error">{errors.gender.message}</div>}
-            </div>
+                </div>
 
-            <div className="patient-registration-form-group">
-              <label>
-                Area <span className="required">*</span>
-              </label>
-              <div className="area-input">
-                <input
-                  type="text"
-                  {...register("area")}
-                  onChange={(e) => {
-                    register("area").onChange(e);
-                    handleAreaChange(e);
-                  }}
-                  onBlur={(e) => {
-                    register("area").onBlur(e);
-                    setTimeout(() => setShowSuggestions(false), 300);
-                  }}
-                  placeholder="Enter area"
-                  autoComplete="off"
-                  className={errors.area ? "error-input" : ""}
-                />
-                {showSuggestions && (
-                  <ul className="suggestions-dropdown">
-                    {areas.length > 0 ? (
-                      areas.map((area, i) => (
-                        <li key={i} onClick={() => handleSuggestionClick(area)}>
-                          {area}
-                        </li>
-                      ))
-                    ) : (
-                      <li className="no-results">No results found</li>
+                <div className="patient-registration-form-group">
+                  <label>
+                    Name <span className="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    {...register("name")}
+                    className={errors.name ? "error-input" : ""}
+                    placeholder="Enter patient name"
+                  />
+                  {errors.name && <div className="field-error">{errors.name.message}</div>}
+                </div>
+
+                <div className="patient-registration-form-group">
+                  <label>
+                    Phone Number <span className="required">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    {...register("phoneNumber")}
+                    maxLength="12"
+                    placeholder="Enter phone number"
+                    className={errors.phoneNumber ? "error-input" : ""}
+                  />
+                  {errors.phoneNumber && <div className="field-error">{errors.phoneNumber.message}</div>}
+                </div>
+
+                <div className="patient-registration-form-group">
+                  <label>
+                    Age <span className="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    {...register("age")}
+                    placeholder="Enter patient age (0.1 - 120)"
+                    className={errors.age ? "error-input" : ""}
+                  />
+                  {errors.age && <div className="field-error">{errors.age.message}</div>}
+                </div>
+
+                <div className="patient-registration-form-group">
+                  <label>
+                    Gender <span className="required">*</span>
+                  </label>
+                  <div className="patient-registration-radio-group">
+                    <label>
+                      <input
+                        type="radio"
+                        value="male"
+                        {...register("gender")}
+                      />
+                      Male
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="female"
+                        {...register("gender")}
+                      />
+                      Female
+                    </label>
+                  </div>
+                  {errors.gender && <div className="field-error">{errors.gender.message}</div>}
+                </div>
+
+                <div className="patient-registration-form-group">
+                  <label>
+                    Area <span className="required">*</span>
+                  </label>
+                  <div className="area-input">
+                    <input
+                      type="text"
+                      {...register("area")}
+                      onChange={(e) => {
+                        register("area").onChange(e);
+                        handleAreaChange(e);
+                      }}
+                      onBlur={(e) => {
+                        register("area").onBlur(e);
+                        setTimeout(() => setShowSuggestions(false), 300);
+                      }}
+                      placeholder="Enter area"
+                      autoComplete="off"
+                      className={errors.area ? "error-input" : ""}
+                    />
+                    {showSuggestions && (
+                      <ul className="suggestions-dropdown">
+                        {areas.length > 0 ? (
+                          areas.map((area, i) => (
+                            <li key={i} onClick={() => handleSuggestionClick(area)}>
+                              {area}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="no-results">No results found</li>
+                        )}
+                      </ul>
                     )}
-                  </ul>
-                )}
-              </div>
-              {errors.area && <div className="field-error">{errors.area.message}</div>}
-            </div>
+                  </div>
+                  {errors.area && <div className="field-error">{errors.area.message}</div>}
+                </div>
 
-            {/* {!hideEidField && (
-              <div className="patient-registration-form-group">
-                <label>Token Number</label>
-                <input
-                  type="text"
-                  {...register("eid")}
-                  placeholder="Enter patient Token Number (optional)"
-                  className={errors.eid ? "error-input" : ""}
-                />
-                {errors.eid && <div className="field-error">{errors.eid.message}</div>}
-              </div>
-            )} */}
-
-            <button
-              type="submit"
-              className="patient-registration-submit-btn"
-              disabled={isLoading}
-            >
-              {isLoading ? "Saving..." : "Save"}
-            </button>
-          </form>
-        )
-      }
+                <button
+                  type="submit"
+                  className="patient-registration-submit-btn"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Saving..." : "Save"}
+                </button>
+              </form>
+            )
+          }
+        </>
+      )}
     </div>
   );
 }
