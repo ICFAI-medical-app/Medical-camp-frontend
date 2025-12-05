@@ -125,10 +125,11 @@ const signupSchema = z.object({
         }, {
             message: "Phone number must start with 6–9",
         })
-        .transform((digits) => {
-            if (digits.length === 10) return `+91${digits}`;
-            return `+${digits}`;
-        }),
+    // .transform((digits) => {
+    //     if (digits.length === 10) return `+91${digits}`;
+    //     return `+${digits}`;
+    // })
+    ,
 
     user_email: z
         .string()
