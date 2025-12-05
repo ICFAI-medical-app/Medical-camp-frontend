@@ -1,6 +1,6 @@
 .download-qr-container {
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     font-family: 'Inter', sans-serif;
 }
@@ -12,13 +12,42 @@
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.controls-panel {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-group label {
+    font-weight: 600;
+    color: #555;
+}
+
+.control-group select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    cursor: pointer;
+    background-color: white;
 }
 
 .print-all-btn {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 8px;
     font-size: 1rem;
     cursor: pointer;
@@ -30,20 +59,35 @@
     background-color: #0056b3;
 }
 
-.qr-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 20px;
+/* Screen Preview Styles */
+.qr-grid-preview-wrapper {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #eee;
 }
 
 .qr-card {
-    border: 1px solid #ddd;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 15px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background: white;
-    page-break-inside: avoid;
-    /* Prevent breaking inside a card */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-height: 200px;
+    /* Min height for preview */
+}
+
+.qr-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+    flex: 1;
 }
 
 .qr-image-container img {
@@ -53,7 +97,8 @@
 }
 
 .qr-details {
-    margin-top: 10px;
+    text-align: center;
+    width: 100%;
 }
 
 .qr-book-no {
@@ -70,6 +115,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .loading-container {
@@ -79,18 +125,12 @@
     color: #666;
 }
 
+/* Print Styles are mostly handled dynamically in JSX, but we need to hide non-print elements */
 @media print {
-    @page {
-        margin: 5mm;
-        /* Minimize margins to fit more content */
-    }
-
-    /* Reset visibility for everything, overriding PatientRegistration.css global hide */
     body * {
         visibility: visible !important;
     }
 
-    /* Hide the navbar, footer, and other non-printable elements */
     .navbar,
     .footer,
     .no-print,
@@ -105,54 +145,16 @@
         max-width: none;
     }
 
-    .qr-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        /* 5 columns per row */
-        gap: 10px;
+    .qr-grid-preview-wrapper {
+        padding: 0;
+        background: transparent;
+        border: none;
     }
 
+    /* Reset some screen-only styles */
     .qr-card {
-        border: 1px solid #ccc;
-        border-radius: 6px;
         box-shadow: none;
-        break-inside: avoid;
-        height: 180px;
-        /* Slightly larger height for 5 columns */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 10px;
-    }
-
-    .qr-image-container img {
-        width: 90px;
-        /* Slightly larger QR code */
-        height: 90px;
-        object-fit: contain;
-        margin-bottom: 5px;
-    }
-
-    .qr-book-no {
-        font-size: 0.9rem;
-        margin: 2px 0;
-        font-weight: 700;
-    }
-
-    .qr-name {
-        font-size: 0.75rem;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #555;
-    }
-
-    body {
-        background: white;
-        -webkit-print-color-adjust: exact;
-        /* Ensure borders print */
-        print-color-adjust: exact;
+        border-radius: 0;
+        min-height: 0;
     }
 }
