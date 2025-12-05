@@ -67,9 +67,7 @@ const patientSchema = z.object({
     })
     .refine(val => val.replace(/\s/g, '').length >= 3, {
       message: "Area must have at least 3 actual characters"
-    }),
-
-  eid: z.string().optional()
+    })
 });
 
 // Schema for book number only
@@ -79,7 +77,7 @@ const bookNumberSchema = z.object({
     .trim()
 });
 
-function PatientRegistration({ initialBookNumber = '', hideEidField = false, initialGender = '' }) {
+function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
   const [isBookNumberSubmitted, setIsBookNumberSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [registeredPatient, setRegisteredPatient] = useState(null);
@@ -116,8 +114,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
       phoneNumber: '',
       age: '',
       gender: initialGender,
-      area: '',
-      eid: ''
+      area: ''
     },
     mode: "onBlur"
   });
@@ -134,6 +131,13 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
       setValue('bookNumber', location.state.bookNumber, { shouldValidate: true });
     }
   }, [location.state, setValue]);
+
+  // Debug: Log errors
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("Current Form Errors:", errors);
+    }
+  }, [errors]);
 
 
   // ------------------ AREA FETCH ------------------
@@ -183,25 +187,8 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
           phoneNumber: response.data.patient_phone_no || '',
           age: response.data.patient_age ? String(response.data.patient_age) : '',
           gender: response.data.patient_sex || initialGender || '',
-          area: response.data.patient_area || '',
-          eid: response.data.eid || ''
+          area: response.data.patient_area || ''
         });
-
-        // Handle Token Generation if needed
-        if (!response.data?.eid && !hideEidField) {
-          try {
-            const tokenRes = await privateAxios.post('/api/token', {
-              bookNumber: data.bookNumber,
-              gender: response.data?.patient_sex || 'unknown'
-            });
-
-            if (tokenRes.data?.tokenNumber) {
-              setValue('eid', tokenRes.data.tokenNumber);
-            }
-          } catch (tokenError) {
-            console.error('Error generating token:', tokenError);
-          }
-        }
         setMessage('Patient data loaded successfully!');
       }
       setIsBookNumberSubmitted(true);
@@ -215,8 +202,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
           phoneNumber: '',
           age: '',
           gender: initialGender || '',
-          area: '',
-          eid: ''
+          area: ''
         });
         setIsBookNumberSubmitted(true);
       } else {
@@ -240,8 +226,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
         patient_age: parseFloat(data.age),
         patient_sex: data.gender,
         patient_phone_no: data.phoneNumber,
-        patient_area: data.area,
-        ...(hideEidField ? {} : { eid: data.eid })
+        patient_area: data.area
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
 
@@ -266,8 +251,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
       phoneNumber: '',
       age: '',
       gender: initialGender || '',
-      area: '',
-      eid: ''
+      area: ''
     });
   };
 
@@ -298,8 +282,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
                 phoneNumber: '',
                 age: '',
                 gender: initialGender || '',
-                area: '',
-                eid: ''
+                area: ''
               });
             }}
           >
@@ -350,7 +333,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleSubmit(onSubmitPatient)} className="patient-registration-form">
+              <form onSubmit={handleSubmit(onSubmitPatient, (errors) => console.log("Validation Errors:", errors))} className="patient-registration-form">
                 <div className="patient-registration-form-group">
                   <label>Book Number</label>
                   <input
@@ -358,6 +341,7 @@ function PatientRegistration({ initialBookNumber = '', hideEidField = false, ini
                     {...register("bookNumber")}
                     disabled
                   />
+                  {errors.bookNumber && <div className="field-error">{errors.bookNumber.message}</div>}
                 </div>
 
                 <div className="patient-registration-form-group">
