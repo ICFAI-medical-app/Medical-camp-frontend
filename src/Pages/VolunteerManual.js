@@ -21,7 +21,7 @@ const VolunteerManual = () => {
                     <div className="workflow-arrow">⬇</div>
                     <div className="workflow-step">4. Doctor Consultation (Prescription)</div>
                     <div className="workflow-arrow">⬇</div>
-                    <div className="workflow-step">5. Medicine Packing & Pickup</div>
+                    <div className="workflow-step">5. Stock Update</div>
                     <div className="workflow-arrow">⬇</div>
                     <div className="workflow-step">6. Counselling (if required)</div>
                     <div className="workflow-arrow">⬇</div>
@@ -118,7 +118,7 @@ const VolunteerManual = () => {
 
                 {/* Card 5: Medicine Packing */}
                 <div className="manual-card-guide">
-                    <h3>5. Medicine Packing</h3>
+                    <h3>5. Medicine Entry</h3>
                     <div className="card-content">
                         <p><strong>Purpose:</strong> Pharmacy volunteers view the prescription and dispense meds.</p>
                         <p><strong>Procedure:</strong></p>

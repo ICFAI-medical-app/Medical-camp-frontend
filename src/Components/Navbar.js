@@ -36,29 +36,29 @@ const Navbar = () => {
     pathname !== VOLUNTEER_DASH;
 
   const adminNavLinks = [
-    { path: ADMIN_DASH,             label: 'Dashboard' },
-    { path: '/camp-analytics',      label: 'Camp Analytics'},
-    { path: '/doctor-availability',label: 'Doctor Availability' },
+    { path: ADMIN_DASH, label: 'Dashboard' },
+    { path: '/camp-analytics', label: 'Camp Analytics' },
+    { path: '/doctor-availability', label: 'Doctor Availability' },
     { path: '/update-medicine-stock', label: 'Update Medicine Stock' },
-    { path: '/get-doctors',         label: 'View Doctors',    menuOnly: true },
-    { path: '/get-medicines',       label: 'View Medicines',  menuOnly: true },
-    { path: '/get-volunteers',      label: 'View Volunteers', menuOnly: true },
-    { path: '/view-patients',      label: 'View Patients', menuOnly: true },
-    { path: '/add-new-medicine',    label: 'Add New Medicine' ,    menuOnly: true },
-    { path: '/add-doctor',          label: 'Add Doctor' ,    menuOnly: true },
-    { path: '/add-volunteer',       label: 'Add Volunteer',    menuOnly: true  },
-    { path: '/log',      label: 'View Logs', menuOnly: true },
+    { path: '/get-doctors', label: 'View Doctors', menuOnly: true },
+    { path: '/get-medicines', label: 'View Medicines', menuOnly: true },
+    { path: '/get-volunteers', label: 'View Volunteers', menuOnly: true },
+    { path: '/view-patients', label: 'View Patients', menuOnly: true },
+    { path: '/add-new-medicine', label: 'Add New Medicine', menuOnly: true },
+    { path: '/add-doctor', label: 'Add Doctor', menuOnly: true },
+    { path: '/add-volunteer', label: 'Add Volunteer', menuOnly: true },
+    { path: '/log', label: 'View Logs', menuOnly: true },
   ];
 
   const volunteerNavLinks = [
-    { path: VOLUNTEER_DASH,          label: 'Dashboard' },
+    { path: VOLUNTEER_DASH, label: 'Dashboard' },
     { path: '/patient-registration', label: 'Patient Registration' },
-    { path: '/view-queue',  label: 'View Queues'},
-    { path: '/vitals',               label: 'Vitals' ,    menuOnly: true },
-    { path: '/doctor-assigning',     label: 'Doctor Assigning',    menuOnly: true },
-    { path: '/doctor-assigning-automatic',     label: 'Doctor Assigning Automatic',    menuOnly: true },
-    { path: '/doctor-prescription',  label: 'Doctor Prescription', menuOnly: true },
-    { path: '/medicine-pickup',      label: 'Medicine Pickup',     menuOnly: true },
+    { path: '/view-queue', label: 'View Queues' },
+    { path: '/vitals', label: 'Vitals', menuOnly: true },
+    { path: '/doctor-assigning', label: 'Doctor Assigning', menuOnly: true },
+    { path: '/doctor-assigning-automatic', label: 'Doctor Assigning Automatic', menuOnly: true },
+    { path: '/doctor-prescription', label: 'Doctor Prescription', menuOnly: true },
+    { path: '/medicine-pickup', label: 'Stock Update', menuOnly: true },
   ];
 
   let linksToDisplay = [];
