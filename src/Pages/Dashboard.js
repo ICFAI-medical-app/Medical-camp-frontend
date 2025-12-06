@@ -29,7 +29,7 @@ function Dashboard() {
     // { title3 "5.2 Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
     { title: "3. Vitals", icon: "💓", path: "/vitals" },
     { title: "4. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
-    { title: "5. Medicine Packing", icon: "💊", path: "/medicine-pickup" },
+    { title: "5. Stock Update", icon: "💊", path: "/medicine-pickup" },
     // { title: "6. Patient Status", icon: "🔍", path:"/patient-status" },
     { title: "6. Counselling", icon: "🗣️", path: "/counselling" },
     { title: "7. Food", icon: "🍽️", path: "/food" },

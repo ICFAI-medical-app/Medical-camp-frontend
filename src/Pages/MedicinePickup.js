@@ -101,17 +101,17 @@ function MedicinePickup() {
 
     // Check if quantities match prescribed amounts
     const quantityMismatch = prescribedMeds.filter(med => {
-      const totalGiven = med.batches.reduce((sum, batch) => 
+      const totalGiven = med.batches.reduce((sum, batch) =>
         sum + (parseInt(batch.quantity_taken) || 0), 0);
       return totalGiven !== parseInt(med.quantity);
     });
 
     if (quantityMismatch.length > 0) {
-      const mismatchItems = quantityMismatch.map(med => 
-        `${med.medicine_id} (Prescribed: ${med.quantity}, Given: ${med.batches.reduce((sum, batch) => 
+      const mismatchItems = quantityMismatch.map(med =>
+        `${med.medicine_id} (Prescribed: ${med.quantity}, Given: ${med.batches.reduce((sum, batch) =>
           sum + (parseInt(batch.quantity_taken) || 0), 0)})`
       ).join(', ');
-      
+
       setError(`Quantity mismatch for medicine(s): ${mismatchItems}. Please ensure the total quantity given matches the prescribed amount.`);
       return;
     }
@@ -144,12 +144,12 @@ function MedicinePickup() {
           medicinesGiven
         }
       );
-      
+
       let successMessage = ` ${bookNo}</p>`
       if (response.data.updated_quantities && response.data.updated_quantities.length > 0) {
-        
+
         response.data.updated_quantities.forEach(item => {
-          let med={};
+          let med = {};
           med["medicine_id"] = item.medicine_id;
           med["picked_up_quantity"] = item.picked_up_quantity;
           med["before_quantity"] = item.before_quantity;
@@ -234,7 +234,7 @@ function MedicinePickup() {
   return (
     <div className="medicine-pickup-container">
       <div className="medicine-pickup-card">
-        <h1 className="medicine-pickup-title">Medicine Pickup</h1>
+        <h1 className="medicine-pickup-title">Stock Update</h1>
 
         <div className="medicine-pickup-form-group">
           <label>Book Number</label>
@@ -254,7 +254,7 @@ function MedicinePickup() {
               className="scan-btn"
               title="Scan QR Code"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none" /><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z" /></svg>
             </button>
           </div>
         </div>
@@ -276,10 +276,10 @@ function MedicinePickup() {
 
             {prescribedMeds.map((med, medIndex) => {
               const totalGiven = med.batches.reduce(
-                (sum, batch) => sum + (parseInt(batch.quantity_taken) || 0), 
+                (sum, batch) => sum + (parseInt(batch.quantity_taken) || 0),
                 0
               );
-              
+
               return (
                 <div key={medIndex} className="medicine-block">
                   <div className="medicine-header">
@@ -318,7 +318,7 @@ function MedicinePickup() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="batches-row">
                     {med.batches.map((batch, batchIndex) => (
                       <div key={batchIndex} className="batch-card">
@@ -346,8 +346,8 @@ function MedicinePickup() {
             })}
 
             <div className="medicine-pickup-btn-container">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="medicine-pickup-submit-btn"
                 disabled={isLoading} // Disable button while loading
               >
@@ -363,7 +363,7 @@ function MedicinePickup() {
           <div className="medicine-pickup-popup">
             <p><strong>Book Number:</strong> {bookNo}</p>
             {
-              updatedMeds.length>0 && (
+              updatedMeds.length > 0 && (
                 <table>
                   <thead>
                     <tr>
