@@ -5,6 +5,7 @@ import AddMedicine from './Pages/AddMedicine';
 import Dashboard from './Pages/Dashboard';
 import DashboardAdmin from './Pages/DashBoardAdmin';
 import DoctorAssigning from './Pages/DoctorAssigning';
+import DoctorConsultation from './Pages/DoctorConsultation';
 import DoctorAssigningAutomatic from './Pages/DoctorAssigningAutomatic';
 import DoctorAvailability from './Pages/DoctorAvailability';
 import DoctorPrescription from './Pages/DoctorPrescription';
@@ -16,6 +17,7 @@ import ViewMedicines from './Pages/ViewMedicines';
 import ViewPatients from './Pages/ViewPatients';
 import Profiles from './Pages/Profiles';
 import ViewQueue from './Pages/ViewQueue';
+import ViewDoctorQueues from './Pages/ViewDoctorQueues';
 import Vitals from './Pages/Vitals';
 // import ExpiredMedicines from './Pages/ExpiredMedicines';
 import './App.css';
@@ -98,6 +100,8 @@ function App() {
               <Route path="/downloadQrcode" element={<ProtectedRoute requiredType="admin"><DownloadQRCodes /></ProtectedRoute>} />
               <Route path="/food" element={<ProtectedRoute requiredType="volunteer"><Food /></ProtectedRoute>} />
               <Route path="/volunteer-manual" element={<ProtectedRoute requiredType="volunteer"><VolunteerManual /></ProtectedRoute>} />
+              <Route path="/counsultation" element={<ProtectedRoute requiredType="volunteer"><DoctorConsultation /></ProtectedRoute>} />
+              <Route path="/view-queues/:type" element={<ProtectedRoute requiredType="volunteer"><ViewDoctorQueues /></ProtectedRoute>} />
             </Routes>
           </QrScannerProvider>
         </div>

@@ -14,25 +14,55 @@ function Dashboard() {
     alert(`Book Number ${bookNumber} scanned! Now click a card to proceed.`);
   };
 
-  const Card = ({ title, icon }) => (
-    <div className="dashboard-card">
+  const handleViewQueue = (e, type) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/view-queues/${type}`);
+  };
+
+  const Card = ({ title, icon, queueType }) => (
+    <div className="dashboard-card" style={{ position: 'relative', paddingBottom: queueType ? '40px' : '20px' }}>
       <div className="dashboard-card-icon">{icon}</div>
       <div className="dashboard-card-content">
         <h3>{title}</h3>
       </div>
+      {queueType && (
+        <button
+          onClick={(e) => handleViewQueue(e, queueType)}
+          style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '10px',
+            padding: '6px 12px',
+            fontSize: '0.85rem',
+            borderRadius: '20px',
+            border: 'none',
+            background: '#4299e1',
+            color: 'white',
+            cursor: 'pointer',
+            zIndex: 10,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            fontWeight: '600'
+          }}
+          onMouseOver={(e) => e.target.style.background = '#3182ce'}
+          onMouseOut={(e) => e.target.style.background = '#4299e1'}
+        >
+          View Queues
+        </button>
+      )}
     </div>
   );
-
   const cardData = [
     { title: "1. Patient Registration", icon: "👤", path: "/patient-registration" },
     { title: "2. Doctor assigning", icon: "👨‍⚕️", path: "/doctor-assigning" },
     // { title3 "5.2 Doctor assigning automatic", icon: "👨‍⚕️", path: "/doctor-assigning-automatic" },
-    { title: "3. Vitals", icon: "💓", path: "/vitals" },
-    { title: "4. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
-    { title: "5. Stock Update", icon: "💊", path: "/medicine-pickup" },
+    { title: "3. Vitals", icon: "💓", path: "/vitals", queueType: "vitals" },
+    { title: "4. Doctor Counsaltation", icon: "👩‍⚕️", path: "/counsultation", queueType: "consultation" },
+    { title: "5. Doctor Prescription", icon: "📝", path: "/doctor-prescription" },
+    { title: "6. Stock Update", icon: "💊", path: "/medicine-pickup" },
     // { title: "6. Patient Status", icon: "🔍", path:"/patient-status" },
-    { title: "6. Counselling", icon: "🗣️", path: "/counselling" },
-    { title: "7. Food", icon: "🍽️", path: "/food" },
+    { title: "7. Counselling", icon: "🗣️", path: "/counselling" },
+    { title: "8. Food", icon: "🍽️", path: "/food" },
     // { title: "8. Lab", icon: "🔬", path: "/lab-tests" },
     // { title: "9. Patient Support", icon: "🤝", path:"/in-progress" },
     // { title: "10. Token Generation", icon: "🎟️", class:"in-progress" },
@@ -75,7 +105,7 @@ function Dashboard() {
             className={`dashboard-card-link ${card.class || ''}`}
             state={{ bookNumber: scannedBookNumber }} // Pass scanned book number to target page
           >
-            <Card title={card.title} icon={card.icon} />
+            <Card title={card.title} icon={card.icon} queueType={card.queueType} />
           </Link>
         ))}
       </div>

@@ -1,0 +1,213 @@
+.view-doctor-queues-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 80vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.back-btn-main {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s;
+}
+
+.back-btn-main:hover {
+    color: #000;
+}
+
+.search-container {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 600px;
+    padding: 1rem 1.5rem;
+    border-radius: 30px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    font-size: 1.1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    box-shadow: 0 6px 12px rgba(66, 153, 225, 0.2);
+    border-color: #4299e1;
+}
+
+/* Doctors Grid */
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.doctor-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    border-color: #e2e8f0;
+}
+
+.doctor-avatar {
+    font-size: 2.5rem;
+    background: #f0f4f8;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doctor-info h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #2d3748;
+}
+
+.specialization {
+    margin: 0.25rem 0 0.5rem;
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.available {
+    background-color: #c6f6d5;
+    color: #22543d;
+}
+
+.status-badge.unavailable {
+    background-color: #fed7d7;
+    color: #822727;
+}
+
+/* Queue Detail View */
+.back-btn-internal {
+    background: #edf2f7;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    transition: background 0.2s;
+}
+
+.back-btn-internal:hover {
+    background: #e2e8f0;
+}
+
+.selected-doctor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #edf2f7;
+}
+
+.selected-doctor-header h2 {
+    margin: 0;
+    color: #2d3748;
+}
+
+.queue-count-badge {
+    background: #4299e1;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.queue-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.queue-table th,
+.queue-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.queue-table th {
+    background-color: #f7fafc;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.queue-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.empty-queue-message {
+    text-align: center;
+    padding: 4rem;
+    color: #a0aec0;
+    font-size: 1.2rem;
+    background: white;
+    border-radius: 12px;
+    border: 2px dashed #e2e8f0;
+}
+
+.error-message {
+    background: #fed7d7;
+    color: #9b2c2c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #4299e1;
+}
