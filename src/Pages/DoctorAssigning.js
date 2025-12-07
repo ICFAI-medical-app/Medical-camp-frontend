@@ -83,7 +83,7 @@ function DoctorAssigning() {
               onChange={handleChange}
               required
               style={{ flexGrow: 1 }}
-              // No longer disabled by isLoading for manual entry fallback
+            // No longer disabled by isLoading for manual entry fallback
             />
             <button
               type="button"
@@ -91,14 +91,14 @@ function DoctorAssigning() {
               className="scan-btn"
               title="Scan QR Code"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none" /><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z" /></svg>
             </button>
           </div>
         </div>
         <div className="doctor-assigning-form-group">
           <label>Doctor Assigned</label>
           <div className="doctor-assigning-radio-group">
-          {doctors.length > 0 ? (
+            {doctors.length > 0 ? (
               doctors.map((doctor) => (
                 <label key={doctor._id}>
                   <input
@@ -110,7 +110,7 @@ function DoctorAssigning() {
                     required
                     disabled={isLoading} // Disable input while loading
                   />
-                  {doctor.doctor_name} ({doctor.specialization})
+                  {doctor.doctor_name} ({doctor.specialization}) - Queue: {doctor.patient_queue ? doctor.patient_queue.length : 0}
                 </label>
               ))
             ) : (
