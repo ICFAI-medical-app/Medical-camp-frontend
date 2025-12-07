@@ -265,7 +265,7 @@ function Vitals() {
           }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
-          <label>Last Meal and Time</label>
+          <label>Last Meal and Time (Optional)</label>
           <input type="text" name="extra_note" value={formData.extra_note} onChange={handleChange} autoComplete='off' />
         </div>
         <button
