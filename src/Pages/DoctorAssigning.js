@@ -10,6 +10,7 @@ function DoctorAssigning() {
   const [doctors, setDoctors] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [currentAssignment, setCurrentAssignment] = useState(null); // Store current assignment info
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const location = useLocation(); // Initialize useLocation hook
 
@@ -35,6 +36,35 @@ function DoctorAssigning() {
 
     fetchDoctors();
   }, []);
+
+  // Check for existing assignment when bookNumber changes
+  useEffect(() => {
+    const checkAssignment = async () => {
+      if (!formData.bookNumber || formData.bookNumber.length < 3) {
+        setCurrentAssignment(null);
+        return;
+      }
+
+      try {
+        const response = await privateAxios.get(`/api/doctor-assign/status/${formData.bookNumber}`);
+        if (response.data.assigned) {
+          setCurrentAssignment(response.data);
+          // Optional: Auto-select the currently assigned doctor
+          // setFormData(prev => ({ ...prev, doc_name: response.data.doctor_name }));
+        } else {
+          setCurrentAssignment(null);
+        }
+      } catch (err) {
+        console.error("Error checking assignment:", err);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      checkAssignment();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [formData.bookNumber]);
 
   const handleQrScan = (bookNumber) => {
     console.log(`QR Code detected: ${bookNumber}`);
@@ -94,6 +124,21 @@ function DoctorAssigning() {
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none" /><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z" /></svg>
             </button>
           </div>
+          {currentAssignment && (
+            <div className="doctor-assigning-warning-msg" style={{
+              backgroundColor: '#fff3cd',
+              color: '#856404',
+              padding: '10px',
+              marginTop: '10px',
+              borderRadius: '5px',
+              border: '1px solid #ffeeba',
+              textAlign: 'center'
+            }}>
+              Currently assigned to: <strong>{currentAssignment.doctor_name}</strong>
+              <br />
+              <small>Selecting a different doctor will re-assign this patient.</small>
+            </div>
+          )}
         </div>
         <div className="doctor-assigning-form-group">
           <label>Doctor Assigned</label>
@@ -125,8 +170,8 @@ function DoctorAssigning() {
         >
           {isLoading ? 'Submitting...' : 'Submit'} {/* Show loading text */}
         </button>
-      </form>
-    </div>
+      </form >
+    </div >
   );
 }
 
