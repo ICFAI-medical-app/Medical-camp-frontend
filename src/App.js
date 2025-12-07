@@ -19,6 +19,7 @@ import Profiles from './Pages/Profiles';
 import ViewQueue from './Pages/ViewQueue';
 import ViewDoctorQueues from './Pages/ViewDoctorQueues';
 import Vitals from './Pages/Vitals';
+import PatientSearch from './Pages/PatientSearch';
 // import ExpiredMedicines from './Pages/ExpiredMedicines';
 import './App.css';
 import Footer from './Components/Footer';
@@ -102,6 +103,7 @@ function App() {
               <Route path="/volunteer-manual" element={<ProtectedRoute requiredType="volunteer"><VolunteerManual /></ProtectedRoute>} />
               <Route path="/counsultation" element={<ProtectedRoute requiredType="volunteer"><DoctorConsultation /></ProtectedRoute>} />
               <Route path="/view-queues/:type" element={<ProtectedRoute requiredType="volunteer"><ViewDoctorQueues /></ProtectedRoute>} />
+              <Route path="/patient-search" element={<ProtectedRoute requiredType="volunteer"><PatientSearch /></ProtectedRoute>} />
             </Routes>
           </QrScannerProvider>
         </div>
