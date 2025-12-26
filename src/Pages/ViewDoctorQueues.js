@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/ViewDoctorQueues.css';
+import { useSocket } from '../hooks/useSocket';
 
 
 
@@ -24,11 +25,10 @@ const ViewDoctorQueues = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchDoctorsAndQueue();
-    }, [type]);
+    // WebSocket connection
+    const { socket, isConnected } = useSocket();
 
-    const fetchDoctorsAndQueue = async () => {
+    const fetchDoctorsAndQueue = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
@@ -42,7 +42,14 @@ const ViewDoctorQueues = () => {
 
             const queue = queueResponse.data.queue || [];
             setAllQueueData(queue);
-            setFilteredQueueData(queue);
+
+            // Apply filter if one is selected
+            if (selectedDoctorFilter) {
+                const filtered = queue.filter(item => item.doctor_name === selectedDoctorFilter);
+                setFilteredQueueData(filtered);
+            } else {
+                setFilteredQueueData(queue);
+            }
 
         } catch (err) {
             console.error("Error fetching data", err);
@@ -50,7 +57,51 @@ const ViewDoctorQueues = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [type, selectedDoctorFilter]);
+
+    useEffect(() => {
+        fetchDoctorsAndQueue();
+    }, [fetchDoctorsAndQueue]);
+
+    // WebSocket event listeners for real-time updates
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleDoctorAssigned = () => {
+            console.log('🔄 Doctor assigned - refreshing queue...');
+            fetchDoctorsAndQueue();
+        };
+
+        const handleQueueUpdated = () => {
+            console.log('🔄 Queue updated - refreshing...');
+            fetchDoctorsAndQueue();
+        };
+
+        const handleVitalsRecorded = () => {
+            console.log('🔄 Vitals recorded - refreshing queue...');
+            fetchDoctorsAndQueue();
+        };
+
+        const handleConsultationCompleted = () => {
+            console.log('🔄 Consultation completed - refreshing queue...');
+            fetchDoctorsAndQueue();
+        };
+
+        // Listen for events that affect doctor queues
+        socket.on('queue:added', handleQueueUpdated);
+        socket.on('queue:removed', handleQueueUpdated);
+        socket.on('doctor:assigned', handleDoctorAssigned);
+        socket.on('vitals:recorded', handleVitalsRecorded);
+        socket.on('consultation:completed', handleConsultationCompleted);
+
+        return () => {
+            socket.off('queue:added', handleQueueUpdated);
+            socket.off('queue:removed', handleQueueUpdated);
+            socket.off('doctor:assigned', handleDoctorAssigned);
+            socket.off('vitals:recorded', handleVitalsRecorded);
+            socket.off('consultation:completed', handleConsultationCompleted);
+        };
+    }, [socket, fetchDoctorsAndQueue]);
 
     const handleDoctorFilterChange = (e) => {
         const doctorName = e.target.value;
@@ -75,6 +126,19 @@ const ViewDoctorQueues = () => {
             <button className="back-btn-main" onClick={() => navigate(-1)}>
                 &larr; Back to Dashboard
             </button>
+
+            {/* WebSocket Connection Status */}
+            <div style={{
+                padding: '8px 12px',
+                margin: '10px 0',
+                borderRadius: '4px',
+                backgroundColor: isConnected ? '#d4edda' : '#f8d7da',
+                color: isConnected ? '#155724' : '#721c24',
+                fontSize: '14px',
+                textAlign: 'center'
+            }}>
+                {isConnected ? '🟢 Real-time updates active' : '🔴 Connecting to real-time updates...'}
+            </div>
 
             {/* Header Area */}
             <div className="queue-header-row">

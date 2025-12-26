@@ -1,9 +1,7 @@
-// src/Pages/ViewQueue.js
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { privateAxios } from '../api/axios';
 import '../Styles/ViewQueue.css';
-import { useNavigate } from 'react-router-dom';
+import { useQueueSocket } from '../hooks/useSocket';
 
 export default function ViewQueue() {
   const [doctors, setDoctors] = useState([]);
@@ -13,7 +11,61 @@ export default function ViewQueue() {
   const [status, setStatus] = useState({});
   const [loadingItem, setLoadingItem] = useState({});
   const [isLoading, setIsLoading] = useState(true); // Main loading state
-  const navigate = useNavigate();
+
+  // WebSocket handler for real-time queue updates
+  const handleQueueUpdate = useCallback(async (eventType, data) => {
+    console.log('Queue update received:', eventType, data);
+
+    if (eventType === 'count-updated') {
+      // Update queue count for specific doctor
+      setQueueCounts(prev => ({
+        ...prev,
+        [data.doctor_id]: data.count
+      }));
+    } else if (eventType === 'added' || eventType === 'removed') {
+      // Refresh queue data for affected doctors
+      if (eventType === 'added' && data.doctor_list) {
+        // Update queues for all doctors in the list
+        for (const doctor of data.doctor_list) {
+          try {
+            const queueRes = await privateAxios.get(`/api/queue/next/${doctor.doctor_id}`);
+            setQueues(prev => ({
+              ...prev,
+              [doctor.doctor_id]: queueRes.data.book_no
+            }));
+          } catch (err) {
+            if (err.response?.status === 404) {
+              setQueues(prev => ({
+                ...prev,
+                [doctor.doctor_id]: null
+              }));
+            }
+          }
+        }
+      } else if (eventType === 'removed') {
+        // Refresh all queues when a patient is removed
+        doctors.forEach(async (doc) => {
+          try {
+            const queueRes = await privateAxios.get(`/api/queue/next/${doc.doctor_id}`);
+            setQueues(prev => ({
+              ...prev,
+              [doc.doctor_id]: queueRes.data.book_no
+            }));
+          } catch (err) {
+            if (err.response?.status === 404) {
+              setQueues(prev => ({
+                ...prev,
+                [doc.doctor_id]: null
+              }));
+            }
+          }
+        });
+      }
+    }
+  }, [doctors]);
+
+  // Initialize WebSocket connection
+  const { isConnected } = useQueueSocket(handleQueueUpdate);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,21 +74,21 @@ export default function ViewQueue() {
         // Fetch doctors
         const res = await privateAxios.get('/api/doctor-assign/get_doctors');
         setDoctors(res.data);
-        
+
         if (res.data.length > 0) {
           const map = {};
           const countMap = {};
-          
+
           // Fetch queue information for each doctor
           await Promise.all(
             res.data.map(async (doc) => {
               try {
                 setLoadingItem(prev => ({ ...prev, [doc.doctor_id]: true }));
-                
+
                 // Fetch next patient in queue
                 const queueRes = await privateAxios.get(`/api/queue/next/${doc.doctor_id}`);
                 map[doc.doctor_id] = queueRes.data.book_no;
-                
+
                 // Fetch queue count
                 const countRes = await privateAxios.get(`/api/queue/count/${doc.doctor_id}`);
                 countMap[doc.doctor_id] = countRes.data.queueCount;
@@ -53,7 +105,7 @@ export default function ViewQueue() {
               }
             })
           );
-          
+
           setQueues(map);
           setQueueCounts(countMap);
         }
@@ -71,11 +123,11 @@ export default function ViewQueue() {
   const handleAssign = async (doctor) => {
     const bookNo = queues[doctor.doctor_id];
     if (!bookNo) return;
-    
+
     try {
       // Update status to indicate processing
       setStatus((s) => ({ ...s, [doctor.doctor_id]: 'Processing...' }));
-      
+
       // Assign doctor to patient
       await privateAxios.post('/api/doctor-assign', {
         book_no: bookNo,
@@ -87,11 +139,10 @@ export default function ViewQueue() {
 
       setStatus((s) => ({ ...s, [doctor.doctor_id]: 'Assigned' }));
 
-      // Show popup and reload after a brief delay to show the status
+      // WebSocket will automatically update the queue, no need to reload
       setTimeout(() => {
-        alert(`Doctor ${doctor.doctor_name} assigned to Book #${bookNo}`);
-        navigate('/view-queue'); // Redirect to the same page to refresh data
-      }, 500);
+        setStatus((s) => ({ ...s, [doctor.doctor_id]: '' }));
+      }, 2000);
     } catch (err) {
       console.error('Assign error:', err);
       setStatus((s) => ({
@@ -124,6 +175,17 @@ export default function ViewQueue() {
   return (
     <div className="view-queues-container">
       <h1 className="view-queues-title">Doctor Queues</h1>
+      <div style={{
+        padding: '8px 12px',
+        marginBottom: '10px',
+        borderRadius: '4px',
+        backgroundColor: isConnected ? '#d4edda' : '#f8d7da',
+        color: isConnected ? '#155724' : '#721c24',
+        fontSize: '14px',
+        textAlign: 'center'
+      }}>
+        {isConnected ? '🟢 Real-time updates active' : '🔴 Connecting to real-time updates...'}
+      </div>
       {error && <div className="view-queues-error">{error}</div>}
       {doctors.length > 0 ? (
         <ul className="view-queues-list">
@@ -153,7 +215,7 @@ export default function ViewQueue() {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="view-queues-controls">
                   {bookNo && (
                     <button
@@ -161,8 +223,8 @@ export default function ViewQueue() {
                       onClick={() => handleAssign(doc)}
                       disabled={status[doc.doctor_id] === 'Assigned' || status[doc.doctor_id] === 'Processing...'}
                     >
-                      {status[doc.doctor_id] && status[doc.doctor_id] !== 'Error' 
-                        ? status[doc.doctor_id] 
+                      {status[doc.doctor_id] && status[doc.doctor_id] !== 'Error'
+                        ? status[doc.doctor_id]
                         : 'Assign'}
                     </button>
                   )}

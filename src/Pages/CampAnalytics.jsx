@@ -1,15 +1,14 @@
 // src/Pages/CampAnalytics.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import {
-  PieChart, Pie, Cell, Tooltip, Legend,
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  BarChart, Bar
+  PieChart, Pie, Cell, Tooltip, Legend
 } from 'recharts';
 import { format } from 'date-fns';
 import { unparse } from 'papaparse';
 import '../Styles/CampAnalytics.css';
+import { useAnalyticsSocket } from '../hooks/useSocket';
 
 const TableView = ({ data, columns }) => (
   <div className="table-responsive">
@@ -316,6 +315,38 @@ const CampAnalytics = () => {
     document.body.removeChild(link);
   };
 
+  // WebSocket handler for real-time analytics updates
+  const handleAnalyticsUpdate = useCallback((eventType, data) => {
+    console.log('Analytics update received:', eventType, data);
+
+    // Trigger a data refresh when analytics events occur
+    if (appliedFilters.hasSubmitted) {
+      // Debounce the refresh to avoid too many API calls
+      setTimeout(() => {
+        // Re-fetch data to get the latest analytics
+        const fetchData = async () => {
+          try {
+            const monthParam = appliedFilters.month !== 'All' ? `?month=${appliedFilters.month}` : '';
+
+            const [patientsRes, patientHistoriesRes] = await Promise.all([
+              privateAxios.get(`/api/admin/get_patients${monthParam}`),
+              privateAxios.get(`/api/patient-history/summary${monthParam}`),
+            ]);
+
+            setPatients(patientsRes.data || []);
+            setPatientHistories(patientHistoriesRes.data || []);
+          } catch (error) {
+            console.error('Error refreshing analytics data:', error);
+          }
+        };
+        fetchData();
+      }, 1000); // 1 second debounce
+    }
+  }, [appliedFilters]);
+
+  // Initialize WebSocket connection for analytics
+  const { isConnected } = useAnalyticsSocket(handleAnalyticsUpdate);
+
   // Fetch all data for month/doctor options once on mount
   useEffect(() => {
     const fetchAllOptionsData = async () => {
@@ -357,7 +388,7 @@ const CampAnalytics = () => {
         setMedicines(medicinesRes.data || []);
         setVitals(vitalsRes.data || []);
         setPatientHistories(patientHistoriesRes.data || []);
-        
+
         console.log('Fetched Patients:', patientsRes.data);
         console.log('Fetched Doctors:', doctorsRes.data);
         console.log('Fetched Medicines:', medicinesRes.data);
@@ -375,6 +406,17 @@ const CampAnalytics = () => {
   return (
     <div className="analytics-container">
       <h1>Camp Analytics Dashboard</h1>
+      <div style={{
+        padding: '8px 12px',
+        marginBottom: '10px',
+        borderRadius: '4px',
+        backgroundColor: isConnected ? '#d4edda' : '#f8d7da',
+        color: isConnected ? '#155724' : '#721c24',
+        fontSize: '14px',
+        textAlign: 'center'
+      }}>
+        {isConnected ? '🟢 Real-time analytics active' : '🔴 Connecting to real-time updates...'}
+      </div>
 
       {/* Filters */}
       <div className="filters">

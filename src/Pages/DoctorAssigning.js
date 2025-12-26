@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom"; // Import useParams and useLocation
 import { privateAxios } from "../api/axios";
 import "../Styles/DoctorAssigning.css";
 import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
+import { useSocket } from '../hooks/useSocket'; // Import WebSocket hook
 
 function DoctorAssigning() {
   const { openScanner } = useQrScanner();
@@ -14,28 +15,31 @@ function DoctorAssigning() {
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const location = useLocation(); // Initialize useLocation hook
 
+  // WebSocket connection
+  const { socket, isConnected } = useSocket();
+
+  const fetchDoctors = useCallback(async () => {
+    setIsLoading(true); // Set loading to true while fetching doctors
+    try {
+      const response = await privateAxios.get('/api/doctor-assign/get_doctors');
+      setDoctors(response.data);
+      setError('');
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      setError('Error fetching doctors');
+    } finally {
+      setIsLoading(false); // Set loading back to false after fetching
+    }
+  }, []);
+
   useEffect(() => {
     // Check if bookNumber is passed via state from Vitals page
     if (location.state && location.state.bookNumber) {
       setFormData((prev) => ({ ...prev, bookNumber: location.state.bookNumber }));
     }
 
-    const fetchDoctors = async () => {
-      setIsLoading(true); // Set loading to true while fetching doctors
-      try {
-        const response = await privateAxios.get('/api/doctor-assign/get_doctors');
-        setDoctors(response.data);
-        setError('');
-      } catch (error) {
-        console.error('Error fetching doctors:', error);
-        setError('Error fetching doctors');
-      } finally {
-        setIsLoading(false); // Set loading back to false after fetching
-      }
-    };
-
     fetchDoctors();
-  }, []);
+  }, [location.state, fetchDoctors]);
 
   // Check for existing assignment when bookNumber changes
   useEffect(() => {
@@ -65,6 +69,30 @@ function DoctorAssigning() {
 
     return () => clearTimeout(debounceTimer);
   }, [formData.bookNumber]);
+
+  // WebSocket event listeners for real-time updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDoctorAssigned = () => {
+      console.log('🔄 Doctor assigned - refreshing doctor list...');
+      fetchDoctors();
+    };
+
+    const handleVitalsRecorded = () => {
+      console.log('🔄 Vitals recorded - refreshing doctor list...');
+      fetchDoctors();
+    };
+
+    // Listen for events that affect doctor queues
+    socket.on('doctor:assigned', handleDoctorAssigned);
+    socket.on('vitals:recorded', handleVitalsRecorded);
+
+    return () => {
+      socket.off('doctor:assigned', handleDoctorAssigned);
+      socket.off('vitals:recorded', handleVitalsRecorded);
+    };
+  }, [socket, fetchDoctors]);
 
   const handleQrScan = (bookNumber) => {
     console.log(`QR Code detected: ${bookNumber}`);
@@ -100,6 +128,20 @@ function DoctorAssigning() {
   return (
     <div className="doctor-assigning-container">
       <h1 className="doctor-assigning-title">Doctor Assigning</h1>
+
+      {/* WebSocket Connection Status */}
+      <div style={{
+        padding: '8px 12px',
+        margin: '10px 0',
+        borderRadius: '4px',
+        backgroundColor: isConnected ? '#d4edda' : '#f8d7da',
+        color: isConnected ? '#155724' : '#721c24',
+        fontSize: '14px',
+        textAlign: 'center'
+      }}>
+        {isConnected ? '🟢 Real-time queue updates active' : '🔴 Connecting...'}
+      </div>
+
       {message && <div className="doctor-assigning-success-msg">{message}</div>}
       {error && <div className="doctor-assigning-error-msg">{error}</div>}
       <form onSubmit={handleSubmit} className="doctor-assigning-form">
