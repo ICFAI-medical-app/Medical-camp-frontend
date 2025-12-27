@@ -15,6 +15,7 @@ function DashboardAdmin() {
 
   const cardData = [
     { title: "Camp Analytics", icon: "📊", path: "/camp-analytics" },
+    { title: "Real-time Analytics", icon: "⚡", path: "/real-time-analytics" },
     { title: "Profiles", icon: "👤", path: "/profiles" },
     { title: "Update Doctor Availability", icon: "📅", path: "/doctor-availability" },
     { title: "Update Medicine Stock", icon: "💊", path: "/update-medicine-stock" },

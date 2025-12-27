@@ -134,14 +134,56 @@ export const useAnalyticsSocket = (onAnalyticsUpdate) => {
             if (onAnalyticsUpdate) onAnalyticsUpdate('medicine-distributed', data);
         };
 
+        const handleMedicineReceived = (data) => {
+            console.log('💊 Medicine received event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('medicine-received', data);
+        };
+
+        const handlePrescriptionGenerated = (data) => {
+            console.log('📝 Prescription generated event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('prescription-generated', data);
+        };
+
+        const handleConsultationStarted = (data) => {
+            console.log('👨‍⚕️ Consultation started event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('consultation-started', data);
+        };
+
+        const handleConsultationCompleted = (data) => {
+            console.log('✅ Consultation completed event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('consultation-completed', data);
+        };
+
+        const handlePatientQueued = (data) => {
+            console.log('⏳ Patient queued event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('patient-queued', data);
+        };
+
+        const handlePatientDequeued = (data) => {
+            console.log('✅ Patient dequeued event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('patient-dequeued', data);
+        };
+
         socket.on('analytics:patient-registered', handlePatientRegistered);
         socket.on('analytics:vitals-recorded', handleVitalsRecorded);
         socket.on('analytics:medicine-distributed', handleMedicineDistributed);
+        socket.on('analytics:medicine-received', handleMedicineReceived);
+        socket.on('analytics:prescription-generated', handlePrescriptionGenerated);
+        socket.on('analytics:consultation-started', handleConsultationStarted);
+        socket.on('analytics:consultation-completed', handleConsultationCompleted);
+        socket.on('analytics:patient-queued', handlePatientQueued);
+        socket.on('analytics:patient-dequeued', handlePatientDequeued);
 
         return () => {
             socket.off('analytics:patient-registered', handlePatientRegistered);
             socket.off('analytics:vitals-recorded', handleVitalsRecorded);
             socket.off('analytics:medicine-distributed', handleMedicineDistributed);
+            socket.off('analytics:medicine-received', handleMedicineReceived);
+            socket.off('analytics:prescription-generated', handlePrescriptionGenerated);
+            socket.off('analytics:consultation-started', handleConsultationStarted);
+            socket.off('analytics:consultation-completed', handleConsultationCompleted);
+            socket.off('analytics:patient-queued', handlePatientQueued);
+            socket.off('analytics:patient-dequeued', handlePatientDequeued);
         };
     }, [socket, onAnalyticsUpdate]);
 
