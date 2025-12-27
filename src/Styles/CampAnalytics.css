@@ -56,6 +56,9 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex: 1;
   min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .chart h3 {
@@ -94,6 +97,55 @@ th {
 }
 
 .filters button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.csv-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.csv-buttons button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+  max-width: 250px;
+}
+
+.csv-buttons button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.csv-buttons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.inline-csv-button {
+  display: block;
+  margin: 0 auto 1rem auto;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #17a2b8;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: auto;
+}
+
+.inline-csv-button:hover:not(:disabled) {
+  background-color: #138496;
+}
+
+.inline-csv-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
