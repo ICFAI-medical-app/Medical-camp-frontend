@@ -14,7 +14,8 @@ import {
   exportPatientsToCSV,
   exportCampSummaryToCSV,
   exportDoctorPatientRatioToCSV,
-  exportMedicineDistributionToCSV
+  exportMedicineDistributionToCSV,
+  exportMedicineInventoryToCSV
 } from '../api/csvService';
 import { fetchCampAnalyticsData, fetchFilterOptionsData } from '../api/dataService';
 import FilterControls from '../Components/FilterControls';
@@ -252,6 +253,10 @@ const CampAnalytics = () => {
     exportPatientsToCSV(filteredPatients, appliedFilters.month);
   };
 
+  const handleExportMedicineInventory = () => {
+    exportMedicineInventoryToCSV(medicines, appliedFilters.month, patientHistories);
+  };
+
   // Fetch all data for month/doctor options once on mount
   useEffect(() => {
     const fetchAllOptionsData = async () => {
@@ -341,9 +346,11 @@ const CampAnalytics = () => {
           <CSVDownloadButtons
             handleExportVolunteers={handleExportVolunteers}
             handleExportPatients={handleExportPatients}
+            handleExportMedicineInventory={handleExportMedicineInventory}
             appliedFilters={appliedFilters}
             filteredVolunteers={filteredVolunteers}
             filteredPatients={filteredPatients}
+            medicines={medicines}
           />
 
           {/* Charts or tables */}

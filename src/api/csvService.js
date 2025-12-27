@@ -77,3 +77,73 @@ export const exportMedicineDistributionToCSV = (medicineDistributionData) => {
 
   downloadCSV(data, 'medicine_distribution.csv', ['Medicine ID', 'Distributed Quantity']);
 };
+
+// Export medicine inventory to CSV
+export const exportMedicineInventoryToCSV = (medicines, month, patientHistories) => {
+  // Format month for headers (e.g., "2025-01" becomes "Jan 2025")
+  const formatMonthForHeader = (month) => {
+    if (!month || month === 'All') return 'Month';
+
+    const [year, monthNum] = month.split('-');
+    if (!year || !monthNum) return 'Month';
+
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    const monthName = monthNames[parseInt(monthNum) - 1] || 'Month';
+    return `${monthName} ${year}`;
+  };
+
+  const monthDisplay = formatMonthForHeader(month);
+
+  // Calculate dispensed quantity per medicine from patient histories
+  const dispensedQuantities = {};
+
+  patientHistories.forEach(history => {
+    history.visits.forEach(visit => {
+      if (visit.medicines_given) {
+        visit.medicines_given.forEach(givenMed => {
+          const medId = givenMed.medicine_id;
+          dispensedQuantities[medId] = (dispensedQuantities[medId] || 0) + givenMed.quantity;
+        });
+      }
+    });
+  });
+
+  // Calculate month before stock and after stock
+  const inventoryData = medicines.map(medicine => {
+    const dispensed = dispensedQuantities[medicine.medicine_id] || 0;  // Use medicine_id instead of _id
+    const monthAfterStock = medicine.total_quantity || 0; // Current stock
+    const monthBeforeStock = parseInt(monthAfterStock) + parseInt(dispensed); // Before = After + Dispensed
+
+    // Create dynamic headers based on selected month
+    const dynamicHeaders = {};
+    dynamicHeaders[`Medicine ID`] = medicine.medicine_id;
+    dynamicHeaders[`Formulation`] = medicine.medicine_formulation || '';
+    dynamicHeaders[`${monthDisplay} Before Stock`] = monthBeforeStock;
+    dynamicHeaders[`${monthDisplay} After Stock`] = monthAfterStock;
+    dynamicHeaders[`Dispensed in ${monthDisplay}`] = dispensed;
+
+    return dynamicHeaders;
+  });
+
+  // Sort by Medicine ID numerically
+  const sortedData = inventoryData.sort((a, b) => {
+    const idA = parseInt(a['Medicine ID'].replace(/\D/g, '')) || 0;
+    const idB = parseInt(b['Medicine ID'].replace(/\D/g, '')) || 0;
+    return idA - idB;
+  });
+
+  // Create dynamic field names for CSV
+  const fields = [
+    'Medicine ID',
+    'Formulation',
+    `${monthDisplay} Before Stock`,
+    `${monthDisplay} After Stock`,
+    `Dispensed in ${monthDisplay}`
+  ];
+
+  downloadCSV(sortedData, `medicine_inventory_${month || 'all'}.csv`, fields);
+};
