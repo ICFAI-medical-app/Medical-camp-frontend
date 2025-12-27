@@ -1,6 +1,5 @@
 import axios from 'axios';
-const BACKEND_URL = 'https://be-medical-camp.apps.swecha.org';
-//const BACKEND_URL = 'http://localhost:5002';
+import { BACKEND_URL } from '../config/api';
 
 const publicAxios = axios.create({
     baseURL: BACKEND_URL,

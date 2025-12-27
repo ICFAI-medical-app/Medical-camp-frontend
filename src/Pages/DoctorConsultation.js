@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { privateAxios } from '../api/axios';
 import '../Styles/DoctorConsultation.css';
 import { useNavigate } from 'react-router-dom';
 import { useQrScanner } from '../Context/QrScannerContext';
+import { useSocket } from '../hooks/useSocket';
 
 const DoctorConsultation = () => {
     const [bookNo, setBookNo] = useState('');
@@ -12,6 +13,9 @@ const DoctorConsultation = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const { openScanner } = useQrScanner();
+
+    // WebSocket connection
+    const { socket, isConnected } = useSocket();
 
     const handleScan = (data) => {
         if (data) {
@@ -44,6 +48,20 @@ const DoctorConsultation = () => {
         <div className="doctor-consultation-container">
             <div className="consultation-card">
                 <h1>Doctor Consultation</h1>
+
+                {/* WebSocket Connection Status */}
+                <div style={{
+                    padding: '8px 12px',
+                    margin: '10px 0',
+                    borderRadius: '4px',
+                    backgroundColor: isConnected ? '#d4edda' : '#f8d7da',
+                    color: isConnected ? '#155724' : '#721c24',
+                    fontSize: '14px',
+                    textAlign: 'center'
+                }}>
+                    {isConnected ? '🟢 Real-time updates active' : '🔴 Connecting...'}
+                </div>
+
                 <div className="input-group">
                     <label htmlFor="bookNo">Book Number</label>
                     <div className="input-wrapper">

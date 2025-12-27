@@ -1,11 +1,10 @@
 // src/Pages/CampAnalytics.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import {
   PieChart, Pie, Cell, Tooltip, Legend,
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  BarChart, Bar
+  BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import { format } from 'date-fns';
 import '../Styles/CampAnalytics.css';
