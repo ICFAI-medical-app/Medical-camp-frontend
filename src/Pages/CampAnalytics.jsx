@@ -8,8 +8,18 @@ import {
   BarChart, Bar
 } from 'recharts';
 import { format } from 'date-fns';
-import { unparse } from 'papaparse';
 import '../Styles/CampAnalytics.css';
+import {
+  exportVolunteersToCSV,
+  exportPatientsToCSV,
+  exportCampSummaryToCSV,
+  exportDoctorPatientRatioToCSV,
+  exportMedicineDistributionToCSV,
+  exportMedicineInventoryToCSV
+} from '../api/csvService';
+import { fetchCampAnalyticsData, fetchFilterOptionsData } from '../api/dataService';
+import FilterControls from '../Components/FilterControls';
+import CSVDownloadButtons from '../Components/CSVDownloadButtons';
 
 const TableView = ({ data, columns }) => (
   <div className="table-responsive">
@@ -34,7 +44,7 @@ const CampAnalytics = () => {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [medicines, setMedicines] = useState([]);
-  const [vitals, setVitals] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
   const [patientHistories, setPatientHistories] = useState([]);
   const [allPatientHistoriesForMonths, setAllPatientHistoriesForMonths] = useState([]);
   const [allDoctorsForMonths, setAllDoctorsForMonths] = useState([]);
@@ -45,11 +55,9 @@ const CampAnalytics = () => {
   const location = useLocation();
 
   const [selectedMonth, setSelectedMonth] = useState('All');
-  const [selectedCamp, setSelectedCamp] = useState('All');
 
   const [appliedFilters, setAppliedFilters] = useState({
     month: 'All',
-    camp: 'All',
     hasSubmitted: true, // Changed to true to display data on initial load
   });
 
@@ -57,12 +65,10 @@ const CampAnalytics = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const month = queryParams.get('month') || 'All';
-    const camp = queryParams.get('camp') || 'All';
 
-    if (month !== 'All' || camp !== 'All') {
+    if (month !== 'All') {
       setSelectedMonth(month);
-      setSelectedCamp(camp);
-      setAppliedFilters({ month, camp, hasSubmitted: true });
+      setAppliedFilters({ month, hasSubmitted: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
@@ -72,14 +78,12 @@ const CampAnalytics = () => {
     if (!appliedFilters.hasSubmitted) return;
     const params = new URLSearchParams();
     if (appliedFilters.month !== 'All') params.set('month', appliedFilters.month);
-    if (appliedFilters.camp !== 'All') params.set('camp', appliedFilters.camp);
     navigate({ search: params.toString() }, { replace: true });
   }, [appliedFilters, navigate]);
 
   // Build unique, sorted options for filters (from all data)
-  const { monthOptions, doctorOptions, campOptions } = useMemo(() => {
+  const { monthOptions, doctorOptions } = useMemo(() => {
     const monthSet = new Set();
-    const campSet = new Set();
     const doctorSet = new Set();
 
     // Use allPatientHistoriesForMonths to get all available months
@@ -94,37 +98,27 @@ const CampAnalytics = () => {
       if (d?.doctor_name) doctorSet.add(d.doctor_name);
     });
 
-    // Camp options are still derived from the currently filtered patients,
-    // as camp is a patient-specific attribute and not directly tied to visits/doctors in the same way.
-    // If camp filtering is also to be "all-encompassing" for options, it would need a separate fetch as well.
-    patients.forEach(p => {
-      if (p?.camp) campSet.add(p.camp);
-    });
-
     const months = ['All', ...Array.from(monthSet).sort((a, b) => a.localeCompare(b))];
-    const camps = ['All', ...Array.from(campSet).sort((a, b) => a.localeCompare(b))];
     const drs = ['All', ...Array.from(doctorSet).sort((a, b) => a.localeCompare(b))];
 
     console.log('Generated month options:', months);
-    console.log('Generated camp options:', camps);
     console.log('Generated doctor options:', drs);
 
-    return { monthOptions: months, doctorOptions: drs, campOptions: camps };
+    return { monthOptions: months, doctorOptions: drs };
   }, [allPatientHistoriesForMonths, allDoctorsForMonths, patients]); // Depend on all data for options
 
   // Validate current selections against available options
   useEffect(() => {
     if (!monthOptions.includes(selectedMonth)) setSelectedMonth('All');
-    if (!campOptions.includes(selectedCamp)) setSelectedCamp('All');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [monthOptions, campOptions]);
+  }, [monthOptions]);
 
   // Apply filters
   const filteredPatients = useMemo(() => {
-    const { month, camp } = appliedFilters;
+    const { month } = appliedFilters;
     if (!appliedFilters.hasSubmitted) return [];
 
-    console.log('Filtering patients with:', { month, camp }); // Debug log
+    console.log('Filtering patients with:', { month }); // Debug log
     console.log('Patients before filtering:', patients); // Debug log
     console.log('Patient Histories for filtering:', patientHistories); // Debug log
 
@@ -138,15 +132,26 @@ const CampAnalytics = () => {
           history.visits.some(visit => visit.timestamp === month)
         ));
 
-      const campMatch =
-        camp === 'All' ||
-        (p.camp && p.camp === camp);
-
-      return monthMatch && campMatch;
+      return monthMatch;
     });
     console.log('Patients after filtering:', filtered); // Debug log
     return filtered;
   }, [patients, appliedFilters, patientHistories]);
+
+  // Filter volunteers based on month
+  const filteredVolunteers = useMemo(() => {
+    const { month } = appliedFilters;
+    if (!appliedFilters.hasSubmitted) return [];
+
+    const filtered = volunteers.filter(volunteer => {
+      // Month match: Check volunteer's list_of_visits
+      return month === 'All' ||
+        volunteer.list_of_visits.some(visit => visit.timestamp === month);
+    });
+
+    console.log('Volunteers after filtering:', filtered);
+    return filtered;
+  }, [volunteers, appliedFilters]);
 
   // Charts/tables data (keep hooks above any return)
   const genderData = useMemo(() => {
@@ -209,123 +214,132 @@ const CampAnalytics = () => {
       distributed_quantity,
     }));
 
-    return data.sort((a, b) => a.medicine_id.localeCompare(b.medicine_id)); // Sort by medicine_id
+    return data.sort((a, b) => {
+      // Extract numeric part from medicine_id for proper numeric sorting
+      const numA = parseInt(a.medicine_id.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.medicine_id.replace(/\D/g, '')) || 0;
+      return numA - numB;
+    });
   }, [patientHistories]);
 
-  const averageVitals = useMemo(() => {
-    const filteredPatientIds = new Set(filteredPatients.map(p => p._id));
-    const relevantVitals = vitals.filter(v => filteredPatientIds.has(v.patientId));
+  const medicineInventoryData = useMemo(() => {
+    // Format month for headers (e.g., "2025-01" becomes "Jan 2025")
+    const formatMonthForHeader = (month) => {
+      if (!month || month === 'All') {
+        // Use current month and year if no filter is applied
+        const now = new Date();
+        const monthNames = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+        const monthName = monthNames[now.getMonth()];
+        const year = now.getFullYear();
+        return `${monthName} ${year}`;
+      }
 
-    const sum = relevantVitals.reduce((a, v) => ({
-      bp: a.bp + (v?.bp || 0),
-      pulse: a.pulse + (v?.pulse || 0),
-      weight: a.weight + (v?.weight || 0),
-      temperature: a.temperature + (v?.temperature || 0),
-    }), { bp: 0, pulse: 0, weight: 0, temperature: 0 });
+      const [year, monthNum] = month.split('-');
+      if (!year || !monthNum) return 'Month';
 
-    const count = relevantVitals.length;
-    if (count === 0) return { bp: 0, pulse: 0, weight: 0, temperature: 0 };
+      const monthNames = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
 
-    return {
-      bp: sum.bp / count,
-      pulse: sum.pulse / count,
-      weight: sum.weight / count,
-      temperature: sum.temperature / count,
+      const monthName = monthNames[parseInt(monthNum) - 1] || 'Month';
+      return `${monthName} ${year}`;
     };
-  }, [vitals, filteredPatients]);
+
+    const monthDisplay = formatMonthForHeader(appliedFilters.month);
+
+    // Calculate dispensed quantity per medicine from patient histories
+    const dispensedQuantities = {};
+
+    patientHistories.forEach(history => {
+      history.visits.forEach(visit => {
+        if (visit.medicines_given) {
+          visit.medicines_given.forEach(givenMed => {
+            const medId = givenMed.medicine_id;
+            dispensedQuantities[medId] = (dispensedQuantities[medId] || 0) + givenMed.quantity;
+          });
+        }
+      });
+    });
+
+    // Create inventory data with current stock, dispensed, and calculated before stock
+    const inventoryData = medicines.map(medicine => {
+      const dispensed = dispensedQuantities[medicine.medicine_id] || 0;
+      const currentStock = medicine.total_quantity || 0;
+      const beforeStock = parseInt(currentStock) + parseInt(dispensed);
+
+      // Create dynamic keys based on the selected month
+      const dynamicData = {};
+      dynamicData[`before_stock_${appliedFilters.month}`] = beforeStock;
+      dynamicData[`current_stock_${appliedFilters.month}`] = currentStock;
+      dynamicData[`dispensed_${appliedFilters.month}`] = dispensed;
+
+      return {
+        medicine_id: medicine.medicine_id,
+        formulation: medicine.medicine_formulation || '',
+        ...dynamicData, // Spread the dynamic properties
+        monthDisplay: monthDisplay // Store the formatted month for column headers
+      };
+    });
+
+    return inventoryData.sort((a, b) => {
+      // Extract numeric part from medicine_id for proper numeric sorting
+      const numA = parseInt(a.medicine_id.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.medicine_id.replace(/\D/g, '')) || 0;
+      return numA - numB;
+    });
+  }, [medicines, patientHistories, appliedFilters.month]);
+
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
   const handleSubmit = () => {
     setAppliedFilters({
       month: selectedMonth,
-      camp: selectedCamp,
       hasSubmitted: true
     });
   };
 
   const handleReset = () => {
     setSelectedMonth('All');
-    setSelectedCamp('All');
-    setAppliedFilters({ month: 'All', camp: 'All', hasSubmitted: false });
+    setAppliedFilters({ month: 'All', hasSubmitted: false });
     navigate({ search: '' }, { replace: true });
   };
 
   const handleExport = () => {
-    const csv = unparse({
-      fields: ['Metric', 'Value'],
-      data: [
-        ['Total Patients', filteredPatients.length],
-        ['Total Doctors', doctors.length],
-        ['Total Medicines', medicines.length],
-        ['Average BP', averageVitals.bp.toFixed(2)],
-        ['Average Pulse', averageVitals.pulse.toFixed(2)],
-        ['Average Weight', averageVitals.weight.toFixed(2)],
-        ['Average Temperature', averageVitals.temperature.toFixed(2)],
-      ]
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'camp_summary.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportCampSummaryToCSV(filteredPatients, doctors, medicines);
   };
 
   const handleExportMedicineDistribution = () => {
-    const csv = unparse({
-      fields: ['Medicine ID', 'Distributed Quantity'],
-      data: medicineDistributionData.map(item => ({
-        'Medicine ID': item.medicine_id,
-        'Distributed Quantity': item.distributed_quantity,
-      }))
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'medicine_distribution.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportMedicineDistributionToCSV(medicineDistributionData);
   };
 
   const handleExportDoctorPatientRatio = () => {
-    const csv = unparse({
-      fields: ['Doctor', 'Patients Visited'],
-      data: doctorPatientData.map(item => ({
-        'Doctor': item.name,
-        'Patients Visited': item.patients,
-      }))
-    });
+    exportDoctorPatientRatioToCSV(doctorPatientData);
+  };
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'doctor_patient_ratio.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportVolunteers = () => {
+    exportVolunteersToCSV(filteredVolunteers, appliedFilters.month);
+  };
+
+  const handleExportPatients = () => {
+    exportPatientsToCSV(filteredPatients, appliedFilters.month);
+  };
+
+  const handleExportMedicineInventory = () => {
+    exportMedicineInventoryToCSV(medicines, appliedFilters.month, patientHistories);
   };
 
   // Fetch all data for month/doctor options once on mount
   useEffect(() => {
     const fetchAllOptionsData = async () => {
       try {
-        const [allDoctorsRes, allPatientHistoriesRes] = await Promise.all([
-          privateAxios.get('/api/admin/get_doctors'), // No month filter for options
-          privateAxios.get('/api/patient-history/summary'), // No month filter for options
-        ]);
-        setAllDoctorsForMonths(allDoctorsRes.data || []);
-        setAllPatientHistoriesForMonths(allPatientHistoriesRes.data || []);
+        const { allDoctors, allPatientHistories } = await fetchFilterOptionsData();
+        setAllDoctorsForMonths(allDoctors);
+        setAllPatientHistoriesForMonths(allPatientHistories);
       } catch (error) {
         console.error('Error fetching all data for options:', error);
       }
@@ -343,26 +357,18 @@ const CampAnalytics = () => {
 
       setLoading(true);
       try {
-        const monthParam = appliedFilters.month !== 'All' ? `?month=${appliedFilters.month}` : '';
+        const { patients, doctors, medicines, volunteers, patientHistories } = await fetchCampAnalyticsData(appliedFilters.month);
+        setPatients(patients);
+        setDoctors(doctors);
+        setMedicines(medicines);
+        setVolunteers(volunteers);
+        setPatientHistories(patientHistories);
 
-        const [patientsRes, doctorsRes, medicinesRes, vitalsRes, patientHistoriesRes] = await Promise.all([
-          privateAxios.get(`/api/admin/get_patients${monthParam}`),
-          privateAxios.get(`/api/admin/get_doctors${monthParam}`),
-          privateAxios.get('/api/admin/get_medicines'), // Medicines are not month-specific
-          privateAxios.get('/api/vitals'), // Vitals are not month-specific, filtered on frontend
-          privateAxios.get(`/api/patient-history/summary${monthParam}`),
-        ]);
-        setPatients(patientsRes.data || []);
-        setDoctors(doctorsRes.data || []);
-        setMedicines(medicinesRes.data || []);
-        setVitals(vitalsRes.data || []);
-        setPatientHistories(patientHistoriesRes.data || []);
-        
-        console.log('Fetched Patients:', patientsRes.data);
-        console.log('Fetched Doctors:', doctorsRes.data);
-        console.log('Fetched Medicines:', medicinesRes.data);
-        console.log('Fetched Vitals:', vitalsRes.data);
-        console.log('Fetched Patient Histories:', patientHistoriesRes.data);
+        console.log('Fetched Patients:', patients);
+        console.log('Fetched Doctors:', doctors);
+        console.log('Fetched Medicines:', medicines);
+        console.log('Fetched Volunteers:', volunteers);
+        console.log('Fetched Patient Histories:', patientHistories);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -376,31 +382,16 @@ const CampAnalytics = () => {
     <div className="analytics-container">
       <h1>Camp Analytics Dashboard</h1>
 
-      {/* Filters */}
-      <div className="filters">
-        <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
-          {monthOptions.map(month => <option key={month} value={month}>{month}</option>)}
-        </select>
-
-        <select
-          value={selectedCamp}
-          onChange={e => setSelectedCamp(e.target.value)}
-          disabled={campOptions.length <= 1}
-        >
-          {campOptions.map(camp => <option key={camp} value={camp}>{camp}</option>)}
-        </select>
-
-
-        <button type="button" onClick={handleSubmit}>Apply Filters</button>
-        <button type="button" onClick={handleReset}>Reset</button>
-        <button
-          onClick={() => setView(v => v === 'graph' ? 'table' : 'graph')}
-          disabled={!appliedFilters.hasSubmitted}
-          aria-disabled={!appliedFilters.hasSubmitted}
-        >
-          Toggle View
-        </button>
-      </div>
+      <FilterControls
+        monthOptions={monthOptions}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        handleSubmit={handleSubmit}
+        handleReset={handleReset}
+        setView={setView}
+        view={view}
+        appliedFilters={appliedFilters}
+      />
 
       {/* Loading / Content */}
       {loading ? (
@@ -427,24 +418,18 @@ const CampAnalytics = () => {
             </div>
           </div>
 
-          <div className="summary-cards">
-            <div className="card">
-              <h3>Average BP</h3>
-              <p>{averageVitals.bp.toFixed(2)}</p>
-            </div>
-            <div className="card">
-              <h3>Average Pulse</h3>
-              <p>{averageVitals.pulse.toFixed(2)}</p>
-            </div>
-            <div className="card">
-              <h3>Average Weight</h3>
-              <p>{averageVitals.weight.toFixed(2)}</p>
-            </div>
-            <div className="card">
-              <h3>Average Temperature</h3>
-              <p>{averageVitals.temperature.toFixed(2)}</p>
-            </div>
-          </div>
+          {/* CSV Download Buttons */}
+          <CSVDownloadButtons
+            handleExportVolunteers={handleExportVolunteers}
+            handleExportPatients={handleExportPatients}
+            handleExportMedicineInventory={handleExportMedicineInventory}
+            handleExportMedicineDistribution={handleExportMedicineDistribution}
+            appliedFilters={appliedFilters}
+            filteredVolunteers={filteredVolunteers}
+            filteredPatients={filteredPatients}
+            medicines={medicines}
+            medicineDistributionData={medicineDistributionData}
+          />
 
           {/* Charts or tables */}
           <div className="charts-container">
@@ -458,55 +443,57 @@ const CampAnalytics = () => {
                   <>
                     <div className="chart">
                       <h3>Gender Distribution</h3>
-                      <PieChart width={400} height={400}>
-                        <Pie
-                          data={genderData}
-                          cx={200}
-                          cy={200}
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}`} // Display name and value
-                        >
+                      <BarChart width={300} height={300} data={genderData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="value" name="Count">
                           {genderData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
+                        </Bar>
+                      </BarChart>
                     </div>
 
 
                     <div className="chart">
                       <h3>Doctor-Patient Ratio</h3>
-                      <TableView
-                        data={doctorPatientData}
-                        columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients Visited', key: 'patients' }]}
-                      />
                       <button
                         onClick={handleExportDoctorPatientRatio}
                         disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
                         aria-disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                        className="inline-csv-button"
                       >
                         Export Doctor-Patient Ratio to CSV
                       </button>
+                      <TableView
+                        data={doctorPatientData}
+                        columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients Visited', key: 'patients' }]}
+                      />
                     </div>
 
+
                     <div className="chart">
-                      <h3>Medicine Distribution</h3>
-                      <TableView
-                        data={medicineDistributionData}
-                        columns={[{ title: 'Medicine ID', key: 'medicine_id' }, { title: 'Distributed Quantity', key: 'distributed_quantity' }]}
-                      />
+                      <h3>Medicine Inventory</h3>
                       <button
-                        onClick={handleExportMedicineDistribution}
-                        disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
-                        aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                        onClick={handleExportMedicineInventory}
+                        disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                        aria-disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                        className="inline-csv-button"
                       >
-                        Export Medicine Distribution to CSV
+                        Export Medicine Inventory to CSV
                       </button>
+                      <TableView
+                        data={medicineInventoryData}
+                        columns={[
+                          { title: 'Medicine ID', key: 'medicine_id' },
+                          { title: 'Formulation', key: 'formulation' },
+                          { title: `${medicineInventoryData[0]?.monthDisplay} Before Stock`, key: `before_stock_${appliedFilters.month}` },
+                          { title: `${medicineInventoryData[0]?.monthDisplay} After Stock`, key: `current_stock_${appliedFilters.month}` },
+                          { title: `Dispensed in ${medicineInventoryData[0]?.monthDisplay}`, key: `dispensed_${appliedFilters.month}` }
+                        ]}
+                      />
                     </div>
                   </>
                 )}
@@ -521,30 +508,41 @@ const CampAnalytics = () => {
 
 
                     <h3>Doctor-Patient Ratio</h3>
-                    <TableView
-                      data={doctorPatientData}
-                      columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients', key: 'patients' }]}
-                    />
                     <button
                       onClick={handleExportDoctorPatientRatio}
                       disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
                       aria-disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                      className="inline-csv-button"
                     >
                       Export Doctor-Patient Ratio to CSV
                     </button>
+                    <TableView
+                      data={doctorPatientData}
+                      columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients', key: 'patients' }]}
+                    />
 
                     <h3>Medicine Distribution</h3>
-                    <TableView
-                      data={medicineDistributionData}
-                      columns={[{ title: 'Medicine ID', key: 'medicine_id' }, { title: 'Distributed Quantity', key: 'distributed_quantity' }]}
-                    />
+                    <p>No visualization available. Download the data using the main buttons above.</p>
+
+                    <h3>Medicine Inventory</h3>
                     <button
-                      onClick={handleExportMedicineDistribution}
-                      disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
-                      aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                      onClick={handleExportMedicineInventory}
+                      disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                      aria-disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                      className="inline-csv-button"
                     >
-                      Export Medicine Distribution to CSV
+                      Export Medicine Inventory to CSV
                     </button>
+                    <TableView
+                      data={medicineInventoryData}
+                      columns={[
+                        { title: 'Medicine ID', key: 'medicine_id' },
+                        { title: 'Formulation', key: 'formulation' },
+                        { title: `${medicineInventoryData[0]?.monthDisplay} Before Stock`, key: `before_stock_${appliedFilters.month}` },
+                        { title: `${medicineInventoryData[0]?.monthDisplay} After Stock`, key: `current_stock_${appliedFilters.month}` },
+                        { title: `Dispensed in ${medicineInventoryData[0]?.monthDisplay}`, key: `dispensed_${appliedFilters.month}` }
+                      ]}
+                    />
                   </div>
                 )}
               </>
