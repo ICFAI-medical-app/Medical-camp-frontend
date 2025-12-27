@@ -56,6 +56,9 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex: 1;
   min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .chart h3 {
@@ -121,6 +124,28 @@ th {
 }
 
 .csv-buttons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.inline-csv-button {
+  display: block;
+  margin: 0 auto 1rem auto;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #17a2b8;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: auto;
+}
+
+.inline-csv-button:hover:not(:disabled) {
+  background-color: #138496;
+}
+
+.inline-csv-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }

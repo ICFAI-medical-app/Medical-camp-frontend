@@ -146,7 +146,7 @@ const CampAnalytics = () => {
     const filtered = volunteers.filter(volunteer => {
       // Month match: Check volunteer's list_of_visits
       return month === 'All' ||
-             volunteer.list_of_visits.some(visit => visit.timestamp === month);
+        volunteer.list_of_visits.some(visit => visit.timestamp === month);
     });
 
     console.log('Volunteers after filtering:', filtered);
@@ -214,8 +214,84 @@ const CampAnalytics = () => {
       distributed_quantity,
     }));
 
-    return data.sort((a, b) => a.medicine_id.localeCompare(b.medicine_id)); // Sort by medicine_id
+    return data.sort((a, b) => {
+      // Extract numeric part from medicine_id for proper numeric sorting
+      const numA = parseInt(a.medicine_id.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.medicine_id.replace(/\D/g, '')) || 0;
+      return numA - numB;
+    });
   }, [patientHistories]);
+
+  const medicineInventoryData = useMemo(() => {
+    // Format month for headers (e.g., "2025-01" becomes "Jan 2025")
+    const formatMonthForHeader = (month) => {
+      if (!month || month === 'All') {
+        // Use current month and year if no filter is applied
+        const now = new Date();
+        const monthNames = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+        const monthName = monthNames[now.getMonth()];
+        const year = now.getFullYear();
+        return `${monthName} ${year}`;
+      }
+
+      const [year, monthNum] = month.split('-');
+      if (!year || !monthNum) return 'Month';
+
+      const monthNames = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+
+      const monthName = monthNames[parseInt(monthNum) - 1] || 'Month';
+      return `${monthName} ${year}`;
+    };
+
+    const monthDisplay = formatMonthForHeader(appliedFilters.month);
+
+    // Calculate dispensed quantity per medicine from patient histories
+    const dispensedQuantities = {};
+
+    patientHistories.forEach(history => {
+      history.visits.forEach(visit => {
+        if (visit.medicines_given) {
+          visit.medicines_given.forEach(givenMed => {
+            const medId = givenMed.medicine_id;
+            dispensedQuantities[medId] = (dispensedQuantities[medId] || 0) + givenMed.quantity;
+          });
+        }
+      });
+    });
+
+    // Create inventory data with current stock, dispensed, and calculated before stock
+    const inventoryData = medicines.map(medicine => {
+      const dispensed = dispensedQuantities[medicine.medicine_id] || 0;
+      const currentStock = medicine.total_quantity || 0;
+      const beforeStock = parseInt(currentStock) + parseInt(dispensed);
+
+      // Create dynamic keys based on the selected month
+      const dynamicData = {};
+      dynamicData[`before_stock_${appliedFilters.month}`] = beforeStock;
+      dynamicData[`current_stock_${appliedFilters.month}`] = currentStock;
+      dynamicData[`dispensed_${appliedFilters.month}`] = dispensed;
+
+      return {
+        medicine_id: medicine.medicine_id,
+        formulation: medicine.medicine_formulation || '',
+        ...dynamicData, // Spread the dynamic properties
+        monthDisplay: monthDisplay // Store the formatted month for column headers
+      };
+    });
+
+    return inventoryData.sort((a, b) => {
+      // Extract numeric part from medicine_id for proper numeric sorting
+      const numA = parseInt(a.medicine_id.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.medicine_id.replace(/\D/g, '')) || 0;
+      return numA - numB;
+    });
+  }, [medicines, patientHistories, appliedFilters.month]);
 
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
@@ -347,10 +423,12 @@ const CampAnalytics = () => {
             handleExportVolunteers={handleExportVolunteers}
             handleExportPatients={handleExportPatients}
             handleExportMedicineInventory={handleExportMedicineInventory}
+            handleExportMedicineDistribution={handleExportMedicineDistribution}
             appliedFilters={appliedFilters}
             filteredVolunteers={filteredVolunteers}
             filteredPatients={filteredPatients}
             medicines={medicines}
+            medicineDistributionData={medicineDistributionData}
           />
 
           {/* Charts or tables */}
@@ -365,55 +443,57 @@ const CampAnalytics = () => {
                   <>
                     <div className="chart">
                       <h3>Gender Distribution</h3>
-                      <PieChart width={400} height={400}>
-                        <Pie
-                          data={genderData}
-                          cx={200}
-                          cy={200}
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, value }) => `${name}: ${value}`} // Display name and value
-                        >
+                      <BarChart width={300} height={300} data={genderData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="value" name="Count">
                           {genderData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
+                        </Bar>
+                      </BarChart>
                     </div>
 
 
                     <div className="chart">
                       <h3>Doctor-Patient Ratio</h3>
-                      <TableView
-                        data={doctorPatientData}
-                        columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients Visited', key: 'patients' }]}
-                      />
                       <button
                         onClick={handleExportDoctorPatientRatio}
                         disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
                         aria-disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                        className="inline-csv-button"
                       >
                         Export Doctor-Patient Ratio to CSV
                       </button>
+                      <TableView
+                        data={doctorPatientData}
+                        columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients Visited', key: 'patients' }]}
+                      />
                     </div>
 
+
                     <div className="chart">
-                      <h3>Medicine Distribution</h3>
-                      <TableView
-                        data={medicineDistributionData}
-                        columns={[{ title: 'Medicine ID', key: 'medicine_id' }, { title: 'Distributed Quantity', key: 'distributed_quantity' }]}
-                      />
+                      <h3>Medicine Inventory</h3>
                       <button
-                        onClick={handleExportMedicineDistribution}
-                        disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
-                        aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                        onClick={handleExportMedicineInventory}
+                        disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                        aria-disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                        className="inline-csv-button"
                       >
-                        Export Medicine Distribution to CSV
+                        Export Medicine Inventory to CSV
                       </button>
+                      <TableView
+                        data={medicineInventoryData}
+                        columns={[
+                          { title: 'Medicine ID', key: 'medicine_id' },
+                          { title: 'Formulation', key: 'formulation' },
+                          { title: `${medicineInventoryData[0]?.monthDisplay} Before Stock`, key: `before_stock_${appliedFilters.month}` },
+                          { title: `${medicineInventoryData[0]?.monthDisplay} After Stock`, key: `current_stock_${appliedFilters.month}` },
+                          { title: `Dispensed in ${medicineInventoryData[0]?.monthDisplay}`, key: `dispensed_${appliedFilters.month}` }
+                        ]}
+                      />
                     </div>
                   </>
                 )}
@@ -428,30 +508,41 @@ const CampAnalytics = () => {
 
 
                     <h3>Doctor-Patient Ratio</h3>
-                    <TableView
-                      data={doctorPatientData}
-                      columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients', key: 'patients' }]}
-                    />
                     <button
                       onClick={handleExportDoctorPatientRatio}
                       disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
                       aria-disabled={!appliedFilters.hasSubmitted || doctorPatientData.length === 0}
+                      className="inline-csv-button"
                     >
                       Export Doctor-Patient Ratio to CSV
                     </button>
+                    <TableView
+                      data={doctorPatientData}
+                      columns={[{ title: 'Doctor', key: 'name' }, { title: 'Patients', key: 'patients' }]}
+                    />
 
                     <h3>Medicine Distribution</h3>
-                    <TableView
-                      data={medicineDistributionData}
-                      columns={[{ title: 'Medicine ID', key: 'medicine_id' }, { title: 'Distributed Quantity', key: 'distributed_quantity' }]}
-                    />
+                    <p>No visualization available. Download the data using the main buttons above.</p>
+
+                    <h3>Medicine Inventory</h3>
                     <button
-                      onClick={handleExportMedicineDistribution}
-                      disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
-                      aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+                      onClick={handleExportMedicineInventory}
+                      disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                      aria-disabled={!appliedFilters.hasSubmitted || medicines.length === 0}
+                      className="inline-csv-button"
                     >
-                      Export Medicine Distribution to CSV
+                      Export Medicine Inventory to CSV
                     </button>
+                    <TableView
+                      data={medicineInventoryData}
+                      columns={[
+                        { title: 'Medicine ID', key: 'medicine_id' },
+                        { title: 'Formulation', key: 'formulation' },
+                        { title: `${medicineInventoryData[0]?.monthDisplay} Before Stock`, key: `before_stock_${appliedFilters.month}` },
+                        { title: `${medicineInventoryData[0]?.monthDisplay} After Stock`, key: `current_stock_${appliedFilters.month}` },
+                        { title: `Dispensed in ${medicineInventoryData[0]?.monthDisplay}`, key: `dispensed_${appliedFilters.month}` }
+                      ]}
+                    />
                   </div>
                 )}
               </>

@@ -3,11 +3,13 @@ import React from 'react';
 const CSVDownloadButtons = ({
   handleExportVolunteers,
   handleExportPatients,
+  handleExportMedicineDistribution,
   handleExportMedicineInventory,
   appliedFilters,
   filteredVolunteers,
   filteredPatients,
-  medicines
+  medicines,
+  medicineDistributionData
 }) => {
   return (
     <div className="csv-buttons">
@@ -24,6 +26,13 @@ const CSVDownloadButtons = ({
         aria-disabled={!appliedFilters.hasSubmitted || filteredPatients.length === 0}
       >
         Download Patients CSV
+      </button>
+      <button
+        onClick={handleExportMedicineDistribution}
+        disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+        aria-disabled={!appliedFilters.hasSubmitted || medicineDistributionData.length === 0}
+      >
+        Download Medicine Distribution CSV
       </button>
       <button
         onClick={handleExportMedicineInventory}
