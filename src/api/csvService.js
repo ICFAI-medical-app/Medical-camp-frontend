@@ -28,23 +28,34 @@ export const exportVolunteersToCSV = (volunteers, month) => {
     'Age': volunteer.user_age,
   }));
 
-  downloadCSV(data, `volunteers_${month || 'all'}.csv`, 
+  downloadCSV(data, `volunteers_${month || 'all'}.csv`,
     ['ID', 'Name', 'Email', 'Phone', 'Age']);
 };
 
-// Export patients to CSV
-export const exportPatientsToCSV = (patients, month) => {
-  const data = patients.map(patient => ({
-    'Book No': patient.book_no,
-    'Name': patient.patient_name || '',
-    'Age': patient.patient_age || '',
-    'Gender': patient.patient_sex || '',
-    'Phone': patient.patient_phone_no || '',
-    'Area': patient.patient_area || '',
-  }));
+// Export patients to CSV with vitals data
+export const exportPatientsToCSV = (patients, month, vitals = []) => {
+  const data = patients.map(patient => {
+    // Find vitals for this patient matching the book_no
+    const patientVitals = vitals.find(v => v.book_no === patient.book_no);
+
+    return {
+      'Book No': patient.book_no,
+      'Name': patient.patient_name || '',
+      'Age': patient.patient_age || '',
+      'Gender': patient.patient_sex || '',
+      'Phone': patient.patient_phone_no || '',
+      'Area': patient.patient_area || '',
+      'BP': patientVitals?.bp || '',
+      'Pulse': patientVitals?.pulse || '',
+      'RBS': patientVitals?.rbs || '',
+      'Weight (kg)': patientVitals?.weight || '',
+      'Height (cm)': patientVitals?.height || '',
+      'Extra Notes': patientVitals?.extra_note || ''
+    };
+  });
 
   downloadCSV(data, `patients_${month || 'all'}.csv`,
-    ['Book No', 'Name', 'Age', 'Gender', 'Phone', 'Area']);
+    ['Book No', 'Name', 'Age', 'Gender', 'Phone', 'Area', 'BP', 'Pulse', 'RBS', 'Weight (kg)', 'Height (cm)', 'Extra Notes']);
 };
 
 // Export camp summary to CSV

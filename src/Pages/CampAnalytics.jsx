@@ -45,10 +45,21 @@ const CampAnalytics = () => {
   const [medicines, setMedicines] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [patientHistories, setPatientHistories] = useState([]);
+  const [vitals, setVitals] = useState([]);
   const [allPatientHistoriesForMonths, setAllPatientHistoriesForMonths] = useState([]);
   const [allDoctorsForMonths, setAllDoctorsForMonths] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('graph');
+
+  // Track which data failed to load (for CSV download validation)
+  const [dataLoadErrors, setDataLoadErrors] = useState({
+    patients: false,
+    doctors: false,
+    medicines: false,
+    volunteers: false,
+    patientHistories: false,
+    vitals: false
+  });
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -325,7 +336,7 @@ const CampAnalytics = () => {
   };
 
   const handleExportPatients = () => {
-    exportPatientsToCSV(filteredPatients, appliedFilters.month);
+    exportPatientsToCSV(filteredPatients, appliedFilters.month, vitals);
   };
 
   const handleExportMedicineInventory = () => {
@@ -356,18 +367,40 @@ const CampAnalytics = () => {
 
       setLoading(true);
       try {
-        const { patients, doctors, medicines, volunteers, patientHistories } = await fetchCampAnalyticsData(appliedFilters.month);
-        setPatients(patients);
-        setDoctors(doctors);
-        setMedicines(medicines);
-        setVolunteers(volunteers);
-        setPatientHistories(patientHistories);
+        const { patients, doctors, medicines, volunteers, patientHistories, vitals } = await fetchCampAnalyticsData(appliedFilters.month);
+
+        // Track which data failed to load
+        setDataLoadErrors({
+          patients: patients === null,
+          doctors: doctors === null,
+          medicines: medicines === null,
+          volunteers: volunteers === null,
+          patientHistories: patientHistories === null,
+          vitals: vitals === null
+        });
+
+        // Set data - null means API failed, [] means no records (both are valid states)
+        setPatients(patients ?? []);
+        setDoctors(doctors ?? []);
+        setMedicines(medicines ?? []);
+        setVolunteers(volunteers ?? []);
+        setPatientHistories(patientHistories ?? []);
+        setVitals(vitals ?? []);
 
         console.log('Fetched Patients:', patients);
         console.log('Fetched Doctors:', doctors);
         console.log('Fetched Medicines:', medicines);
         console.log('Fetched Volunteers:', volunteers);
         console.log('Fetched Patient Histories:', patientHistories);
+        console.log('Fetched Vitals:', vitals);
+
+        // Log warnings for failed API calls
+        if (patients === null) console.warn('⚠️ Patients API failed - CSV download should be disabled');
+        if (doctors === null) console.warn('⚠️ Doctors API failed');
+        if (medicines === null) console.warn('⚠️ Medicines API failed');
+        if (volunteers === null) console.warn('⚠️ Volunteers API failed');
+        if (patientHistories === null) console.warn('⚠️ Patient Histories API failed');
+        if (vitals === null) console.warn('⚠️ Vitals API failed - CSV may have incomplete data');
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -428,6 +461,7 @@ const CampAnalytics = () => {
             filteredPatients={filteredPatients}
             medicines={medicines}
             medicineDistributionData={medicineDistributionData}
+            dataLoadErrors={dataLoadErrors}
           />
 
           {/* Charts or tables */}
