@@ -1,21 +1,8 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { privateAxios } from '../api/axios';
 import '../Styles/Vitals.css';
 import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
-
-// Debounce utility function moved outside the component to prevent re-creation on every render
-const debounce = (func, delay) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, delay);
-  };
-};
 
 function Vitals() {
   const VitalEmptyData = {
@@ -39,10 +26,10 @@ function Vitals() {
   const location = useLocation(); // Initialize useLocation
   const { openScanner } = useQrScanner();
   const { book_no: urlBookNumber } = useParams(); // Get book_no from URL parameters
+  const debounceTimer = useRef(null); // Add debounce timer ref
 
   const handleQrScan = (scannedBookNumber) => {
     setFormData((prev) => ({ ...prev, bookNumber: scannedBookNumber }));
-    debouncedFetchVitals(scannedBookNumber);
   };
 
   const fetchVitals = async (value) => {
@@ -85,21 +72,32 @@ function Vitals() {
       setFormData(VitalEmptyData);
       setMessage('');
       setError('');
+      setIsLoading(false);
     }
   };
 
-  const debouncedFetchVitals = useCallback(
-    debounce((value) => fetchVitals(value), 500),
-    []
-  );
+  // useEffect for debounced book number search
+  useEffect(() => {
+    // Clear the previous timer
+    clearTimeout(debounceTimer.current);
+
+    // Set a new timer for debouncing
+    debounceTimer.current = setTimeout(() => {
+      if (formData.bookNumber) {
+        fetchVitals(formData.bookNumber);
+      }
+    }, 500);
+
+    // Cleanup function to clear timer on unmount or when bookNumber changes
+    return () => clearTimeout(debounceTimer.current);
+  }, [formData.bookNumber]); // Trigger when bookNumber changes
 
   // Effect to pre-fill book number if available from URL
   useEffect(() => {
     if (urlBookNumber) {
       setFormData((prev) => ({ ...prev, bookNumber: urlBookNumber }));
-      debouncedFetchVitals(urlBookNumber);
     }
-  }, [urlBookNumber, debouncedFetchVitals]);
+  }, [urlBookNumber]);
 
   // Effect to clear messages after a few seconds, but keep doctor assignment error
   useEffect(() => {
@@ -204,10 +202,7 @@ function Vitals() {
               name="bookNumber"
               value={formData.bookNumber}
               autoComplete='off'
-              onChange={(e) => {
-                handleChange(e);
-                debouncedFetchVitals(e.target.value);
-              }}
+              onChange={handleChange}
               required
               style={{ flexGrow: 1 }}
             />
