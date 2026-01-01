@@ -164,6 +164,11 @@ export const useAnalyticsSocket = (onAnalyticsUpdate) => {
             if (onAnalyticsUpdate) onAnalyticsUpdate('patient-dequeued', data);
         };
 
+        const handleMedicineDispensed = (data) => {
+            console.log('💊 Medicine dispensed event received:', data);
+            if (onAnalyticsUpdate) onAnalyticsUpdate('medicine-dispensed', data);
+        };
+
         socket.on('analytics:patient-registered', handlePatientRegistered);
         socket.on('analytics:vitals-recorded', handleVitalsRecorded);
         socket.on('analytics:medicine-distributed', handleMedicineDistributed);
@@ -173,6 +178,7 @@ export const useAnalyticsSocket = (onAnalyticsUpdate) => {
         socket.on('analytics:consultation-completed', handleConsultationCompleted);
         socket.on('analytics:patient-queued', handlePatientQueued);
         socket.on('analytics:patient-dequeued', handlePatientDequeued);
+        socket.on('analytics:medicine-dispensed', handleMedicineDispensed);
 
         return () => {
             socket.off('analytics:patient-registered', handlePatientRegistered);
@@ -184,6 +190,7 @@ export const useAnalyticsSocket = (onAnalyticsUpdate) => {
             socket.off('analytics:consultation-completed', handleConsultationCompleted);
             socket.off('analytics:patient-queued', handlePatientQueued);
             socket.off('analytics:patient-dequeued', handlePatientDequeued);
+            socket.off('analytics:medicine-dispensed', handleMedicineDispensed);
         };
     }, [socket, onAnalyticsUpdate]);
 

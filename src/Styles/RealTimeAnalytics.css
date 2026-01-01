@@ -73,3 +73,61 @@
   color: #007bff;
   text-align: center;
 }
+
+/* Medicine Inventory Table Styles */
+.medicine-inventory-table-container {
+  margin-top: 30px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+}
+
+.medicine-inventory-table-container h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+.medicine-inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.medicine-inventory-table th,
+.medicine-inventory-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.medicine-inventory-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #495057;
+}
+
+.medicine-inventory-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.medicine-inventory-table .no-data {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .medicine-inventory-table th,
+  .medicine-inventory-table td {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .medicine-inventory-table-container {
+    padding: 15px;
+  }
+}

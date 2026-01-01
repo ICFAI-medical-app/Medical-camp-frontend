@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAnalyticsSocket } from '../hooks/useSocket';
+import axios from 'axios';
+import { BACKEND_URL } from '../config/api';
 import '../Styles/RealTimeAnalytics.css';
 
 const RealTimeAnalytics = () => {
@@ -10,9 +12,44 @@ const RealTimeAnalytics = () => {
     prescriptionsGenerated: 0,
     medicinesReceived: 0,
     vitalsRecorded: 0,
-    patientsWaiting: 0,
     completedConsultations: 0
   });
+
+  // State for medicine inventory
+  const [medicineInventory, setMedicineInventory] = useState({});
+
+  // Fetch today's analytics data on component mount
+  useEffect(() => {
+    const fetchTodayAnalytics = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${BACKEND_URL}/api/analytics/today`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        // Initialize with today's actual counts from database
+        setRealTimeData({
+          totalPatients: response.data.totalPatients || 0,
+          vitalsRecorded: response.data.vitalsRecorded || 0,
+          activeConsultations: response.data.activeConsultations || 0,
+          completedConsultations: response.data.completedConsultations || 0,
+          prescriptionsGenerated: response.data.prescriptionsGenerated || 0,
+          medicinesReceived: response.data.medicinesReceived || 0
+        });
+
+        // Initialize medicine inventory with dispensed medicines only
+        setMedicineInventory(response.data.dispensedMedicines || {});
+
+        console.log('📊 Today\'s analytics loaded:', response.data);
+      } catch (error) {
+        console.error('Error fetching today\'s analytics:', error);
+      }
+    };
+
+    fetchTodayAnalytics();
+  }, []);
 
   // WebSocket handler for real-time analytics updates
   const handleAnalyticsUpdate = useCallback((eventType, data) => {
@@ -37,14 +74,42 @@ const RealTimeAnalytics = () => {
             activeConsultations: Math.max(0, prev.activeConsultations - 1),
             completedConsultations: prev.completedConsultations + 1
           };
-        case 'patient-queued':
-          return { ...prev, patientsWaiting: prev.patientsWaiting + 1 };
-        case 'patient-dequeued':
-          return { ...prev, patientsWaiting: Math.max(0, prev.patientsWaiting - 1) };
         default:
           return prev;
       }
     });
+
+    // Update medicine inventory if it's a medicine distribution event
+    if (eventType === 'medicine-distributed' && data) {
+      setMedicineInventory(prev => {
+        const medicineId = data.medicine_id || 'Unknown';
+        const currentMedicine = prev[medicineId] || { totalQuantity: 0, dispensedQuantity: 0 };
+
+        return {
+          ...prev,
+          [medicineId]: {
+            totalQuantity: currentMedicine.totalQuantity,
+            dispensedQuantity: (currentMedicine.dispensedQuantity || 0) + (data.quantity || 0)
+          }
+        };
+      });
+    }
+
+    // Update medicine inventory when medicines are dispensed to patients
+    if (eventType === 'medicine-dispensed' && data) {
+      setMedicineInventory(prev => {
+        const medicineId = data.medicine_id || 'Unknown';
+        const currentMedicine = prev[medicineId] || { totalQuantity: 0, dispensedQuantity: 0 };
+
+        return {
+          ...prev,
+          [medicineId]: {
+            totalQuantity: currentMedicine.totalQuantity, // Keep total unchanged
+            dispensedQuantity: (currentMedicine.dispensedQuantity || 0) + (data.quantity || 0)
+          }
+        };
+      });
+    }
   }, []);
 
   // Initialize WebSocket connection for analytics
@@ -99,12 +164,41 @@ const RealTimeAnalytics = () => {
             <span className="value">{realTimeData.medicinesReceived}</span>
           </div>
         </div>
+      </div>
 
-        <div className="real-time-card">
-          <div className="real-time-item">
-            <span className="label">Patients in Vitals/Consultation Queues</span>
-            <span className="value">{realTimeData.patientsWaiting}</span>
-          </div>
+      {/* Medicine Inventory Table - Shows only dispensed medicines */}
+      <div className="medicine-inventory-table-container">
+        <h3>Medicines Dispensed Today</h3>
+        <div className="table-responsive">
+          <table className="medicine-inventory-table">
+            <thead>
+              <tr>
+                <th>Medicine ID</th>
+                <th>Dispensed Today</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(medicineInventory).length > 0 ? (
+                Object.entries(medicineInventory)
+                  .map(([medicineId, details]) => ({
+                    medicineId,
+                    dispensedToday: details.dispensedQuantity || 0,
+                    remaining: (details.totalQuantity || 0) - (details.dispensedQuantity || 0)
+                  }))
+                  .sort((a, b) => b.dispensedToday - a.dispensedToday) // Sort by dispensed quantity (descending)
+                  .map((record) => (
+                    <tr key={record.medicineId}>
+                      <td>{record.medicineId}</td>
+                      <td>{record.dispensedToday}</td>
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td colSpan="3" className="no-data">No medicines dispensed today</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
