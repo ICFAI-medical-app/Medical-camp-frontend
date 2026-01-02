@@ -48,6 +48,7 @@ import LoginOTP from './Pages/LoginOTP';
 import VerifyOTP from './Pages/VerifyOTP';
 import { QrScannerProvider } from './Context/QrScannerContext';
 import DownloadQRCodes from './Pages/DownloadQRCodes';
+import RealTimeAnalytics from './Pages/RealTimeAnalytics';
 
 function App() {
   return (
@@ -93,6 +94,7 @@ function App() {
               <Route path="/volunteer/:id" element={<ProtectedRoute requiredType="admin"><VolunteerProfile /></ProtectedRoute>} />
               <Route path="/analytics" element={<ProtectedRoute requiredType="admin"><AdminAnalytics /></ProtectedRoute>} />
               <Route path="/camp-analytics" element={<ProtectedRoute requiredType="admin"><CampAnalytics /></ProtectedRoute>} />
+              <Route path="/real-time-analytics" element={<ProtectedRoute requiredType="admin"><RealTimeAnalytics /></ProtectedRoute>} />
               <Route path="/patient/:id" element={<ProtectedRoute requiredType="admin"><PatientProfile /></ProtectedRoute>} />
               <Route path="/profiles" element={<ProtectedRoute requiredType="admin"><Profiles /></ProtectedRoute>} />
               <Route path="/patient-status" element={<ProtectedRoute requiredType="volunteer"><PatientStatusPage /></ProtectedRoute>} />
