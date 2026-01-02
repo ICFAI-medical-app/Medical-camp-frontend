@@ -127,7 +127,6 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       phoneNumber: '',
       age: '',
       gender: initialGender,
-      gender: initialGender,
       area: '',
       chronicHistory: [],
       otherHistory: ''
@@ -203,7 +202,6 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
           phoneNumber: response.data.patient_phone_no || '',
           age: response.data.patient_age ? String(response.data.patient_age) : '',
           gender: response.data.patient_sex || initialGender || '',
-          gender: response.data.patient_sex || initialGender || '',
           area: response.data.patient_area || '',
           chronicHistory: response.data.chronic_history || [],
           otherHistory: response.data.other_history || ''
@@ -217,10 +215,6 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
         // Reset form but keep book number
         reset({
           bookNumber: data.bookNumber,
-          name: '',
-          phoneNumber: '',
-          age: '',
-          gender: initialGender || '',
           name: '',
           phoneNumber: '',
           age: '',
@@ -290,7 +284,6 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       phoneNumber: '',
       age: '',
       gender: initialGender || '',
-      gender: initialGender || '',
       area: '',
       chronicHistory: [],
       otherHistory: ''
@@ -322,8 +315,6 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
                 bookNumber: '',
                 name: '',
                 phoneNumber: '',
-                age: '',
-                gender: initialGender || '',
                 age: '',
                 gender: initialGender || '',
                 area: '',
