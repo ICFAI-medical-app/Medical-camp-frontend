@@ -345,3 +345,61 @@
     display: none !important;
   }
 }
+
+/* Chronic History Grid */
+.helper-text {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 5px;
+}
+
+.chronic-history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #333;
+  line-height: 1.4;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #007bff;
+  cursor: pointer;
+}
+
+.other-checkbox-label {
+  grid-column: 1 / -1;
+  /* Make 'Other' take full width */
+  align-items: center;
+}
+
+.other-history-input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-left: 5px;
+}
+
+.other-history-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}

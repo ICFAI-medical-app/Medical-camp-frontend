@@ -9,6 +9,16 @@ import PatientIDCard from "../Components/PatientIDCard";
 import { useQrScanner } from '../Context/QrScannerContext'; // Import useQrScanner hook
 import '../Styles/PatientRegistration.css';
 
+const CHRONIC_CONDITIONS = [
+  "High Blood Pressure (BP / Tension)",
+  "Sugar / Diabetes (Sugar / Injections)",
+  "Heart Trouble (Heart attack / Stents)",
+  "Breathing (Asthma / Pumps / Inhalers)",
+  "Fits / Seizures (Fainting / Shaking)",
+  "Thyroid (Goiter / Neck swelling)",
+  "Kidney Issues (Dialysis / Swelling in feet)"
+];
+
 // ---------------------- ZOD VALIDATION --------------------------
 const patientSchema = z.object({
   bookNumber: z.string()
@@ -67,7 +77,10 @@ const patientSchema = z.object({
     })
     .refine(val => val.replace(/\s/g, '').length >= 3, {
       message: "Area must have at least 3 actual characters"
-    })
+    }),
+
+  chronicHistory: z.array(z.string()).optional(),
+  otherHistory: z.string().optional(),
 });
 
 // Schema for book number only
@@ -114,7 +127,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       phoneNumber: '',
       age: '',
       gender: initialGender,
-      area: ''
+      area: '',
+      chronicHistory: [],
+      otherHistory: ''
     },
     mode: "onBlur"
   });
@@ -187,7 +202,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
           phoneNumber: response.data.patient_phone_no || '',
           age: response.data.patient_age ? String(response.data.patient_age) : '',
           gender: response.data.patient_sex || initialGender || '',
-          area: response.data.patient_area || ''
+          area: response.data.patient_area || '',
+          chronicHistory: response.data.chronic_history || [],
+          otherHistory: response.data.other_history || ''
         });
         setMessage('Patient data loaded successfully!');
       }
@@ -202,7 +219,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
           phoneNumber: '',
           age: '',
           gender: initialGender || '',
-          area: ''
+          area: '',
+          chronicHistory: [],
+          otherHistory: ''
         });
         setIsBookNumberSubmitted(true);
       } else {
@@ -219,6 +238,17 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
     setError('');
     setMessage('');
 
+    console.log("📤 Sending Patient Data:", {
+      book_no: data.bookNumber,
+      patient_name: data.name,
+      patient_age: parseFloat(data.age),
+      patient_sex: data.gender,
+      patient_phone_no: data.phoneNumber,
+      patient_area: data.area,
+      chronic_history: data.chronicHistory,
+      other_history: data.otherHistory
+    });
+
     try {
       const response = await privateAxios.post('/api/patients', {
         book_no: data.bookNumber,
@@ -226,7 +256,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
         patient_age: parseFloat(data.age),
         patient_sex: data.gender,
         patient_phone_no: data.phoneNumber,
-        patient_area: data.area
+        patient_area: data.area,
+        chronic_history: data.chronicHistory || [],
+        other_history: data.otherHistory || ""
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
 
@@ -234,6 +266,7 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
         setRegisteredPatient(response.data.patient);
       }
     } catch (error) {
+      console.error("Submission Error:", error);
       setError(error.response?.data?.message || 'An error occurred while saving patient data.');
     } finally {
       setIsLoading(false);
@@ -251,7 +284,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       phoneNumber: '',
       age: '',
       gender: initialGender || '',
-      area: ''
+      area: '',
+      chronicHistory: [],
+      otherHistory: ''
     });
   };
 
@@ -282,7 +317,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
                 phoneNumber: '',
                 age: '',
                 gender: initialGender || '',
-                area: ''
+                area: '',
+                chronicHistory: [],
+                otherHistory: ''
               });
             }}
           >
@@ -444,6 +481,33 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
                     )}
                   </div>
                   {errors.area && <div className="field-error">{errors.area.message}</div>}
+                </div>
+
+                <div className="patient-registration-form-group">
+                  <label>
+                    Chronic History <span className="helper-text">(select all that apply based on what the patient tells you)</span>
+                  </label>
+                  <div className="chronic-history-grid">
+                    {CHRONIC_CONDITIONS.map((condition) => (
+                      <label key={condition} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          value={condition}
+                          {...register("chronicHistory")}
+                        />
+                        {condition}
+                      </label>
+                    ))}
+                    <label className="checkbox-label other-checkbox-label">
+                      <span>Other:</span>
+                      <input
+                        type="text"
+                        {...register("otherHistory")}
+                        placeholder="Short Text Input"
+                        className="other-history-input"
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <button
