@@ -1,7 +1,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom"; // Import useLocation and useNavigate
 import { z } from "zod";
 import { privateAxios } from "../api/axios";
@@ -81,6 +81,18 @@ const patientSchema = z.object({
 
   chronicHistory: z.array(z.string()).optional(),
   otherHistory: z.string().optional(),
+  visitType: z.enum(['First Time', 'Follow-up Visit'], {
+    errorMap: () => ({ message: "Please select a visit type" })
+  }),
+  followUpType: z.string().optional()
+}).superRefine((data, ctx) => {
+  if (data.visitType === 'Follow-up Visit' && !data.followUpType) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please select a follow-up type",
+      path: ["followUpType"]
+    });
+  }
 });
 
 // Schema for book number only
@@ -104,6 +116,14 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
   const location = useLocation(); // Initialize useLocation
   const navigate = useNavigate(); // Initialize useNavigate
 
+  // 🔹 Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFilterType, setSearchFilterType] = useState('all');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
   // ------------------ REACT HOOK FORM ------------------
   const { openScanner } = useQrScanner();
 
@@ -119,6 +139,7 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
     setValue,
     reset,
     trigger,
+    control,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(isBookNumberSubmitted ? patientSchema : bookNumberSchema),
@@ -130,10 +151,14 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       gender: initialGender,
       area: '',
       chronicHistory: [],
-      otherHistory: ''
+      otherHistory: '',
+      visitType: 'First Time',
+      followUpType: ''
     },
     mode: "onBlur"
   });
+
+  const selectedVisitType = useWatch({ control, name: 'visitType' });
 
   useEffect(() => {
     if (initialGender) {
@@ -154,6 +179,49 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       console.log("Current Form Errors:", errors);
     }
   }, [errors]);
+
+  // ------------------ SEARCH PATIENT ------------------
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    setError('');
+    setHasSearched(true);
+
+    try {
+      const response = await privateAxios.get(`/api/patients/search?q=${encodeURIComponent(searchQuery)}&type=${searchFilterType}`);
+      setSearchResults(response.data);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch search results. Please try again.');
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectPatient = (patient) => {
+    reset({
+      bookNumber: patient.book_no,
+      name: patient.patient_name || '',
+      phoneNumber: patient.patient_phone_no || '',
+      age: patient.patient_age ? String(patient.patient_age) : '',
+      gender: patient.patient_sex || initialGender || '',
+      area: patient.patient_area || '',
+      area: patient.patient_area || '',
+      chronicHistory: patient.chronic_history || [],
+      otherHistory: patient.other_history || '',
+      visitType: patient.visit_type || 'First Time',
+      followUpType: patient.follow_up_type || ''
+    });
+    setIsBookNumberSubmitted(true);
+    setShowSearch(false);
+    setSearchResults([]);
+    setHasSearched(false);
+    setSearchQuery('');
+    setMessage('Patient details loaded from search.');
+  };
 
 
   // ------------------ AREA FETCH ------------------
@@ -205,7 +273,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
           gender: response.data.patient_sex || initialGender || '',
           area: response.data.patient_area || '',
           chronicHistory: response.data.chronic_history || [],
-          otherHistory: response.data.other_history || ''
+          otherHistory: response.data.other_history || '',
+          visitType: response.data.visit_type || 'First Time',
+          followUpType: response.data.follow_up_type || ''
         });
         setMessage('Patient data loaded successfully!');
       }
@@ -222,7 +292,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
           gender: initialGender || '',
           area: '',
           chronicHistory: [],
-          otherHistory: ''
+          otherHistory: '',
+          visitType: 'First Time',
+          followUpType: ''
         });
         setIsBookNumberSubmitted(true);
       } else {
@@ -247,7 +319,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       patient_phone_no: data.phoneNumber,
       patient_area: data.area,
       chronic_history: data.chronicHistory,
-      other_history: data.otherHistory
+      other_history: data.otherHistory,
+      visit_type: data.visitType,
+      follow_up_type: data.visitType === 'Follow-up Visit' ? data.followUpType : ''
     });
 
     try {
@@ -259,7 +333,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
         patient_phone_no: data.phoneNumber,
         patient_area: data.area,
         chronic_history: data.chronicHistory || [],
-        other_history: data.otherHistory || ""
+        other_history: data.otherHistory || "",
+        visit_type: data.visitType || "First Time",
+        follow_up_type: data.visitType === 'Follow-up Visit' ? data.followUpType : ''
       });
       setMessage(response.data.message || 'Patient data saved successfully!');
 
@@ -276,9 +352,12 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
 
   const handleRegisterNext = () => {
     setRegisteredPatient(null);
-    setIsBookNumberSubmitted(false);
     setMessage('');
     setError('');
+    setShowSearch(false);
+    setSearchResults([]);
+    setHasSearched(false);
+    setIsBookNumberSubmitted(false);
     reset({
       bookNumber: '',
       name: '',
@@ -287,7 +366,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
       gender: initialGender || '',
       area: '',
       chronicHistory: [],
-      otherHistory: ''
+      otherHistory: '',
+      visitType: 'First Time',
+      followUpType: ''
     });
   };
 
@@ -325,7 +406,9 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
                   gender: initialGender || '',
                   area: '',
                   chronicHistory: [],
-                  otherHistory: ''
+                  otherHistory: '',
+                  visitType: 'First Time',
+                  followUpType: ''
                 });
               } else {
                 navigate('/dashboard');
@@ -341,6 +424,85 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
           </button>
 
           <h1 className="patient-registration-title">Patient Registration</h1>
+
+          <div className="registration-top-actions">
+            <button
+              className={`btn-toggle-search ${showSearch ? 'active' : ''}`}
+              onClick={() => {
+                setShowSearch(!showSearch);
+                if (!showSearch) {
+                  setError('');
+                  setMessage('');
+                }
+              }}
+            >
+              {showSearch ? "Close Search" : "Search Existing Patient"}
+            </button>
+          </div>
+
+          {showSearch && (
+            <div className="patient-search-section">
+              <form onSubmit={handleSearch} className="search-input-group">
+                <select
+                  value={searchFilterType}
+                  onChange={(e) => setSearchFilterType(e.target.value)}
+                  className="search-filter-select"
+                >
+                  <option value="all">All</option>
+                  <option value="name">Name</option>
+                  <option value="phone">Mobile</option>
+                  <option value="book_no">Book No</option>
+                </select>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name, phone, or book no..."
+                  className="search-input"
+                />
+                <button type="submit" className="search-btn" disabled={isSearching}>
+                  {isSearching ? '...' : 'Search'}
+                </button>
+              </form>
+
+              {hasSearched && searchResults.length === 0 && !isSearching && (
+                <div className="no-results-msg">No patients found.</div>
+              )}
+
+              {searchResults.length > 0 && (
+                <div className="search-results-table-container">
+                  <table className="search-results-table">
+                    <thead>
+                      <tr>
+                        <th>Book No</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {searchResults.map((patient) => (
+                        <tr key={patient.book_no}>
+                          <td>{patient.book_no}</td>
+                          <td>{patient.patient_name}</td>
+                          <td>{patient.patient_phone_no}</td>
+                          <td>
+                            <button
+                              className="btn-select-patient"
+                              onClick={() => handleSelectPatient(patient)}
+                            >
+                              Select
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
           {message && <div className="patient-registration-success-msg">{message}</div>}
           {error && <div className="patient-registration-error-msg">{error}</div>}
 
@@ -453,6 +615,58 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
                     </label>
                   </div>
                   {errors.gender && <div className="field-error">{errors.gender.message}</div>}
+                </div>
+
+                <div className="patient-registration-form-group">
+                  <label>
+                    Visit Type <span className="required">*</span>
+                  </label>
+                  <div className="patient-registration-radio-group">
+                    <label>
+                      <input
+                        type="radio"
+                        value="First Time"
+                        {...register("visitType")}
+                      />
+                      First Time
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="Follow-up Visit"
+                        {...register("visitType")}
+                      />
+                      Follow-up Visit
+                    </label>
+                  </div>
+                  {errors.visitType && <div className="field-error">{errors.visitType.message}</div>}
+
+                  {selectedVisitType === 'Follow-up Visit' && (
+                    <div style={{ marginTop: '10px', paddingLeft: '20px', borderLeft: '3px solid #007bff' }}>
+                      <label style={{ fontSize: '0.9rem', marginBottom: '8px', display: 'block', color: '#555' }}>
+                        Follow-up Action <span className="required">*</span>
+                      </label>
+                      <div className="patient-registration-radio-group" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                        <label>
+                          <input
+                            type="radio"
+                            value="Book Consultation"
+                            {...register("followUpType")}
+                          />
+                          Book Consultation
+                        </label>
+                        <label>
+                          <input
+                            type="radio"
+                            value="Repeat Medicine"
+                            {...register("followUpType")}
+                          />
+                          Repeat Medicine
+                        </label>
+                      </div>
+                      {errors.followUpType && <div className="field-error">{errors.followUpType.message}</div>}
+                    </div>
+                  )}
                 </div>
 
                 <div className="patient-registration-form-group">
