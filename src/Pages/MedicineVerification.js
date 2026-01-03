@@ -39,7 +39,7 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
     <div className="medicine-verification-overlay">
       <div className="medicine-verification-popup">
         <h2>Medicine Verification - Book #{bookNo}</h2>
-        
+
         <div className="verification-section">
           <h3>Prescribed Medicines</h3>
           {isLoading ? ( // Show loading state while fetching data
@@ -51,6 +51,7 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
                   <th>Medicine ID</th>
                   <th>Quantity</th>
                   <th>Schedule</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -71,6 +72,33 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
                         'No schedule'
                       )}
                     </td>
+                    <td>
+                      <span className={`status-badge ${med.status === 'prescribed' ? 'status-prescribed' :
+                          med.status === 'dispensed' ? 'status-dispensed' :
+                            med.status === 'replaced' ? 'status-replaced' :
+                              med.status === 'buy_outside' ? 'status-buy-outside' :
+                                med.status === 'out_of_stock' ? 'status-out-of-stock' :
+                                  'status-prescribed'
+                        }`}>
+                        {med.status === 'prescribed' ? 'Prescribed' :
+                          med.status === 'dispensed' ? 'Dispensed' :
+                            med.status === 'replaced' ? 'Replaced' :
+                              med.status === 'buy_outside' ? 'Buy Outside' :
+                                med.status === 'out_of_stock' ? 'Out of Stock' :
+                                  'Prescribed'}
+                      </span>
+                      {med.status === 'replaced' && med.replacement_medicine_id && (
+                        <div style={{ marginTop: '8px', fontSize: '12px' }}>
+                          <div><strong>Replacement:</strong> {med.replacement_medicine_id}</div>
+                          <div><strong>Qty:</strong> {med.replacement_quantity}</div>
+                        </div>
+                      )}
+                      {med.status_note && (
+                        <div style={{ marginTop: '4px', fontSize: '12px', fontStyle: 'italic' }}>
+                          Note: {med.status_note}
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -79,7 +107,7 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
             <p>No prescribed medicines found</p>
           )}
         </div>
-        
+
         <div className="verification-section">
           <h3>Medicines Given</h3>
           {isLoading ? ( // Show loading state while fetching data
@@ -107,8 +135,8 @@ function MedicineVerification({ bookNo, showVerification, setShowVerification })
         </div>
 
         {error && <div className="verification-error">{error}</div>}
-        
-        <button 
+
+        <button
           className="medicine-pickup-close-popup"
           onClick={() => setShowVerification(false)}
           disabled={isLoading} // Disable the button while loading

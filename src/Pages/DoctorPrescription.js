@@ -22,24 +22,9 @@ function DoctorPrescription() {
 
   // Function to validate quantities and update submit button state
   const validateQuantities = () => {
-    let disable = false;
-    let errorMsg = '';
-
-    for (const [index, prescription] of prescriptions.entries()) {
-      // Only validate if medicine details are available and no error in fetching them
-      if (medicineDetails[index] && !medicineDetails[index].error) {
-        const availableStock = medicineDetails[index].total_quantity;
-        const calculatedQuantity = prescription.quantity;
-
-        if (calculatedQuantity > availableStock) {
-          disable = true;
-          errorMsg = `Calculated quantity for Medicine ID- ${prescription.medicine_id} exceeds available stock (${availableStock}).`;
-          break;
-        }
-      }
-    }
-    setIsSubmitDisabled(disable);
-    setQuantityExceedsError(errorMsg);
+    // Validation logic removed as per user request - stock is managed via status flags
+    setIsSubmitDisabled(false);
+    setQuantityExceedsError('');
   };
 
   // Call validateQuantities whenever prescriptions or medicineDetails change
@@ -424,7 +409,7 @@ function DoctorPrescription() {
                     }
                     required
                     placeholder="Enter quantity"
-                    min="1"
+                    onWheel={(e) => e.target.blur()}
                     disabled={isLoading} // Disable input while loading
                   />
                 </div>
