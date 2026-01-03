@@ -12,7 +12,8 @@ const RealTimeAnalytics = () => {
     prescriptionsGenerated: 0,
     medicinesReceived: 0,
     vitalsRecorded: 0,
-    completedConsultations: 0
+    completedConsultations: 0,
+    repeatMedicinePatients: []
   });
 
   // State for medicine inventory
@@ -36,7 +37,10 @@ const RealTimeAnalytics = () => {
           activeConsultations: response.data.activeConsultations || 0,
           completedConsultations: response.data.completedConsultations || 0,
           prescriptionsGenerated: response.data.prescriptionsGenerated || 0,
-          medicinesReceived: response.data.medicinesReceived || 0
+          completedConsultations: response.data.completedConsultations || 0,
+          prescriptionsGenerated: response.data.prescriptionsGenerated || 0,
+          medicinesReceived: response.data.medicinesReceived || 0,
+          repeatMedicinePatients: response.data.repeatMedicinePatients || []
         });
 
         // Initialize medicine inventory with dispensed medicines only
@@ -59,7 +63,14 @@ const RealTimeAnalytics = () => {
     setRealTimeData(prev => {
       switch (eventType) {
         case 'patient-registered':
-          return { ...prev, totalPatients: prev.totalPatients + 1 };
+          const isRepeatMedicine = data.visit_type === 'Follow-up Visit' && data.follow_up_type === 'Repeat Medicine';
+          return {
+            ...prev,
+            totalPatients: prev.totalPatients + 1,
+            repeatMedicinePatients: isRepeatMedicine
+              ? [...prev.repeatMedicinePatients, { book_no: data.book_no, patient_name: data.patient_name }]
+              : prev.repeatMedicinePatients
+          };
         case 'vitals-recorded':
           return { ...prev, vitalsRecorded: prev.vitalsRecorded + 1 };
         case 'medicine-received':
@@ -165,6 +176,33 @@ const RealTimeAnalytics = () => {
           </div>
         </div>
       </div>
+
+      {/* Priority Patients Table - Blinking */}
+      {realTimeData.repeatMedicinePatients.length > 0 && (
+        <div className="priority-patients-container blinking-border">
+          <h3 className="blinking-text">⚠️ Priority: Repeat Medicines</h3>
+          <div className="table-responsive">
+            <table className="priority-patients-table">
+              <thead>
+                <tr>
+                  <th>Book No</th>
+                  <th>Patient Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {realTimeData.repeatMedicinePatients.map((patient, index) => (
+                  <tr key={`${patient.book_no}-${index}`}>
+                    <td>{patient.book_no}</td>
+                    <td>{patient.patient_name}</td>
+                    <td>Repeat Medicine</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Medicine Inventory Table - Shows only dispensed medicines */}
       <div className="medicine-inventory-table-container">
