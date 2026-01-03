@@ -11,3 +11,31 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Global Back Button Icon Styles */
+.back-icon-btn {
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 8px !important;
+  border-radius: 50% !important;
+  transition: background 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 10px !important;
+  width: 40px !important;
+  height: 40px !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.back-icon-btn:hover {
+  background-color: #f0f0f0 !important;
+}
+
+.back-icon-btn svg {
+  width: 24px !important;
+  height: 24px !important;
+  fill: #555 !important;
+}

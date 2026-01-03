@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom"; // Import useLocation
+import { useLocation, useNavigate } from "react-router-dom"; // Import useLocation and useNavigate
 import { z } from "zod";
 import { privateAxios } from "../api/axios";
 import PatientIDCard from "../Components/PatientIDCard";
@@ -102,6 +102,7 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceTimer = useRef(null);
   const location = useLocation(); // Initialize useLocation
+  const navigate = useNavigate(); // Initialize useNavigate
 
   // ------------------ REACT HOOK FORM ------------------
   const { openScanner } = useQrScanner();
@@ -294,33 +295,41 @@ function PatientRegistration({ initialBookNumber = '', initialGender = '' }) {
   return (
     <div className="patient-registration-container">
       {registeredPatient ? (
-        <div className="simple-qr-view" id="printable-qr">
-          <img src={registeredPatient.qr} alt="Patient QR Code" />
-          <h2>{registeredPatient.book_no}</h2>
-          <div className="action-buttons">
-            <button className="btn-register-next" onClick={handleRegisterNext}>Register Next Patient</button>
-            <button className="btn-print" onClick={() => window.print()}>Print</button>
+        <div className="registration-success-view">
+          <div className="success-card">
+            <div className="success-icon">✅</div>
+            <h2>Registration Successful!</h2>
+            <div className="patient-summary">
+              <p>Book Number: <strong>{registeredPatient.book_no}</strong></p>
+              <p>Patient Name: <strong>{registeredPatient.patient_name}</strong></p>
+            </div>
+            <div className="action-buttons">
+              <button className="btn-register-next" onClick={handleRegisterNext}>Register Next Patient</button>
+            </div>
           </div>
         </div>
       ) : (
         <>
           <button
-            className="back-btn"
-            hidden={!isBookNumberSubmitted}
+            className="back-icon-btn"
             onClick={() => {
-              setIsBookNumberSubmitted(false);
-              setMessage('');
-              setError('');
-              reset({
-                bookNumber: '',
-                name: '',
-                phoneNumber: '',
-                age: '',
-                gender: initialGender || '',
-                area: '',
-                chronicHistory: [],
-                otherHistory: ''
-              });
+              if (isBookNumberSubmitted) {
+                setIsBookNumberSubmitted(false);
+                setMessage('');
+                setError('');
+                reset({
+                  bookNumber: '',
+                  name: '',
+                  phoneNumber: '',
+                  age: '',
+                  gender: initialGender || '',
+                  area: '',
+                  chronicHistory: [],
+                  otherHistory: ''
+                });
+              } else {
+                navigate('/dashboard');
+              }
             }}
           >
             <svg fill="#000000" xmlns="http://www.w3.org/2000/svg"

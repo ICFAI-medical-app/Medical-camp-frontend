@@ -19,7 +19,7 @@ function UpdateMedicineStock() {
     quantity: ""
   });
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
-  const [notification, setNotification] = useState(""); 
+  const [notification, setNotification] = useState("");
   const [fieldErrors, setFieldErrors] = useState({
     medicineId: "",
     medicine_name: "",
@@ -46,29 +46,29 @@ function UpdateMedicineStock() {
 
   const validateField = (name, value) => {
     let error = "";
-    
+
     if (value === null || value === undefined || value.toString().trim() === "") {
       error = `This field is required`;
     } else if (name === "quantity" && parseInt(value, 10) < 0) {
       error = "Quantity cannot be negative";
     }
-    
+
     return error;
   };
 
   const handleFetchMedicine = async (e) => {
     e.preventDefault();
-    
+
     const idError = validateField("medicineId", medicineId);
     if (idError) {
-      setFieldErrors({...fieldErrors, medicineId: idError});
+      setFieldErrors({ ...fieldErrors, medicineId: idError });
       setError("Please select a medicine from the dropdown");
       return;
     }
-    
+
     setLoading(true);
     setError("");
-    setFieldErrors({...fieldErrors, medicineId: ""});
+    setFieldErrors({ ...fieldErrors, medicineId: "" });
 
     try {
       const foundMedicine = medicines.find(med => med.medicine_id === medicineId);
@@ -113,7 +113,7 @@ function UpdateMedicineStock() {
       setNotification(dateError);
       setTimeout(() => setNotification(""), 3000);
     }
-    
+
     setUpdatedExpiryDates({
       ...updatedExpiryDates,
       [index]: value
@@ -165,7 +165,7 @@ function UpdateMedicineStock() {
 
   const handleNewEntryChange = (e) => {
     const { name, value } = e.target;
-    
+
     const fieldError = validateField(name, value);
     setFieldErrors({
       ...fieldErrors,
@@ -186,7 +186,7 @@ function UpdateMedicineStock() {
 
   const handleUpdateBatch = async (index) => {
     const selectedDetail = medicine.medicine_details[index];
-    
+
     const quantityError = validateField("quantity", updatedQuantities[index]);
     if (quantityError) {
       setError(quantityError);
@@ -232,15 +232,15 @@ function UpdateMedicineStock() {
     const nameError = validateField("medicine_name", newEntry.medicine_name);
     const dateError = validateField("expiry_date", newEntry.expiry_date);
     const quantityError = validateField("quantity", newEntry.quantity);
-    
+
     const newFieldErrors = {
       medicine_name: nameError,
       expiry_date: dateError,
       quantity: quantityError
     };
-    
-    setFieldErrors({...fieldErrors, ...newFieldErrors});
-    
+
+    setFieldErrors({ ...fieldErrors, ...newFieldErrors });
+
     if (nameError || dateError || quantityError) {
       setError("Please fill in all required fields correctly");
       return;
@@ -301,7 +301,7 @@ function UpdateMedicineStock() {
         expiry_date: "",
         quantity: ""
       });
-      
+
       setFieldErrors({
         ...fieldErrors,
         medicine_name: "",
@@ -329,10 +329,30 @@ function UpdateMedicineStock() {
 
   return (
     <div className="update-medicine-container">
+      <button
+        className="back-icon-btn"
+        onClick={() => {
+          if (medicine) {
+            setMedicine(null);
+            setMedicineId("");
+            setFieldErrors({ ...fieldErrors, medicineId: "" });
+          } else {
+            navigate('/dashboard');
+          }
+        }}
+        title="Back"
+      >
+        <svg fill="#000000" xmlns="http://www.w3.org/2000/svg"
+          width="24px" height="24px" viewBox="0 0 52 52" enableBackground="new 0 0 52 52">
+          <path d="M48.6,23H15.4c-0.9,0-1.3-1.1-0.7-1.7l9.6-9.6c0.6-0.6,0.6-1.5,0-2.1l-2.2-2.2c-0.6-0.6-1.5-0.6-2.1,0
+            L2.5,25c-0.6,0.6-0.6,1.5,0,2.1L20,44.6c0.6,0.6,1.5,0.6,2.1,0l2.1-2.1c0.6-0.6,0.6-1.5,0-2.1l-9.6-9.6C14,30.1,14.4,29,15.3,29
+            h33.2c0.8,0,1.5-0.6,1.5-1.4v-3C50,23.8,49.4,23,48.6,23z"/>
+        </svg>
+      </button>
       <h2>Update Medicine Stock</h2>
 
       {error && <div className="update-medicine-error">{error}</div>}
-      
+
       {notification && (
         <div className="update-medicine-popup-overlay">
           <div className="update-medicine-popup">
@@ -355,7 +375,7 @@ function UpdateMedicineStock() {
               value={medicineId}
               onChange={(e) => {
                 setMedicineId(e.target.value);
-                setFieldErrors({...fieldErrors, medicineId: ""});
+                setFieldErrors({ ...fieldErrors, medicineId: "" });
               }}
               className={fieldErrors.medicineId ? "form-control error-input" : "form-control"}
             >
@@ -542,7 +562,7 @@ function UpdateMedicineStock() {
               onClick={() => {
                 setMedicine(null);
                 setMedicineId("");
-                setFieldErrors({...fieldErrors, medicineId: ""});
+                setFieldErrors({ ...fieldErrors, medicineId: "" });
               }}
             >
               Back to Medicine Selection
