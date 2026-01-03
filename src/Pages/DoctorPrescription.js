@@ -19,6 +19,9 @@ function DoctorPrescription() {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(true); // State to disable submit button
   const [quantityExceedsError, setQuantityExceedsError] = useState(''); // State to show quantity exceeds error
   const [medicines, setMedicines] = useState([]); // State to store all medicines
+  const [previousPrescriptions, setPreviousPrescriptions] = useState([]);
+  const [debouncedBookNo, setDebouncedBookNo] = useState('');
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
   // Function to validate quantities and update submit button state
   const validateQuantities = () => {
@@ -98,6 +101,135 @@ function DoctorPrescription() {
     setBookNo(scannedBookNumber);
   };
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedBookNo(bookNo);
+    }, 600);
+    return () => clearTimeout(handler);
+  }, [bookNo]);
+
+  useEffect(() => {
+    const fetchPreviousPrescriptions = async () => {
+      if (!debouncedBookNo) {
+        setPreviousPrescriptions([]);
+        return;
+      }
+      try {
+        setIsHistoryLoading(true);
+        console.log(`Fetching history for: ${debouncedBookNo}`);
+        const response = await privateAxios.get(`/api/patient-history/${debouncedBookNo}/previous-prescriptions`);
+        const data = response.data;
+
+        console.log('History data received:', data);
+
+        let normalized = [];
+        if (data.visits && Array.isArray(data.visits)) {
+          normalized = data.visits.map(visit => ({
+            ...visit,
+            medicines: visit.medicines.map(m => ({
+              ...m,
+              isMedicine: m.isMedicine !== undefined ? m.isMedicine : (Number(m.days) > 0 || !!m.morning || !!m.afternoon || !!m.night)
+            }))
+          }));
+        } else if (data.previous_prescriptions && Array.isArray(data.previous_prescriptions)) {
+          // Handle legacy format by wrapping it in a pseudo-visit
+          normalized = [{
+            timestamp: 'Average (Last 3 Months)',
+            medicines: data.previous_prescriptions.map(m => {
+              const days = Number(m.days) || 0;
+              const morning = !!m.morning;
+              const afternoon = !!m.afternoon;
+              const night = !!m.night;
+              return {
+                medicine_id: m.medicine_id?.toString() || '',
+                quantity: Number(m.quantity) || 0,
+                days,
+                morning,
+                afternoon,
+                night,
+                isMedicine: days > 0 || morning || afternoon || night
+              };
+            })
+          }];
+        }
+
+        console.log('Normalized history:', normalized);
+        setPreviousPrescriptions(normalized);
+      } catch (err) {
+        console.error('Failed to fetch previous prescriptions:', err);
+        setPreviousPrescriptions([]);
+      } finally {
+        setIsHistoryLoading(false);
+      }
+    };
+
+    fetchPreviousPrescriptions();
+  }, [debouncedBookNo]);
+
+  const fetchMedicineInfo = async (index, medicineId) => {
+    if (!medicineId) {
+      const detailsCopy = [...medicineDetails];
+      detailsCopy[index] = null;
+      setMedicineDetails(detailsCopy);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await privateAxios.get(`/api/inventory/${medicineId}`);
+      setMedicineDetails(prev => {
+        const copy = [...prev];
+        copy[index] = response.data;
+        return copy;
+      });
+    } catch (err) {
+      setMedicineDetails(prev => {
+        const copy = [...prev];
+        copy[index] = { error: 'Item not found' };
+        return copy;
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCopyPrescription = (med) => {
+    console.log('Copying medicine:', med);
+    let targetIndex;
+
+    const firstPrescription = prescriptions[0];
+    const isFirstRowEmpty = prescriptions.length === 1 &&
+      !firstPrescription.medicine_id &&
+      firstPrescription.quantity === 0 &&
+      !firstPrescription.morning &&
+      !firstPrescription.afternoon &&
+      !firstPrescription.night;
+
+    const hasDosageInfo = Number(med.days) > 0 || !!med.morning || !!med.afternoon || !!med.night;
+    const newPrescriptionItem = {
+      medicine_id: (med.medicine_id || '').toString(),
+      days: Number(med.days) || 0,
+      morning: !!med.morning,
+      afternoon: !!med.afternoon,
+      night: !!med.night,
+      quantity: Number(med.quantity) || 0,
+      isMedicine: hasDosageInfo ? true : (med.isMedicine !== undefined ? med.isMedicine : false)
+    };
+
+    if (isFirstRowEmpty) {
+      targetIndex = 0;
+      setPrescriptions([newPrescriptionItem]);
+    } else {
+      targetIndex = prescriptions.length;
+      setPrescriptions(prev => [...prev, newPrescriptionItem]);
+      // Also need to add a slot in medicineDetails to keep indices aligned
+      setMedicineDetails(prev => [...prev, null]);
+    }
+
+    // Fetch medicine info for the row
+    fetchMedicineInfo(targetIndex, newPrescriptionItem.medicine_id);
+  };
+
   const handlePrescriptionChange = async (index, field, value) => {
     const updatedPrescriptions = prescriptions.map((prescription, i) => {
       if (i === index) {
@@ -126,26 +258,11 @@ function DoctorPrescription() {
       }
 
       if (value !== '') {
-        debounceTimeout.current = setTimeout(async () => {
-          try {
-            setIsLoading(true); // Set loading to true while fetching medicine details
-            const response = await privateAxios.get(`/api/inventory/${value}`);
-            const detailsCopy = [...medicineDetails];
-            detailsCopy[index] = response.data;
-            setMedicineDetails(detailsCopy);
-          } catch (err) {
-            const detailsCopy = [...medicineDetails];
-            detailsCopy[index] = { error: 'Item not found' };
-            setMedicineDetails(detailsCopy);
-          } finally {
-            setIsLoading(false); // Set loading back to false after fetching
-          }
+        debounceTimeout.current = setTimeout(() => {
+          fetchMedicineInfo(index, value);
         }, 500); // Debounce for 500ms
       } else {
-        // Clear medicine details if medicine_id is empty
-        const detailsCopy = [...medicineDetails];
-        detailsCopy[index] = null;
-        setMedicineDetails(detailsCopy);
+        fetchMedicineInfo(index, '');
       }
     }
   };
@@ -276,183 +393,252 @@ function DoctorPrescription() {
   };
 
   return (
-    <div className="doctor-prescription-container">
-      <div className="doctor-prescription-card">
-        <h1 className="doctor-prescription-title">Doctor Prescription</h1>
-        <form onSubmit={handleSubmit} className="doctor-prescription-form">
-          <div className="doctor-prescription-form-group">
-            <label>Book Number</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <input
-                type="text"
-                value={bookNo}
-                onChange={(e) => setBookNo(e.target.value)}
-                required
-                placeholder="Enter Book No"
-                disabled={isLoading} // Disable input while loading
-                style={{ flexGrow: 1 }}
-              />
-              <button
-                type="button"
-                onClick={() => openScanner(handleQrScan)}
-                className="scan-btn"
-                title="Scan QR Code"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none" /><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z" /></svg>
-              </button>
-            </div>
-          </div>
-          <h3 className="doctor-prescription-subheading">Medicines</h3>
-          {prescriptions.map((prescription, index) => (
-            <div key={index} className="doctor-prescription-row">
-              <div className="prescription-type-toggle">
-                <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`}
-                  onClick={() => handlePrescriptionTypeChange(index, true)}>
-                  By Dosing Schedule
-                </div>
-                <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`}
-                  onClick={() => handlePrescriptionTypeChange(index, false)}>
-                  By Quantity
+    <div className="doctor-prescription-container-fluid">
+      <h1 className="doctor-prescription-page-title">Doctor Prescription</h1>
+
+      <div className="doctor-prescription-content-layout">
+        <div className="doctor-prescription-main-column">
+          <div className="doctor-prescription-card">
+            <form onSubmit={handleSubmit} className="doctor-prescription-form">
+              <div className="doctor-prescription-form-group">
+                <label>Book Number</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="text"
+                    value={bookNo}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBookNo(val);
+                    }}
+                    required
+                    placeholder="Enter Book No"
+                    disabled={isLoading} // Disable input while loading
+                    style={{ flexGrow: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openScanner(handleQrScan)}
+                    className="scan-btn"
+                    title="Scan QR Code"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none" /><path d="M4 12V6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0V6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM4 20v-6H2v6c0 1.1.9 2 2 2h2v-2H4zm16 0v-6h2v6c0 1.1-.9 2-2 2h-2v-2h2zM7 19h10V5H7v14zm2-2v-2h6v2H9zm0-4v-2h6v2H9zm0-4V7h6v2H9z" /></svg>
+                  </button>
                 </div>
               </div>
+              <h3 className="doctor-prescription-subheading">Medicines</h3>
+              {prescriptions.map((prescription, index) => (
+                <div key={index} className="doctor-prescription-row">
+                  <div className="prescription-type-toggle">
+                    <div className={`toggle-option ${prescription.isMedicine ? 'active' : ''}`}
+                      onClick={() => handlePrescriptionTypeChange(index, true)}>
+                      By Dosing Schedule
+                    </div>
+                    <div className={`toggle-option ${!prescription.isMedicine ? 'active' : ''}`}
+                      onClick={() => handlePrescriptionTypeChange(index, false)}>
+                      By Quantity
+                    </div>
+                  </div>
 
-              <div className="doctor-prescription-form-group">
-                <label>Medicine ID</label>
-                <input
-                  type="text"
-                  value={prescription.medicine_id}
-                  onChange={(e) =>
-                    handlePrescriptionChange(index, 'medicine_id', e.target.value)
-                  }
-                  required
-                  placeholder="e.g. 101"
-                />
-                {medicineDetails[index] && (
-                  <div className="doctor-prescription-medicine-info">
-                    {medicineDetails[index].error ? (
-                      <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
-                    ) : (
-                      <>
-                        <p><strong>{prescription.isMedicine ? "Formulation" : "Item"}:</strong> {medicineDetails[index].medicine_formulation}</p>
-                        <p><strong>Available Stock:</strong> {medicineDetails[index].total_quantity}</p> {/* Display total_quantity */}
-                      </>
+                  <div className="doctor-prescription-form-group">
+                    <label>Medicine ID</label>
+                    <input
+                      type="text"
+                      value={prescription.medicine_id}
+                      onChange={(e) =>
+                        handlePrescriptionChange(index, 'medicine_id', e.target.value)
+                      }
+                      required
+                      placeholder="e.g. 101"
+                    />
+                    {medicineDetails[index] && (
+                      <div className="doctor-prescription-medicine-info">
+                        {medicineDetails[index].error ? (
+                          <p style={{ color: 'red' }}>{medicineDetails[index].error}</p>
+                        ) : (
+                          <>
+                            <p><strong>{prescription.isMedicine ? "Formulation" : "Item"}:</strong> {medicineDetails[index].medicine_formulation}</p>
+                            <p><strong>Available Stock:</strong> {medicineDetails[index].total_quantity}</p> {/* Display total_quantity */}
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
+
+                  {prescription.isMedicine ? (
+                    <>
+                      <div className="doctor-prescription-form-group">
+                        <label>Days</label>
+                        <input
+                          type="number"
+                          value={prescription.days === 0 ? '' : prescription.days}
+                          onChange={(e) =>
+                            handlePrescriptionChange(index, 'days', Number(e.target.value))
+                          }
+                          onWheel={(e) => e.target.blur()} // Disable scroll sensitivity
+                          required
+                          placeholder="e.g. 3"
+                          disabled={isLoading} // Disable input while loading
+                        />
+                      </div>
+
+                      <div className="doctor-prescription-form-group doctor-prescription-checkbox-group">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={prescription.morning}
+                            onChange={(e) =>
+                              handlePrescriptionChange(index, 'morning', e.target.checked)
+                            }
+                            disabled={isLoading} // Disable checkbox while loading
+                          />
+                          Morning
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={prescription.afternoon}
+                            onChange={(e) =>
+                              handlePrescriptionChange(index, 'afternoon', e.target.checked)
+                            }
+                            disabled={isLoading} // Disable checkbox while loading
+                          />
+                          Afternoon
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={prescription.night}
+                            onChange={(e) =>
+                              handlePrescriptionChange(index, 'night', e.target.checked)
+                            }
+                            disabled={isLoading} // Disable checkbox while loading
+                          />
+                          Night
+                        </label>
+                      </div>
+
+                      <div className="doctor-prescription-form-group">
+                        <strong>Calculated Quantity:</strong> {prescription.quantity}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="doctor-prescription-form-group">
+                      <label>Quantity</label>
+                      <input
+                        type="number"
+                        value={prescription.quantity === 0 ? '' : prescription.quantity}
+                        onChange={(e) =>
+                          handlePrescriptionChange(index, 'quantity', Number(e.target.value))
+                        }
+                        required
+                        placeholder="Enter quantity"
+                        onWheel={(e) => e.target.blur()}
+                        disabled={isLoading} // Disable input while loading
+                      />
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    className="doctor-prescription-remove-btn"
+                    onClick={() => removePrescriptionRow(index)}
+                    disabled={isLoading} // Disable button while loading
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+
+              <div className="doctor-prescription-btn-container">
+                <button
+                  type="button"
+                  className="doctor-prescription-add-btn"
+                  onClick={addPrescriptionRow}
+                  disabled={isLoading} // Disable button while loading
+                >
+                  Add Item
+                </button>
               </div>
 
-              {prescription.isMedicine ? (
-                <>
-                  <div className="doctor-prescription-form-group">
-                    <label>Days</label>
-                    <input
-                      type="number"
-                      value={prescription.days === 0 ? '' : prescription.days}
-                      onChange={(e) =>
-                        handlePrescriptionChange(index, 'days', Number(e.target.value))
-                      }
-                      onWheel={(e) => e.target.blur()} // Disable scroll sensitivity
-                      required
-                      placeholder="e.g. 3"
-                      disabled={isLoading} // Disable input while loading
-                    />
-                  </div>
+              <div className="doctor-prescription-btn-container">
+                {quantityExceedsError && (
+                  <p className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
+                    {quantityExceedsError}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="doctor-prescription-submit-btn"
+                  disabled={isLoading || isSubmitDisabled} // Disable button while loading or if validation fails
+                >
+                  {isLoading ? 'Submitting...' : 'Submit Prescription'} {/* Show loading text */}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
 
-                  <div className="doctor-prescription-form-group doctor-prescription-checkbox-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={prescription.morning}
-                        onChange={(e) =>
-                          handlePrescriptionChange(index, 'morning', e.target.checked)
-                        }
-                        disabled={isLoading} // Disable checkbox while loading
-                      />
-                      Morning
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={prescription.afternoon}
-                        onChange={(e) =>
-                          handlePrescriptionChange(index, 'afternoon', e.target.checked)
-                        }
-                        disabled={isLoading} // Disable checkbox while loading
-                      />
-                      Afternoon
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={prescription.night}
-                        onChange={(e) =>
-                          handlePrescriptionChange(index, 'night', e.target.checked)
-                        }
-                        disabled={isLoading} // Disable checkbox while loading
-                      />
-                      Night
-                    </label>
-                  </div>
+        {debouncedBookNo && (
+          <div className="previous-prescriptions-aside">
+            <div className="doctor-prescription-card">
+              <h3 className="previous-prescriptions-title">Recent History</h3>
+              <p className="previous-prescriptions-subtitle">Last 2 visit records</p>
 
-                  <div className="doctor-prescription-form-group">
-                    <strong>Calculated Quantity:</strong> {prescription.quantity}
-                  </div>
-                </>
+              {isHistoryLoading ? (
+                <div className="history-status-msg">Loading history...</div>
+              ) : previousPrescriptions.length === 0 ? (
+                <div className="history-status-msg">No previous visits found.</div>
               ) : (
-                <div className="doctor-prescription-form-group">
-                  <label>Quantity</label>
-                  <input
-                    type="number"
-                    value={prescription.quantity === 0 ? '' : prescription.quantity}
-                    onChange={(e) =>
-                      handlePrescriptionChange(index, 'quantity', Number(e.target.value))
-                    }
-                    required
-                    placeholder="Enter quantity"
-                    onWheel={(e) => e.target.blur()}
-                    disabled={isLoading} // Disable input while loading
-                  />
+                <div className="previous-prescriptions-visits-container">
+                  {previousPrescriptions.map((visit, vIdx) => (
+                    <div key={vIdx} className="previous-visit-group">
+                      <h4 className="visit-timestamp">{visit.timestamp}</h4>
+                      <div className="previous-prescriptions-table-container">
+                        <table className="previous-prescriptions-table">
+                          <thead>
+                            <tr>
+                              <th>Med ID</th>
+                              <th>Dose / Qty</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {visit.medicines.map((med, mIdx) => (
+                              <tr key={mIdx}>
+                                <td>{med.medicine_id}</td>
+                                <td>
+                                  {med.isMedicine ? (
+                                    <span className="dosage-badge">
+                                      {med.morning ? '1' : '0'}-{med.afternoon ? '1' : '0'}-{med.night ? '1' : '0'} × {med.days}d
+                                    </span>
+                                  ) : (
+                                    <span className="qty-badge">Qty: {med.quantity}</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="copy-prescription-btn"
+                                    onClick={() => handleCopyPrescription(med)}
+                                    title="Copy to prescription"
+                                  >
+                                    Copy
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-
-              <button
-                type="button"
-                className="doctor-prescription-remove-btn"
-                onClick={() => removePrescriptionRow(index)}
-                disabled={isLoading} // Disable button while loading
-              >
-                Remove
-              </button>
             </div>
-          ))}
-
-          <div className="doctor-prescription-btn-container">
-            <button
-              type="button"
-              className="doctor-prescription-add-btn"
-              onClick={addPrescriptionRow}
-              disabled={isLoading} // Disable button while loading
-            >
-              Add Item
-            </button>
           </div>
-
-          <div className="doctor-prescription-btn-container">
-            {quantityExceedsError && (
-              <p className="error-message" style={{ color: 'red', marginBottom: '10px' }}>
-                {quantityExceedsError}
-              </p>
-            )}
-            <button
-              type="submit"
-              className="doctor-prescription-submit-btn"
-              disabled={isLoading || isSubmitDisabled} // Disable button while loading or if validation fails
-            >
-              {isLoading ? 'Submitting...' : 'Submit Prescription'} {/* Show loading text */}
-            </button>
-          </div>
-        </form>
+        )}
       </div>
+
       {message && (
         <div className="doctor-prescription-popup-overlay">
           <div className="doctor-prescription-popup">
