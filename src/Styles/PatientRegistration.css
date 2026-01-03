@@ -209,29 +209,7 @@
   font-weight: 500;
 }
 
-/* Back Button */
-.back-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-}
-
-.back-btn:hover {
-  background-color: #f0f0f0;
-}
-
-.back-btn svg {
-  width: 24px;
-  height: 24px;
-  fill: #555;
-}
+/* Back Button - moved to global back-icon-btn */
 
 @media screen and (max-width: 600px) {
   .patient-registration-container {
@@ -261,61 +239,97 @@
   }
 }
 
-/* Simple QR View for Success State */
-.simple-qr-view {
+/* Registration Success View */
+.registration-success-view {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.success-card {
+  background: #ffffff;
   text-align: center;
-  padding: 20px;
+  width: 100%;
 }
 
-.simple-qr-view img {
-  max-width: 250px;
-  height: auto;
-  margin-bottom: 5px;
+.success-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.simple-qr-view h2 {
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0 0 25px 0;
-  color: #000;
+.registration-success-view h2 {
+  color: #28a745;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
-.simple-qr-view .action-buttons {
+.patient-summary {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  border: 1px solid #eee;
+}
+
+.patient-summary p {
+  margin: 12px 0;
+  color: #666;
+  font-size: 1.1rem;
   display: flex;
-  gap: 15px;
-  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
 }
 
-.simple-qr-view button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  border: none;
+.patient-summary p:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.patient-summary strong {
+  color: #1a1a1a;
   font-weight: 600;
-  transition: all 0.2s;
+}
+
+.registration-success-view .action-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .btn-register-next {
   background-color: #007bff;
   color: white;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
 }
 
 .btn-register-next:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
 
-.btn-print {
-  background-color: #6c757d;
-  color: white;
-}
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
 
-.btn-print:hover {
-  background-color: #5a6268;
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media print {
@@ -339,7 +353,7 @@
   }
 
   .simple-qr-view .action-buttons,
-  .back-btn,
+  .back-icon-btn,
   .patient-registration-title,
   .patient-registration-success-msg {
     display: none !important;
