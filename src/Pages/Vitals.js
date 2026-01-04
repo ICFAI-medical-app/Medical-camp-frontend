@@ -8,7 +8,9 @@ function Vitals() {
   const VitalEmptyData = {
     bookNumber: '',
     bp: '',
+    bp_digital: '',
     pulse: '',
+    heart_rate: '',
     rbs: '',
     weight: '',
     height: '',
@@ -130,6 +132,21 @@ function Vitals() {
       } else {
         setBpError('');
       }
+    } else if (name === 'bp_digital') {
+      if (value) {
+        const parts = value.split('/');
+        if (
+          parts.length !== 2 ||
+          isNaN(Number(parts[0])) ||
+          isNaN(Number(parts[1]))
+        ) {
+          setBpError('BP (Digital) must be in the format systolic/diastolic (e.g., 120/80)');
+        } else {
+          setBpError('');
+        }
+      } else {
+        setBpError('');
+      }
     } else if (name === 'bookNumber') {
       const regex = /^[0-9]*$/;
       if (!regex.test(value)) {
@@ -149,9 +166,11 @@ function Vitals() {
         book_no: formData.bookNumber,
         rbs: formData.rbs || null,
         bp: formData.bp || null,
+        bp_digital: formData.bp_digital || null,
         height: formData.height || null,
         weight: formData.weight || null,
         pulse: formData.pulse || null,
+        heart_rate: formData.heart_rate || null,
         extra_note: formData.extra_note || null
       });
       setMessage(response.data.message || 'Vitals recorded successfully!');
@@ -159,7 +178,9 @@ function Vitals() {
       setFormData({
         bookNumber: '',
         bp: '',
+        bp_digital: '',
         pulse: '',
+        heart_rate: '',
         rbs: '',
         weight: '',
         height: '',
@@ -230,14 +251,29 @@ function Vitals() {
           {bookNumberError && <div className="vitals-error-msg">{bookNumberError}</div>}
         </div>
         <div className="vitals-form-group">
-          <label>BP (systolic/diastolic)</label>
+          <label>BP Manual (systolic/diastolic)</label>
           <input type="text" name="bp" value={formData.bp} onChange={(e) => {
+            handleChange(e);
+          }} autoComplete='off' />
+        </div>
+        <div className="vitals-form-group">
+          <label>BP (Digital) (systolic/diastolic)</label>
+          <input type="text" name="bp_digital" value={formData.bp_digital} onChange={(e) => {
             handleChange(e);
           }} autoComplete='off' />
         </div>
         <div className="vitals-form-group">
           <label>Pulse</label>
           <input type="text" name="pulse" value={formData.pulse} onChange={(e) => {
+            const regex = /^[0-9]+$/;
+            if (regex.test(e.target.value) || e.target.value === '') {
+              handleChange(e);
+            }
+          }} autoComplete='off' />
+        </div>
+        <div className="vitals-form-group">
+          <label>Heart Rate</label>
+          <input type="text" name="heart_rate" value={formData.heart_rate} onChange={(e) => {
             const regex = /^[0-9]+$/;
             if (regex.test(e.target.value) || e.target.value === '') {
               handleChange(e);
