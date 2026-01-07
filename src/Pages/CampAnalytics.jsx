@@ -226,8 +226,10 @@ const CampAnalytics = () => {
 
     return data.sort((a, b) => {
       // Extract numeric part from medicine_id for proper numeric sorting
-      const numA = parseInt(a.medicine_id.replace(/\D/g, '')) || 0;
-      const numB = parseInt(b.medicine_id.replace(/\D/g, '')) || 0;
+      const idA = a.medicine_id ? String(a.medicine_id) : '';
+      const idB = b.medicine_id ? String(b.medicine_id) : '';
+      const numA = parseInt(idA.replace(/\D/g, '')) || 0;
+      const numB = parseInt(idB.replace(/\D/g, '')) || 0;
       return numA - numB;
     });
   }, [patientHistories]);
@@ -297,8 +299,10 @@ const CampAnalytics = () => {
 
     return inventoryData.sort((a, b) => {
       // Extract numeric part from medicine_id for proper numeric sorting
-      const numA = parseInt(a.medicine_id.replace(/\D/g, '')) || 0;
-      const numB = parseInt(b.medicine_id.replace(/\D/g, '')) || 0;
+      const idA = a.medicine_id ? String(a.medicine_id) : '';
+      const idB = b.medicine_id ? String(b.medicine_id) : '';
+      const numA = parseInt(idA.replace(/\D/g, '')) || 0;
+      const numB = parseInt(idB.replace(/\D/g, '')) || 0;
       return numA - numB;
     });
   }, [medicines, patientHistories, appliedFilters.month]);

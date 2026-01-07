@@ -142,8 +142,10 @@ export const exportMedicineInventoryToCSV = (medicines, month, patientHistories)
 
   // Sort by Medicine ID numerically
   const sortedData = inventoryData.sort((a, b) => {
-    const idA = parseInt(a['Medicine ID'].replace(/\D/g, '')) || 0;
-    const idB = parseInt(b['Medicine ID'].replace(/\D/g, '')) || 0;
+    const valA = a['Medicine ID'] ? String(a['Medicine ID']) : '';
+    const valB = b['Medicine ID'] ? String(b['Medicine ID']) : '';
+    const idA = parseInt(valA.replace(/\D/g, '')) || 0;
+    const idB = parseInt(valB.replace(/\D/g, '')) || 0;
     return idA - idB;
   });
 
