@@ -140,13 +140,11 @@ export const exportMedicineInventoryToCSV = (medicines, month, patientHistories)
     return dynamicHeaders;
   });
 
-  // Sort by Medicine ID numerically
+  // Sort by Medicine ID using natural sort order
   const sortedData = inventoryData.sort((a, b) => {
     const valA = a['Medicine ID'] ? String(a['Medicine ID']) : '';
     const valB = b['Medicine ID'] ? String(b['Medicine ID']) : '';
-    const idA = parseInt(valA.replace(/\D/g, '')) || 0;
-    const idB = parseInt(valB.replace(/\D/g, '')) || 0;
-    return idA - idB;
+    return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' });
   });
 
   // Create dynamic field names for CSV
